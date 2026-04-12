@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:ani_to_xcursor/features/converter/data/repositories/converter_repository.dart';
@@ -55,6 +57,16 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
 
     await for (final theme in usecase.execute(state!, settings)) {
       state = theme;
+    }
+
+    // Efectos de sonido personalizados (App Assets)
+    if (state != null) {
+      final player = AudioPlayer();
+      if (state!.status == ThemeStatus.error || (state!.status == ThemeStatus.done && state!.errors > 0)) {
+        player.play(AssetSource('sounds/error_1.mp3'));
+      } else if (state!.status == ThemeStatus.done) {
+        player.play(AssetSource('sounds/notification_1.mp3'));
+      }
     }
   }
 

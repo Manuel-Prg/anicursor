@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ani_to_xcursor/features/converter/presentation/converter_provider.dart';
+import 'package:ani_to_xcursor/shared/providers/dependency_provider.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -15,6 +16,7 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
+    final deps = ref.watch(dependencyProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -54,34 +56,99 @@ class HomePage extends ConsumerWidget {
             ),
             const SizedBox(height: 48),
 
-            // Drop zone
-            _DropZone(
-              onFolderSelected: (path) {
-                ref.read(cursorThemeProvider.notifier).scanDirectory(path);
-                context.push('/converter');
-              },
-            ),
-
-            const SizedBox(height: 24),
-
-            // Botón seleccionar carpeta
-            OutlinedButton.icon(
-              onPressed: () async {
-               final result = await FilePicker.getDirectoryPath();
-                if (result != null) {
-                  ref.read(cursorThemeProvider.notifier).scanDirectory(result);
-                  if (context.mounted) context.push('/converter');
-                }
-              },
-              icon: const Icon(Icons.folder_open),
-              label: const Text('Seleccionar carpeta'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
+            if (deps.status == DependencyStatus.checking)
+              const CircularProgressIndicator()
+            else if (deps.status == DependencyStatus.missing)
+              Container(
+                width: 400,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  border: Border.all(color: Colors.red.withOpacity(0.5), width: 2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 48),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Dependencias Faltantes',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Para que la magia funcione en Linux, necesitamos soporte de ImageMagick y Xcursorgen.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red[200]),
+                    ),
+                    const SizedBox(height: 16),
+                    if (deps.isInstalling)
+                      const CircularProgressIndicator()
+                    else
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () async {
+                          final success = await ref.read(dependencyProvider.notifier).installDependencies();
+                          if (!success && context.mounted) {
+                            showDialog(
+                              context: context,
+                              builder: (c) => AlertDialog(
+                                title: const Text('Instalación Manual Requerida'),
+                                content: const Text(
+                                  'Tu sistema operativo bloqueó la instalación automática o no admite "apt-get".\n\n'
+                                  'Por favor instala "imagemagick" y "xcursorgen" desde la terminal usando tu gestor de paquetes (pacman, dnf, zypper).',
+                                ),
+                                actions: [
+                                  FilledButton(
+                                    onPressed: () => Navigator.pop(c),
+                                    child: const Text('Entendido'),
+                                  )
+                                ],
+                              ),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.download),
+                        label: const Text('Instalar (Apt)'),
+                      ),
+                  ],
+                ),
+              )
+            else ...[
+              // Drop zone
+              _DropZone(
+                onFolderSelected: (path) {
+                  ref.read(cursorThemeProvider.notifier).scanDirectory(path);
+                  context.push('/converter');
+                },
+              ),
+              const SizedBox(height: 24),
+              // Botón seleccionar carpeta
+              OutlinedButton.icon(
+                onPressed: () async {
+                 final result = await FilePicker.getDirectoryPath();
+                  if (result != null) {
+                    ref.read(cursorThemeProvider.notifier).scanDirectory(result);
+                    if (context.mounted) context.push('/converter');
+                  }
+                },
+                icon: const Icon(Icons.folder_open),
+                label: const Text('Seleccionar carpeta'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                 ),
               ),
-            ),
+            ],
+
             const SizedBox(height: 48),
 
             // Footer
