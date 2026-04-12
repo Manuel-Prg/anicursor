@@ -1,11 +1,9 @@
 import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
-import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:ani_to_xcursor/features/converter/data/repositories/converter_repository.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dart';
 import 'package:ani_to_xcursor/features/converter/domain/usecases/convert_theme_usecase.dart';

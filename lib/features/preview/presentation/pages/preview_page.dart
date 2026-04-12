@@ -264,7 +264,7 @@ class _AnimatedCursorPreviewState extends State<_AnimatedCursorPreview> {
   }
 
   void _scheduleNextFrame() {
-    int delay = widget.cursor.framesData[_currentIndex].$2;
+    int delay = widget.cursor.framesData[_currentIndex].delay;
     if (delay <= 0) delay = 100;
     
     _timer = Timer(Duration(milliseconds: delay), () {
@@ -290,7 +290,7 @@ class _AnimatedCursorPreviewState extends State<_AnimatedCursorPreview> {
     
     final currentFrame = widget.cursor.framesData[_currentIndex];
     return Image.file(
-      File(currentFrame.$1),
+      File(currentFrame.imagePath),
       width: 32,
       height: 32,
       filterQuality: FilterQuality.high,

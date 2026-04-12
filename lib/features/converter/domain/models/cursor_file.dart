@@ -1,10 +1,30 @@
+// Just in case, though the enum is here
+
+class CursorFrame {
+  final String imagePath;
+  final int delay;
+  final int hotspotX;
+  final int hotspotY;
+  final int width;
+  final int height;
+
+  const CursorFrame({
+    required this.imagePath,
+    required this.delay,
+    required this.hotspotX,
+    required this.hotspotY,
+    required this.width,
+    required this.height,
+  });
+}
+
 class CursorFile {
   final String windowsName;
   final String linuxName;
   final String aniPath;
   final List<String> aliases;
   final ConversionStatus status;
-  final List<(String, int)> framesData;
+  final List<CursorFrame> framesData;
 
   const CursorFile({
     required this.windowsName,
@@ -21,7 +41,7 @@ class CursorFile {
     String? aniPath,
     List<String>? aliases,
     ConversionStatus? status,
-    List<(String, int)>? framesData,
+    List<CursorFrame>? framesData,
   }) {
     return CursorFile(
       windowsName: windowsName ?? this.windowsName,
@@ -34,9 +54,4 @@ class CursorFile {
   }
 }
 
-enum ConversionStatus {
-  pending,
-  converting,
-  done,
-  error,
-}
+enum ConversionStatus { pending, converting, done, error }

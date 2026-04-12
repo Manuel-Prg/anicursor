@@ -60,7 +60,9 @@ class ConvertThemeUsecase {
           status: success ? ConversionStatus.done : ConversionStatus.error,
           framesData: frames,
         );
-      } catch (e) {
+      } catch (e, stack) {
+        print('Error crítico detectado en conversion de ${cursor.windowsName}: $e');
+        print(stack);
         updatedCursors[i] = cursor.copyWith(status: ConversionStatus.error);
       }
 
