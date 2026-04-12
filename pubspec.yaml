@@ -76,6 +76,7 @@ flutter:
     - assets/ani_xcursor_logo_v3.svg
     - assets/ani_xcursor_logo_light.svg
     - assets/sounds/
+    - assets/icons/anicursor.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

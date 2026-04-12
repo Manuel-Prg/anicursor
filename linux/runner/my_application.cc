@@ -54,6 +54,16 @@ static void my_application_activate(GApplication* application) {
 
   gtk_window_set_default_size(window, 1280, 720);
 
+  // Establecer ícono de la ventana
+  gchar* icon_path = g_build_filename(
+      g_get_current_dir(), "data", "flutter_assets", "assets", "icons", "anicursor.png", nullptr);
+  GdkPixbuf* icon = gdk_pixbuf_new_from_file(icon_path, nullptr);
+  g_free(icon_path);
+  if (icon) {
+    gtk_window_set_icon(GTK_WINDOW(window), icon);
+    g_object_unref(icon);
+  }
+
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(
       project, self->dart_entrypoint_arguments);
