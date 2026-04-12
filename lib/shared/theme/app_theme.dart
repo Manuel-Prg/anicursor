@@ -17,6 +17,12 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
       ),
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+      ),
     );
   }
 
@@ -34,6 +40,14 @@ class AppTheme {
         backgroundColor: backgroundColorDark,
         elevation: 0,
         centerTitle: false,
+      ),
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: cardColorDark,
+        contentTextStyle: TextStyle(color: Colors.white),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
       ),
     );
   }

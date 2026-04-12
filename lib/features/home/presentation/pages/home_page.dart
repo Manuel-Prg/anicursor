@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ani_to_xcursor/features/converter/presentation/converter_provider.dart';
 
 class HomePage extends ConsumerWidget {
@@ -77,6 +79,44 @@ class HomePage extends ConsumerWidget {
                   vertical: 16,
                 ),
               ),
+            ),
+            const SizedBox(height: 48),
+
+            // Footer
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const FaIcon(FontAwesomeIcons.github),
+                  tooltip: 'GitHub',
+                  onPressed: () => launchUrl(Uri.parse('https://github.com/Manuel-Prg')),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.info_outline),
+                  tooltip: 'Acerca de',
+                  onPressed: () {
+                    showAboutDialog(
+                      context: context,
+                      applicationName: 'ANI to XCursor',
+                      applicationVersion: '1.0.0',
+                      applicationIcon: const Icon(Icons.mouse, size: 48),
+                      children: const [
+                        Text('Creado por manuelprz.\nUn conversor de temas de Windows (.ani) hacia cursores nativos XCursor para Linux.'),
+                      ]
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.coffee),
+                  tooltip: 'Apóyame en Ko-fi',
+                  onPressed: () => launchUrl(Uri.parse('https://ko-fi.com/manuelprz0180')),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Made with ♥ by manuelprz',
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38),
             ),
           ],
         ),

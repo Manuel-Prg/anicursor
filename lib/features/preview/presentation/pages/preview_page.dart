@@ -41,7 +41,13 @@ class PreviewPage extends ConsumerWidget {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('✅ Tema instalado correctamente'),
+                    content: Row(
+                      children: [
+                        Icon(Icons.check, color: Colors.white),
+                        SizedBox(width: 12),
+                        Text('Tema instalado en el sistema'),
+                      ],
+                    ),
                   ),
                 );
               }
