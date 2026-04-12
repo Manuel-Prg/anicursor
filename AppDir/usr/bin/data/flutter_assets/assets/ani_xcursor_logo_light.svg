@@ -1,0 +1,21 @@
+<svg width="100%" viewBox="0 0 680 690" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">ANI to XCursor logo light</title>
+  <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Logo cursor flecha con gradiente azul a rosa sobre fondo claro</desc>
+
+  <defs>
+    <linearGradient id="cursorGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4A90E2"/>
+      <stop offset="50%" stop-color="#9B59B6"/>
+      <stop offset="100%" stop-color="#E91E8C"/>
+    </linearGradient>
+    <linearGradient id="innerGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0eeff"/>
+      <stop offset="100%" stop-color="#ffe0f4"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="680" height="680" rx="48" fill="#F5F5F5" style="fill:rgb(245, 245, 245);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <path d="M 180 120 L 180 480 L 290 370 L 370 540 L 440 505 L 360 335 L 500 335 Z" fill="url(#innerGradLight)" stroke="url(#cursorGradLight)" stroke-width="22" stroke-linejoin="round" stroke-linecap="round" style="color:rgb(255, 255, 255);stroke-width:22px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+</svg>
