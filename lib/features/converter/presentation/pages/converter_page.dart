@@ -82,15 +82,34 @@ class ConverterPage extends ConsumerWidget {
   }
 }
 
-class _ThemeNameField extends ConsumerWidget {
+class _ThemeNameField extends ConsumerStatefulWidget {
   final CursorTheme cursorTheme;
 
   const _ThemeNameField({required this.cursorTheme});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ThemeNameField> createState() => _ThemeNameFieldState();
+}
+
+class _ThemeNameFieldState extends ConsumerState<_ThemeNameField> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.cursorTheme.name);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return TextField(
-      controller: TextEditingController(text: cursorTheme.name),
+      controller: _controller,
       decoration: const InputDecoration(
         labelText: 'Nombre del tema',
         border: OutlineInputBorder(),

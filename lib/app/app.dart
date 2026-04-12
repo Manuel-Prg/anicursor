@@ -12,7 +12,7 @@ class App extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
 
     return MaterialApp.router(
-      title: 'ANI to XCursor',
+      title: 'AniCursor',
       theme: AppTheme.light(settings.primaryColor),
       darkTheme: AppTheme.dark(settings.primaryColor),
       themeMode: settings.themeMode,

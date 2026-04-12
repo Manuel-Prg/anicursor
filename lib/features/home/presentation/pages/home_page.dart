@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ani_to_xcursor/features/converter/presentation/converter_provider.dart';
 
 class HomePage extends ConsumerWidget {
@@ -13,6 +14,7 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
 
     return Scaffold(
       appBar: AppBar(
@@ -30,14 +32,14 @@ class HomePage extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Logo / título
-            Icon(
-              Icons.mouse,
-              size: 80,
-              color: theme.colorScheme.primary,
+            SvgPicture.asset(
+              isLight ? 'assets/ani_xcursor_logo_light.svg' : 'assets/ani_xcursor_logo_v3.svg',
+              width: 80,
+              height: 80,
             ),
             const SizedBox(height: 16),
             Text(
-              'ANI to XCursor',
+              'AniCursor',
               style: theme.textTheme.headlineLarge?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -47,7 +49,7 @@ class HomePage extends ConsumerWidget {
             Text(
               'Convierte cursores de Windows a Linux',
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: Colors.white54,
+                color: theme.colorScheme.onSurface.withOpacity(0.54),
               ),
             ),
             const SizedBox(height: 48),
@@ -97,9 +99,13 @@ class HomePage extends ConsumerWidget {
                   onPressed: () {
                     showAboutDialog(
                       context: context,
-                      applicationName: 'ANI to XCursor',
+                      applicationName: 'AniCursor',
                       applicationVersion: '1.0.0',
-                      applicationIcon: const Icon(Icons.mouse, size: 48),
+                      applicationIcon: SvgPicture.asset(
+                        isLight ? 'assets/ani_xcursor_logo_light.svg' : 'assets/ani_xcursor_logo_v3.svg',
+                        width: 48,
+                        height: 48,
+                      ),
                       children: const [
                         Text('Creado por manuelprz.\nUn conversor de temas de Windows (.ani) hacia cursores nativos XCursor para Linux.'),
                       ]
@@ -116,7 +122,9 @@ class HomePage extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               'Made with ♥ by manuelprz',
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.38),
+              ),
             ),
           ],
         ),
@@ -169,7 +177,7 @@ class _DropZoneState extends State<_DropZone> {
             border: Border.all(
               color: _hovering
                   ? theme.colorScheme.primary
-                  : Colors.white24,
+                  : theme.colorScheme.onSurface.withOpacity(0.15),
               width: 2,
             ),
           ),
@@ -181,7 +189,7 @@ class _DropZoneState extends State<_DropZone> {
                 size: 48,
                 color: _hovering
                     ? theme.colorScheme.primary
-                    : Colors.white38,
+                    : theme.colorScheme.onSurface.withOpacity(0.38),
               ),
               const SizedBox(height: 12),
               Text(
@@ -189,14 +197,14 @@ class _DropZoneState extends State<_DropZone> {
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: _hovering
                       ? theme.colorScheme.primary
-                      : Colors.white54,
+                      : theme.colorScheme.onSurface.withOpacity(0.54),
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 'o haz clic para seleccionar',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.white38,
+                  color: theme.colorScheme.onSurface.withOpacity(0.38),
                 ),
               ),
             ],
