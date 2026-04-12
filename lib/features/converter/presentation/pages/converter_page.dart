@@ -43,9 +43,7 @@ class ConverterPage extends ConsumerWidget {
             // Info del directorio
             Text(
               'Directorio: ${cursorTheme.inputDir}',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: Colors.white38,
-              ),
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38),
             ),
             const SizedBox(height: 24),
 
@@ -67,9 +65,7 @@ class ConverterPage extends ConsumerWidget {
             ],
 
             // Lista de cursores
-            Expanded(
-              child: _CursorList(cursors: cursorTheme.cursors),
-            ),
+            Expanded(child: _CursorList(cursors: cursorTheme.cursors)),
 
             const SizedBox(height: 24),
 
@@ -131,7 +127,7 @@ class _CursorList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.separated(
       itemCount: cursors.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final cursor = cursors[index];
         return _CursorTile(cursor: cursor);
@@ -176,13 +172,19 @@ class _StatusIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (status) {
-      ConversionStatus.pending => const Icon(Icons.hourglass_empty, color: Colors.white38),
+      ConversionStatus.pending => const Icon(
+        Icons.hourglass_empty,
+        color: Colors.white38,
+      ),
       ConversionStatus.converting => const SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      ConversionStatus.done => const Icon(Icons.check_circle, color: Colors.green),
+        width: 24,
+        height: 24,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+      ConversionStatus.done => const Icon(
+        Icons.check_circle,
+        color: Colors.green,
+      ),
       ConversionStatus.error => const Icon(Icons.error, color: Colors.red),
     };
   }
@@ -196,7 +198,9 @@ class _ActionButtons extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isConverting = cursorTheme.status == ThemeStatus.converting;
-    final isFinished = cursorTheme.status == ThemeStatus.done || cursorTheme.status == ThemeStatus.error;
+    final isFinished =
+        cursorTheme.status == ThemeStatus.done ||
+        cursorTheme.status == ThemeStatus.error;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,

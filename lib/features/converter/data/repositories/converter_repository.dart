@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:path/path.dart' as p;
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_file.dart';
-import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dart';
 import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 
 class ConverterRepository {
@@ -18,10 +17,22 @@ class ConverterRepository {
     '08-Unavailable.ani': ('not-allowed', ['forbidden']),
     '09-Location Select.ani': ('crosshair', []),
     '10-Person Select.ani': ('alias', []),
-    '11-Vertical Resize.ani': ('sb_v_double_arrow', ['n-resize', 's-resize', 'ns-resize']),
-    '12-Horizontal Resize.ani': ('sb_h_double_arrow', ['e-resize', 'w-resize', 'ew-resize']),
-    '13-Diagonal Resize 1.ani': ('top_left_corner', ['nw-resize', 'se-resize', 'nwse-resize']),
-    '14-Diagonal Resize 2.ani': ('top_right_corner', ['ne-resize', 'sw-resize', 'nesw-resize']),
+    '11-Vertical Resize.ani': (
+      'sb_v_double_arrow',
+      ['n-resize', 's-resize', 'ns-resize'],
+    ),
+    '12-Horizontal Resize.ani': (
+      'sb_h_double_arrow',
+      ['e-resize', 'w-resize', 'ew-resize'],
+    ),
+    '13-Diagonal Resize 1.ani': (
+      'top_left_corner',
+      ['nw-resize', 'se-resize', 'nwse-resize'],
+    ),
+    '14-Diagonal Resize 2.ani': (
+      'top_right_corner',
+      ['ne-resize', 'sw-resize', 'nesw-resize'],
+    ),
     '15-Move.ani': ('fleur', ['move', 'all-scroll']),
     '16-Alternate Select.ani': ('left_ptr_watch', ['half-busy']),
   };
@@ -38,7 +49,7 @@ class ConverterRepository {
     for (final file in files) {
       final name = p.basename(file.path);
       final ext = p.extension(name).toLowerCase();
-      
+
       if (ext != '.ani' && ext != '.cur') continue;
 
       final lowerName = name.toLowerCase();
@@ -47,7 +58,8 @@ class ConverterRepository {
       // 1. Exact match
       for (final entry in _cursorMap.entries) {
         final keyLower = entry.key.toLowerCase();
-        if (lowerName == keyLower || lowerName.replaceAll(ext, '.ani') == keyLower) {
+        if (lowerName == keyLower ||
+            lowerName.replaceAll(ext, '.ani') == keyLower) {
           matchedKey = entry.key;
           break;
         }
@@ -59,14 +71,24 @@ class ConverterRepository {
           final linuxName = entry.value.$1;
           final aliases = entry.value.$2;
           final baseWindows = entry.key.replaceAll('.ani', '').toLowerCase();
-          
+
           // Split base windows name
-          final keywords = baseWindows.split(RegExp(r'[\s-]+')).where((k) => k.isNotEmpty && !int.tryParse(k[0]).toString().isNotEmpty).toList();
-          
+          final keywords = baseWindows
+              .split(RegExp(r'[\s-]+'))
+              .where(
+                (k) =>
+                    k.isNotEmpty && !int.tryParse(k[0]).toString().isNotEmpty,
+              )
+              .toList();
+
           bool matched = false;
-          if (linuxName.isNotEmpty && lowerName.contains(linuxName.replaceAll('_', ''))) { // left_ptr -> leftptr
+          if (linuxName.isNotEmpty &&
+              lowerName.contains(linuxName.replaceAll('_', ''))) {
+            // left_ptr -> leftptr
             matched = true;
-          } else if (aliases.any((a) => lowerName.contains(a.replaceAll('-', '')))) {
+          } else if (aliases.any(
+            (a) => lowerName.contains(a.replaceAll('-', '')),
+          )) {
             matched = true;
           } else {
             // Check if any keyword > 3 chars matches
@@ -87,15 +109,17 @@ class ConverterRepository {
 
       if (matchedKey != null) {
         final (linuxName, aliases) = _cursorMap[matchedKey]!;
-        cursors.add(CursorFile(
-          windowsName: name,
-          linuxName: linuxName,
-          aniPath: file.path,
-          aliases: List<String>.from(aliases),
-          status: File(file.path).existsSync()
-              ? ConversionStatus.pending
-              : ConversionStatus.error,
-        ));
+        cursors.add(
+          CursorFile(
+            windowsName: name,
+            linuxName: linuxName,
+            aniPath: file.path,
+            aliases: List<String>.from(aliases),
+            status: File(file.path).existsSync()
+                ? ConversionStatus.pending
+                : ConversionStatus.error,
+          ),
+        );
       }
     }
 
@@ -104,9 +128,13 @@ class ConverterRepository {
 
   /// Extrae frames de un archivo .ani o .cur
   Future<List<(String, int)>> extractFrames(
-      String fileOrAniPath, String framesDir, String name, int defaultDelay) async {
+    String fileOrAniPath,
+    String framesDir,
+    String name,
+    int defaultDelay,
+  ) async {
     final ext = p.extension(fileOrAniPath).toLowerCase();
-    
+
     // Soporte para archivos .cur (no animados)
     if (ext == '.cur') {
       final pngPath = p.join(framesDir, '${name}_0.png');
@@ -162,7 +190,10 @@ class ConverterRepository {
     if (frames.isEmpty) {
       // Fallback: it might not be a valid RIFF .ani or it's a disguised .cur
       final fallbackPng = p.join(framesDir, '${name}_fallback.png');
-      final fallbackResult = await Process.run('convert', [fileOrAniPath, fallbackPng]);
+      final fallbackResult = await Process.run('convert', [
+        fileOrAniPath,
+        fallbackPng,
+      ]);
       if (fallbackResult.exitCode == 0 && await File(fallbackPng).exists()) {
         frames.add((fallbackPng, defaultDelay));
       }
@@ -173,7 +204,10 @@ class ConverterRepository {
 
   /// Genera el cursor Linux desde los frames
   Future<bool> generateCursor(
-      List<(String, int)> frames, String outputPath, List<int> sizes) async {
+    List<(String, int)> frames,
+    String outputPath,
+    List<int> sizes,
+  ) async {
     if (frames.isEmpty) return false;
 
     final confPath = '$outputPath.conf';
@@ -195,7 +229,10 @@ class ConverterRepository {
 
   /// Crea symlinks para los aliases
   Future<void> createAliases(
-      String cursorsDir, String linuxName, List<String> aliases) async {
+    String cursorsDir,
+    String linuxName,
+    List<String> aliases,
+  ) async {
     for (final alias in aliases) {
       final linkPath = p.join(cursorsDir, alias);
       final link = Link(linkPath);
@@ -207,7 +244,8 @@ class ConverterRepository {
 
   /// Crea el archivo cursor.theme
   Future<void> createThemeFile(String themeDir, String themeName) async {
-    final content = '''
+    final content =
+        '''
 [Icon Theme]
 Name=$themeName
 Comment=$themeName cursor theme for Linux - converted with ANI to XCursor
@@ -216,7 +254,11 @@ Comment=$themeName cursor theme for Linux - converted with ANI to XCursor
   }
 
   /// Instala el tema en ~/.local/share/icons
-  Future<bool> installTheme(String themeDir, String themeName, Settings settings) async {
+  Future<bool> installTheme(
+    String themeDir,
+    String themeName,
+    Settings settings,
+  ) async {
     final home = Platform.environment['HOME']!;
     final iconsDir = settings.systemInstall
         ? '/usr/share/icons'
@@ -254,15 +296,19 @@ Comment=$themeName cursor theme for Linux - converted with ANI to XCursor
     }
 
     if (success && settings.autoApplyCursor) {
-      await Process.run('gsettings', ['set', 'org.gnome.desktop.interface', 'cursor-theme', themeName]);
+      await Process.run('gsettings', [
+        'set',
+        'org.gnome.desktop.interface',
+        'cursor-theme',
+        themeName,
+      ]);
     }
 
     return success;
   }
 
   // Helpers para parsear binario RIFF
-  int _findChunk(Uint8List data, String tag) =>
-      _findChunkFrom(data, tag, 0);
+  int _findChunk(Uint8List data, String tag) => _findChunkFrom(data, tag, 0);
 
   int _findChunkFrom(Uint8List data, String tag, int start) {
     final tagBytes = tag.codeUnits;

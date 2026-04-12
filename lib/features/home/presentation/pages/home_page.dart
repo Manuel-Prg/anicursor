@@ -35,7 +35,9 @@ class HomePage extends ConsumerWidget {
           children: [
             // Logo / título
             SvgPicture.asset(
-              isLight ? 'assets/ani_xcursor_logo_light.svg' : 'assets/ani_xcursor_logo_v3.svg',
+              isLight
+                  ? 'assets/ani_xcursor_logo_light.svg'
+                  : 'assets/ani_xcursor_logo_v3.svg',
               width: 80,
               height: 80,
             ),
@@ -64,12 +66,19 @@ class HomePage extends ConsumerWidget {
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: Colors.red.withOpacity(0.1),
-                  border: Border.all(color: Colors.red.withOpacity(0.5), width: 2),
+                  border: Border.all(
+                    color: Colors.red.withOpacity(0.5),
+                    width: 2,
+                  ),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   children: [
-                    const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 48),
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      color: Colors.red,
+                      size: 48,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Dependencias Faltantes',
@@ -82,7 +91,9 @@ class HomePage extends ConsumerWidget {
                     Text(
                       'Para que la magia funcione en Linux, necesitamos soporte de ImageMagick y Xcursorgen.',
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red[200]),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.red[200],
+                      ),
                     ),
                     const SizedBox(height: 16),
                     if (deps.isInstalling)
@@ -94,12 +105,16 @@ class HomePage extends ConsumerWidget {
                           foregroundColor: Colors.white,
                         ),
                         onPressed: () async {
-                          final success = await ref.read(dependencyProvider.notifier).installDependencies();
+                          final success = await ref
+                              .read(dependencyProvider.notifier)
+                              .installDependencies();
                           if (!success && context.mounted) {
                             showDialog(
                               context: context,
                               builder: (c) => AlertDialog(
-                                title: const Text('Instalación Manual Requerida'),
+                                title: const Text(
+                                  'Instalación Manual Requerida',
+                                ),
                                 content: const Text(
                                   'Tu sistema operativo bloqueó la instalación automática o no admite "apt-get".\n\n'
                                   'Por favor instala "imagemagick" y "xcursorgen" desde la terminal usando tu gestor de paquetes (pacman, dnf, zypper).',
@@ -108,7 +123,7 @@ class HomePage extends ConsumerWidget {
                                   FilledButton(
                                     onPressed: () => Navigator.pop(c),
                                     child: const Text('Entendido'),
-                                  )
+                                  ),
                                 ],
                               ),
                             );
@@ -132,9 +147,11 @@ class HomePage extends ConsumerWidget {
               // Botón seleccionar carpeta
               OutlinedButton.icon(
                 onPressed: () async {
-                 final result = await FilePicker.getDirectoryPath();
+                  final result = await FilePicker.getDirectoryPath();
                   if (result != null) {
-                    ref.read(cursorThemeProvider.notifier).scanDirectory(result);
+                    ref
+                        .read(cursorThemeProvider.notifier)
+                        .scanDirectory(result);
                     if (context.mounted) context.push('/converter');
                   }
                 },
@@ -158,7 +175,8 @@ class HomePage extends ConsumerWidget {
                 IconButton(
                   icon: const FaIcon(FontAwesomeIcons.github),
                   tooltip: 'GitHub',
-                  onPressed: () => launchUrl(Uri.parse('https://github.com/Manuel-Prg')),
+                  onPressed: () =>
+                      launchUrl(Uri.parse('https://github.com/Manuel-Prg')),
                 ),
                 IconButton(
                   icon: const Icon(Icons.info_outline),
@@ -169,20 +187,25 @@ class HomePage extends ConsumerWidget {
                       applicationName: 'AniCursor',
                       applicationVersion: '1.0.0',
                       applicationIcon: SvgPicture.asset(
-                        isLight ? 'assets/ani_xcursor_logo_light.svg' : 'assets/ani_xcursor_logo_v3.svg',
+                        isLight
+                            ? 'assets/ani_xcursor_logo_light.svg'
+                            : 'assets/ani_xcursor_logo_v3.svg',
                         width: 48,
                         height: 48,
                       ),
                       children: const [
-                        Text('Creado por manuelprz.\nUn conversor de temas de Windows (.ani) hacia cursores nativos XCursor para Linux.'),
-                      ]
+                        Text(
+                          'Creado por manuelprz.\nUn conversor de temas de Windows (.ani) hacia cursores nativos XCursor para Linux.',
+                        ),
+                      ],
                     );
                   },
                 ),
                 IconButton(
                   icon: const Icon(Icons.coffee),
                   tooltip: 'Apóyame en Ko-fi',
-                  onPressed: () => launchUrl(Uri.parse('https://ko-fi.com/manuelprz0180')),
+                  onPressed: () =>
+                      launchUrl(Uri.parse('https://ko-fi.com/manuelprz0180')),
                 ),
               ],
             ),
@@ -239,7 +262,7 @@ class _DropZoneState extends State<_DropZone> {
           decoration: BoxDecoration(
             color: _hovering
                 ? theme.colorScheme.primary.withOpacity(0.1)
-                : theme.colorScheme.surfaceVariant,
+                : theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: _hovering

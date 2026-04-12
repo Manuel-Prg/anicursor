@@ -19,10 +19,11 @@ final convertThemeUsecaseProvider = Provider<ConvertThemeUsecase>((ref) {
   return ConvertThemeUsecase(ref.watch(converterRepositoryProvider));
 });
 
-final cursorThemeProvider =
-    NotifierProvider<CursorThemeNotifier, CursorTheme?>(() {
-  return CursorThemeNotifier();
-});
+final cursorThemeProvider = NotifierProvider<CursorThemeNotifier, CursorTheme?>(
+  () {
+    return CursorThemeNotifier();
+  },
+);
 
 class CursorThemeNotifier extends Notifier<CursorTheme?> {
   @override
@@ -37,9 +38,9 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
     state = CursorTheme(
       name: themeName,
       inputDir: dirPath,
-      outputDir: settings.customOutputDir != null 
-          ? p.join(settings.customOutputDir!, '${themeName}-Linux')
-          : p.join(dirPath, '..', '${themeName}-Linux'),
+      outputDir: settings.customOutputDir != null
+          ? p.join(settings.customOutputDir!, '$themeName-Linux')
+          : p.join(dirPath, '..', '$themeName-Linux'),
       cursors: cursors,
     );
   }
@@ -62,7 +63,8 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
     // Efectos de sonido personalizados (App Assets)
     if (state != null) {
       final player = AudioPlayer();
-      if (state!.status == ThemeStatus.error || (state!.status == ThemeStatus.done && state!.errors > 0)) {
+      if (state!.status == ThemeStatus.error ||
+          (state!.status == ThemeStatus.done && state!.errors > 0)) {
         player.play(AssetSource('sounds/error_1.mp3'));
       } else if (state!.status == ThemeStatus.done) {
         player.play(AssetSource('sounds/notification_1.mp3'));
@@ -79,7 +81,7 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
 
   Future<void> exportZip() async {
     if (state == null) return;
-    
+
     final zipPath = await FilePicker.saveFile(
       dialogTitle: 'Exportar tema como ZIP',
       fileName: '${state!.name}.zip',
@@ -91,17 +93,17 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
 
     final encoder = ZipFileEncoder();
     encoder.create(zipPath);
-    
+
     final cursorsDir = p.join(state!.outputDir, 'cursors');
     final themeFile = p.join(state!.outputDir, 'cursor.theme');
-    
+
     if (Directory(cursorsDir).existsSync()) {
       encoder.addDirectory(Directory(cursorsDir));
     }
     if (File(themeFile).existsSync()) {
       encoder.addFile(File(themeFile));
     }
-    
+
     encoder.close();
   }
 

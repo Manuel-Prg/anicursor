@@ -48,7 +48,7 @@ class SettingsPage extends ConsumerWidget {
               children: [
                 ListTile(
                   title: const Text('Tamaños de Cursor'),
-                  subtitle: Text(settings.cursorSizes.join('px, ') + 'px'),
+                  subtitle: Text('${settings.cursorSizes.join('px, ')}px'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => _showSizesDialog(context, settings, notifier),
                 ),
@@ -56,7 +56,8 @@ class SettingsPage extends ConsumerWidget {
                 ListTile(
                   title: const Text('Delay por defecto (ms)'),
                   subtitle: Text(
-                      'Usado cuando el archivo orginal no provee retardos: ${settings.defaultDelay}ms'),
+                    'Usado cuando el archivo orginal no provee retardos: ${settings.defaultDelay}ms',
+                  ),
                   trailing: SizedBox(
                     width: 200,
                     child: Slider(
@@ -65,14 +66,18 @@ class SettingsPage extends ConsumerWidget {
                       max: 500,
                       divisions: 49,
                       label: settings.defaultDelay.toString(),
-                      onChanged: (val) => notifier.updateDefaultDelay(val.toInt()),
+                      onChanged: (val) =>
+                          notifier.updateDefaultDelay(val.toInt()),
                     ),
                   ),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   title: const Text('Directorio de Salida Perso.'),
-                  subtitle: Text(settings.customOutputDir ?? 'Automático (junto a la carpeta de entrada)'),
+                  subtitle: Text(
+                    settings.customOutputDir ??
+                        'Automático (junto a la carpeta de entrada)',
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -112,14 +117,18 @@ class SettingsPage extends ConsumerWidget {
               children: [
                 SwitchListTile(
                   title: const Text('Instalar globalmente'),
-                  subtitle: const Text('Requiere pkexec/root (/usr/share/icons)'),
+                  subtitle: const Text(
+                    'Requiere pkexec/root (/usr/share/icons)',
+                  ),
                   value: settings.systemInstall,
                   onChanged: notifier.updateSystemInstall,
                 ),
                 const Divider(height: 1),
                 SwitchListTile(
                   title: const Text('Auto-Aplicar Cursor'),
-                  subtitle: const Text('Forzar inmediatamente vía gsettings x-cursor'),
+                  subtitle: const Text(
+                    'Forzar inmediatamente vía gsettings x-cursor',
+                  ),
                   value: settings.autoApplyCursor,
                   onChanged: notifier.updateAutoApply,
                 ),
@@ -143,19 +152,28 @@ class SettingsPage extends ConsumerWidget {
                 ListTile(
                   leading: const Icon(Icons.security),
                   title: const Text('Evitar cursor fantasma en Flatpak'),
-                  subtitle: const Text('Otorga permiso de lectura a Flatpak para poder ver tus cursores personalizados.'),
+                  subtitle: const Text(
+                    'Otorga permiso de lectura a Flatpak para poder ver tus cursores personalizados.',
+                  ),
                   trailing: FilledButton.tonal(
                     onPressed: () async {
                       try {
                         final home = Platform.environment['HOME']!;
                         final iconsPath = '$home/.local/share/icons';
-                        await Process.run('flatpak', ['override', '--user', '--filesystem=$iconsPath:ro']);
+                        await Process.run('flatpak', [
+                          'override',
+                          '--user',
+                          '--filesystem=$iconsPath:ro',
+                        ]);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Row(
                                 children: [
-                                  Icon(Icons.check_circle_outline, color: Colors.green),
+                                  Icon(
+                                    Icons.check_circle_outline,
+                                    color: Colors.green,
+                                  ),
                                   SizedBox(width: 12),
                                   Text('Permisos de Flatpak actualizados'),
                                 ],
@@ -169,7 +187,10 @@ class SettingsPage extends ConsumerWidget {
                             const SnackBar(
                               content: Row(
                                 children: [
-                                  Icon(Icons.error_outline, color: Colors.orange),
+                                  Icon(
+                                    Icons.error_outline,
+                                    color: Colors.orange,
+                                  ),
                                   SizedBox(width: 12),
                                   Text('No se detectó Flatpak o hubo un error'),
                                 ],
@@ -223,11 +244,17 @@ class SettingsPage extends ConsumerWidget {
                     trailing: SegmentedButton<ThemeMode>(
                       segments: const [
                         ButtonSegment(
-                            value: ThemeMode.system, icon: Icon(Icons.computer)),
+                          value: ThemeMode.system,
+                          icon: Icon(Icons.computer),
+                        ),
                         ButtonSegment(
-                            value: ThemeMode.light, icon: Icon(Icons.light_mode)),
+                          value: ThemeMode.light,
+                          icon: Icon(Icons.light_mode),
+                        ),
                         ButtonSegment(
-                            value: ThemeMode.dark, icon: Icon(Icons.dark_mode)),
+                          value: ThemeMode.dark,
+                          icon: Icon(Icons.dark_mode),
+                        ),
                       ],
                       selected: {settings.themeMode},
                       onSelectionChanged: (Set<ThemeMode> selection) {
@@ -241,7 +268,8 @@ class SettingsPage extends ConsumerWidget {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: _availableColors.map((color) {
-                        final isSelected = settings.primaryColor.value == color.value;
+                        final isSelected =
+                            settings.primaryColor.value == color.value;
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           child: InkWell(
@@ -273,7 +301,10 @@ class SettingsPage extends ConsumerWidget {
   }
 
   void _showSizesDialog(
-      BuildContext context, Settings settings, SettingsNotifier notifier) {
+    BuildContext context,
+    Settings settings,
+    SettingsNotifier notifier,
+  ) {
     showDialog(
       context: context,
       builder: (context) {
@@ -352,7 +383,7 @@ class _SizesDialogState extends State<_SizesDialog> {
                 child: const Icon(Icons.add),
               ),
             ],
-          )
+          ),
         ],
       ),
       actions: [
@@ -366,7 +397,7 @@ class _SizesDialogState extends State<_SizesDialog> {
             Navigator.pop(context);
           },
           child: const Text('Guardar'),
-        )
+        ),
       ],
     );
   }
