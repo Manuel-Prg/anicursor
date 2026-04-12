@@ -73,13 +73,21 @@ class ConvertThemeUsecase {
       yield current;
     }
 
-    // Crear archivo cursor.theme
-    await _repository.createThemeFile(theme.outputDir, theme.name);
+    try {
+      // Crear archivo cursor.theme
+      await _repository.createThemeFile(theme.outputDir, theme.name);
 
-    current = current.copyWith(
-      status: current.errors > 0 ? ThemeStatus.error : ThemeStatus.done,
-      progress: 100,
-    );
+      current = current.copyWith(
+        status: current.errors > 0 ? ThemeStatus.error : ThemeStatus.done,
+        progress: 100,
+      );
+    } catch (e) {
+      print('Error al finalizar el tema: $e');
+      current = current.copyWith(
+        status: ThemeStatus.error,
+        progress: 100,
+      );
+    }
     yield current;
   }
 }

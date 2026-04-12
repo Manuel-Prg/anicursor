@@ -360,8 +360,23 @@ class ConverterRepository {
       print('Cursor generado con éxito: $outputPath');
     }
 
-    // Cleanup resized frames
-    // for (final size in sizes) { ... } // Se limpian al borrar el directorio temporal del proceso completo
+    print('Limpiando archivos redimensionados basura para $outputPath...');
+    try {
+      final dir = Directory(framesDir);
+      if (await dir.exists()) {
+        final files = dir.listSync();
+        for (var file in files) {
+          final fileName = p.basename(file.path);
+          // Borramos solo los archivos que empiezan con 'res_' y pertenecen a este cursor
+          if (fileName.startsWith('res_') && 
+              fileName.contains(p.basenameWithoutExtension(outputPath))) {
+            await file.delete();
+          }
+        }
+      }
+    } catch (e) {
+      print('Error no fatal limpiando frames basura: $e');
+    }
 
     await File(confPath).delete();
     return result.exitCode == 0;

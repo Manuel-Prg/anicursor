@@ -1,8 +1,9 @@
+import 'package:flutter/services.dart';
+
 import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:path/path.dart' as p;
 import 'package:ani_to_xcursor/features/converter/data/repositories/converter_repository.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dart';
@@ -54,19 +55,48 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
     final usecase = ref.read(convertThemeUsecaseProvider);
     final settings = ref.read(settingsProvider);
 
-    await for (final theme in usecase.execute(state!, settings)) {
-      state = theme;
-    }
-
-    // Efectos de sonido personalizados (App Assets)
-    if (state != null) {
-      final player = AudioPlayer();
-      if (state!.status == ThemeStatus.error ||
-          (state!.status == ThemeStatus.done && state!.errors > 0)) {
-        player.play(AssetSource('sounds/error_1.mp3'));
-      } else if (state!.status == ThemeStatus.done) {
-        player.play(AssetSource('sounds/notification_1.mp3'));
+    try {
+      await for (final theme in usecase.execute(state!, settings)) {
+        state = theme;
       }
+
+      // Intentar reproducir sonido de finalización de forma ultra-segura (Sistema)
+      if (state != null) {
+        if (state!.status == ThemeStatus.error ||
+            (state!.status == ThemeStatus.done && state!.errors > 0)) {
+          await _playSound('assets/sounds/error_1.mp3');
+        } else if (state!.status == ThemeStatus.done) {
+          await _playSound('assets/sounds/notification_1.mp3');
+        }
+      }
+    } catch (e) {
+      print('Error durante la conversion (UI): $e');
+    }
+  }
+
+  Future<void> _playSound(String assetPath) async {
+    try {
+      // 1. Extraer el asset a un archivo temporal (el sistema no lee assets directamente)
+      final byteData = await rootBundle.load(assetPath);
+      final cacheDir = Directory(p.join(Directory.systemTemp.path, 'anicursor_audio'));
+      if (!await cacheDir.exists()) await cacheDir.create();
+      
+      final tempFile = File(p.join(cacheDir.path, p.basename(assetPath)));
+      await tempFile.writeAsBytes(byteData.buffer.asUint8List());
+
+      // 2. Ejecutar comando de sistema de forma asíncrona para no bloquear y evitar crashes
+      // Intentamos con gst-launch-1.0 que es el estándar de Linux/GTK
+      await Process.run('gst-launch-1.0', [
+        'playbin', 
+        'uri=file://${tempFile.path}',
+        'video-sink=fakesink',
+        'audio-sink=autoaudiosink'
+      ]);
+      
+      print('Sonido sistema ejecutado: $assetPath');
+    } catch (e) {
+      print('Audio del sistema no disponible o falló: $e');
+      // No hacemos nada más, la app sigue funcionando perfectamente
     }
   }
 

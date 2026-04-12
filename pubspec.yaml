@@ -45,7 +45,6 @@ dependencies:
   url_launcher: ^6.2.5
   font_awesome_flutter: ^10.7.0
   flutter_svg: ^2.0.10
-  audioplayers: ^6.1.0
   path: ^1.9.1
 
 dev_dependencies:
