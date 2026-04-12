@@ -16,7 +16,9 @@ class PreviewPage extends ConsumerWidget {
     final cursorTheme = ref.watch(cursorThemeProvider);
 
     if (cursorTheme == null) {
-      context.go('/');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) context.go('/');
+      });
       return const SizedBox.shrink();
     }
 

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:path/path.dart' as p;
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_file.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dart';
+import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 
 class ConverterRepository {
   static const _cursorMap = {
@@ -103,7 +104,7 @@ class ConverterRepository {
 
   /// Extrae frames de un archivo .ani o .cur
   Future<List<(String, int)>> extractFrames(
-      String fileOrAniPath, String framesDir, String name) async {
+      String fileOrAniPath, String framesDir, String name, int defaultDelay) async {
     final ext = p.extension(fileOrAniPath).toLowerCase();
     
     // Soporte para archivos .cur (no animados)
@@ -111,14 +112,14 @@ class ConverterRepository {
       final pngPath = p.join(framesDir, '${name}_0.png');
       final result = await Process.run('convert', [fileOrAniPath, pngPath]);
       if (result.exitCode == 0 && await File(pngPath).exists()) {
-        return [(pngPath, 100)];
+        return [(pngPath, defaultDelay)];
       }
       return [];
     }
 
     final data = await File(fileOrAniPath).readAsBytes();
     final frames = <(String, int)>[];
-    int delay = 100;
+    int delay = defaultDelay;
 
     // Buscar chunk 'rate' para delays
     final ratePos = _findChunk(data, 'rate');
@@ -158,21 +159,30 @@ class ConverterRepository {
       pos = iconPos + 8 + size;
     }
 
+    if (frames.isEmpty) {
+      // Fallback: it might not be a valid RIFF .ani or it's a disguised .cur
+      final fallbackPng = p.join(framesDir, '${name}_fallback.png');
+      final fallbackResult = await Process.run('convert', [fileOrAniPath, fallbackPng]);
+      if (fallbackResult.exitCode == 0 && await File(fallbackPng).exists()) {
+        frames.add((fallbackPng, defaultDelay));
+      }
+    }
+
     return frames;
   }
 
   /// Genera el cursor Linux desde los frames
   Future<bool> generateCursor(
-      List<(String, int)> frames, String outputPath) async {
+      List<(String, int)> frames, String outputPath, List<int> sizes) async {
     if (frames.isEmpty) return false;
 
     final confPath = '$outputPath.conf';
     final conf = StringBuffer();
 
     for (final (framePath, delay) in frames) {
-      conf.writeln('24 0 0 $framePath $delay');
-      conf.writeln('32 0 0 $framePath $delay');
-      conf.writeln('48 0 0 $framePath $delay');
+      for (final size in sizes) {
+        conf.writeln('$size 0 0 $framePath $delay');
+      }
     }
 
     await File(confPath).writeAsString(conf.toString());
@@ -206,15 +216,48 @@ Comment=$themeName cursor theme for Linux - converted with ANI to XCursor
   }
 
   /// Instala el tema en ~/.local/share/icons
-  Future<bool> installTheme(String themeDir, String themeName) async {
+  Future<bool> installTheme(String themeDir, String themeName, Settings settings) async {
     final home = Platform.environment['HOME']!;
-    final iconsDir = p.join(home, '.local', 'share', 'icons');
+    final iconsDir = settings.systemInstall
+        ? '/usr/share/icons'
+        : p.join(home, '.local', 'share', 'icons');
     final dest = p.join(iconsDir, themeName);
 
-    await Directory(iconsDir).create(recursive: true);
+    bool success = true;
+    final cursorsSrc = p.join(themeDir, 'cursors');
+    final themeSrc = p.join(themeDir, 'cursor.theme');
 
-    final result = await Process.run('cp', ['-r', themeDir, dest]);
-    return result.exitCode == 0;
+    if (settings.systemInstall) {
+      await Process.run('pkexec', ['rm', '-rf', dest]);
+      await Process.run('pkexec', ['mkdir', '-p', dest]);
+
+      if (await Directory(cursorsSrc).exists()) {
+        final res = await Process.run('pkexec', ['cp', '-r', cursorsSrc, dest]);
+        if (res.exitCode != 0) success = false;
+      }
+      if (await File(themeSrc).exists()) {
+        final res = await Process.run('pkexec', ['cp', themeSrc, dest]);
+        if (res.exitCode != 0) success = false;
+      }
+    } else {
+      await Process.run('rm', '-rf $dest'.split(' '));
+      await Directory(dest).create(recursive: true);
+
+      if (await Directory(cursorsSrc).exists()) {
+        final res = await Process.run('cp', ['-r', cursorsSrc, dest]);
+        if (res.exitCode != 0) success = false;
+      }
+      if (await File(themeSrc).exists()) {
+        final res = await Process.run('cp', [themeSrc, dest]);
+        if (res.exitCode != 0) success = false;
+      }
+    }
+
+    if (success && settings.autoApplyCursor) {
+      await Process.run('gsettings', ['set', 'org.gnome.desktop.interface', 'cursor-theme', themeName]);
+    }
+
+    return success;
   }
 
   // Helpers para parsear binario RIFF

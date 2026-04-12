@@ -14,7 +14,9 @@ class ConverterPage extends ConsumerWidget {
     final cursorTheme = ref.watch(cursorThemeProvider);
 
     if (cursorTheme == null) {
-      context.go('/');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) context.go('/');
+      });
       return const SizedBox.shrink();
     }
 
@@ -175,12 +177,12 @@ class _ActionButtons extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isConverting = cursorTheme.status == ThemeStatus.converting;
-    final isDone = cursorTheme.status == ThemeStatus.done;
+    final isFinished = cursorTheme.status == ThemeStatus.done || cursorTheme.status == ThemeStatus.error;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (isDone) ...[
+        if (isFinished) ...[
           OutlinedButton.icon(
             onPressed: () => context.push('/preview'),
             icon: const Icon(Icons.preview),

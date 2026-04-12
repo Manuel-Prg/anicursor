@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ani_to_xcursor/features/home/presentation/pages/home_page.dart';
 import 'package:ani_to_xcursor/features/converter/presentation/pages/converter_page.dart';
 import 'package:ani_to_xcursor/features/preview/presentation/pages/preview_page.dart';
+import 'package:ani_to_xcursor/features/settings/presentation/pages/settings_page.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -20,6 +21,11 @@ final appRouter = GoRouter(
       path: '/preview',
       name: 'preview',
       builder: (context, state) => const PreviewPage(),
+    ),
+    GoRoute(
+      path: '/settings',
+      name: 'settings',
+      builder: (context, state) => const SettingsPage(),
     ),
   ],
 );

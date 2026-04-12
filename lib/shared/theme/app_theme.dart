@@ -1,28 +1,40 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const _primaryColor = Color(0xFFE91E8C);
-  static const _backgroundColor = Color(0xFF0F0F0F);
-  static const _surfaceColor = Color(0xFF1A1A1A);
-  static const _cardColor = Color(0xFF242424);
+  static const backgroundColorDark = Color(0xFF0F0F0F);
+  static const surfaceColorDark = Color(0xFF1A1A1A);
+  static const cardColorDark = Color(0xFF242424);
 
-  static ThemeData get dark => ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        colorScheme: const ColorScheme.dark(
-          primary: _primaryColor,
-          background: _backgroundColor,
-          surface: _surfaceColor,
-          surfaceVariant: _cardColor,
-        ),
-        scaffoldBackgroundColor: _backgroundColor,
-        cardTheme: const CardThemeData(
-          color: _cardColor,
-          elevation: 0,
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: _backgroundColor,
-          elevation: 0,
-        ),
-      );
+  static ThemeData light(Color primaryColor) {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      colorSchemeSeed: primaryColor,
+      cardTheme: const CardThemeData(
+        elevation: 0,
+      ),
+      appBarTheme: const AppBarTheme(
+        elevation: 0,
+        centerTitle: false,
+      ),
+    );
+  }
+
+  static ThemeData dark(Color primaryColor) {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorSchemeSeed: primaryColor,
+      scaffoldBackgroundColor: backgroundColorDark,
+      cardTheme: const CardThemeData(
+        color: cardColorDark,
+        elevation: 0,
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: backgroundColorDark,
+        elevation: 0,
+        centerTitle: false,
+      ),
+    );
+  }
 }

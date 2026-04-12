@@ -3,13 +3,14 @@ import 'package:path/path.dart' as p;
 import 'package:ani_to_xcursor/features/converter/data/repositories/converter_repository.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_file.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dart';
+import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 
 class ConvertThemeUsecase {
   final ConverterRepository _repository;
 
   ConvertThemeUsecase(this._repository);
 
-  Stream<CursorTheme> execute(CursorTheme theme) async* {
+  Stream<CursorTheme> execute(CursorTheme theme, Settings settings) async* {
     final framesDir = p.join(theme.outputDir, 'frames');
     final cursorsDir = p.join(theme.outputDir, 'cursors');
 
@@ -39,11 +40,12 @@ class ConvertThemeUsecase {
           cursor.aniPath,
           framesDir,
           cursor.linuxName,
+          settings.defaultDelay,
         );
 
         // Generar cursor
         final outputPath = p.join(cursorsDir, cursor.linuxName);
-        final success = await _repository.generateCursor(frames, outputPath);
+        final success = await _repository.generateCursor(frames, outputPath, settings.cursorSizes);
 
         // Crear aliases
         if (success && cursor.aliases.isNotEmpty) {

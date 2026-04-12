@@ -13,6 +13,16 @@ class HomePage extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => context.push('/settings'),
+          ),
+          const SizedBox(width: 16),
+        ],
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -95,7 +105,9 @@ class _DropZoneState extends State<_DropZone> {
       onDragDone: (detail) {
         // Obtenemos la primera ruta. Idealmente se verifica que sea directorio
         if (detail.files.isNotEmpty) {
-          widget.onFolderSelected(detail.files.first.path);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            widget.onFolderSelected(detail.files.first.path);
+          });
         }
       },
       onDragEntered: (detail) => setState(() => _hovering = true),

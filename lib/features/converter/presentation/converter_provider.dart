@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:ani_to_xcursor/features/converter/data/repositories/converter_repository.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dart';
 import 'package:ani_to_xcursor/features/converter/domain/usecases/convert_theme_usecase.dart';
+import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 
 final converterRepositoryProvider = Provider<ConverterRepository>((ref) {
   return ConverterRepository();
@@ -27,13 +28,16 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
 
   void scanDirectory(String dirPath) {
     final repo = ref.read(converterRepositoryProvider);
+    final settings = ref.read(settingsProvider);
     final cursors = repo.scanDirectory(dirPath);
     final themeName = dirPath.split('/').last;
 
     state = CursorTheme(
       name: themeName,
       inputDir: dirPath,
-      outputDir: p.join(dirPath, '..', '${themeName}-Linux'),
+      outputDir: settings.customOutputDir != null 
+          ? p.join(settings.customOutputDir!, '${themeName}-Linux')
+          : p.join(dirPath, '..', '${themeName}-Linux'),
       cursors: cursors,
     );
   }
@@ -47,8 +51,9 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
     if (state == null) return;
 
     final usecase = ref.read(convertThemeUsecaseProvider);
+    final settings = ref.read(settingsProvider);
 
-    await for (final theme in usecase.execute(state!)) {
+    await for (final theme in usecase.execute(state!, settings)) {
       state = theme;
     }
   }
@@ -56,7 +61,8 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
   Future<void> install() async {
     if (state == null) return;
     final repo = ref.read(converterRepositoryProvider);
-    await repo.installTheme(state!.outputDir, state!.name);
+    final settings = ref.read(settingsProvider);
+    await repo.installTheme(state!.outputDir, state!.name, settings);
   }
 
   Future<void> exportZip() async {
