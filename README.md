@@ -15,6 +15,11 @@
 
 ---
 
+
+<img width="1904" height="1038" alt="imagen_1_anicursor" src="https://github.com/user-attachments/assets/2cc7aa3c-1df0-4358-aaa6-5ffaf567f5d9" />
+<img width="1904" height="1038" alt="imagen_2_anicursor" src="https://github.com/user-attachments/assets/7d4067fa-97bd-42c8-9fd3-61e38c3c4edb" />
+<img width="1904" height="1038" alt="imagen_3_anicursor" src="https://github.com/user-attachments/assets/c7859a5a-6f5e-4b27-95e0-f1dcbe57a82d" />
+
 ## Requisitos y Dependencias ⚙️
 
 Como el motor detrás de la app funciona de la mano del sistema operativo nativo, debes asegurarte de tener instaladas las siguientes herramientas clásicas en Linux:
