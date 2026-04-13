@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_file.dart';
 import 'package:ani_to_xcursor/features/converter/presentation/converter_provider.dart';
+import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 
 class PreviewPage extends ConsumerWidget {
   const PreviewPage({super.key});
@@ -37,19 +38,96 @@ class PreviewPage extends ConsumerWidget {
         actions: [
           FilledButton.icon(
             onPressed: () async {
-              await ref.read(cursorThemeProvider.notifier).install();
+              final settings = ref.read(settingsProvider);
+              final success = await ref.read(cursorThemeProvider.notifier).install();
+              
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Row(
-                      children: [
-                        Icon(Icons.check, color: Colors.white),
-                        SizedBox(width: 12),
-                        Text('Tema instalado en el sistema'),
-                      ],
+                if (success) {
+                  // Si no se auto-aplica, mostrar un dialogo guiando al usuario
+                  if (!settings.autoApplyCursor) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        title: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check_circle_rounded,
+                                color: Colors.green,
+                                size: 48,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              '¡Tema Instalado!',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        content: const Text(
+                          'El tema se ha instalado correctamente en el sistema.\n\n'
+                          'Para activarlo, selecciónalo manualmente en la aplicación de '
+                          'Retoques (Tweaks) o en la configuración de apariencia.',
+                          textAlign: TextAlign.center,
+                        ),
+                        actionsAlignment: MainAxisAlignment.center,
+                        actions: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: FilledButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: FilledButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32,
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text('Entendido'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Row(
+                          children: [
+                            Icon(Icons.check, color: Colors.white),
+                            SizedBox(width: 12),
+                            Text('Tema instalado y aplicado con éxito'),
+                          ],
+                        ),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Row(
+                        children: [
+                          Icon(Icons.error_outline, color: Colors.white),
+                          SizedBox(width: 12),
+                          Text('Error al instalar el tema. Revisa los permisos.'),
+                        ],
+                      ),
+                      backgroundColor: Colors.red,
                     ),
-                  ),
-                );
+                  );
+                }
               }
             },
             icon: const Icon(Icons.download),

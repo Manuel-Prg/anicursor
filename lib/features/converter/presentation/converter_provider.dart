@@ -100,11 +100,11 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
     }
   }
 
-  Future<void> install() async {
-    if (state == null) return;
+  Future<bool> install() async {
+    if (state == null) return false;
     final repo = ref.read(converterRepositoryProvider);
     final settings = ref.read(settingsProvider);
-    await repo.installTheme(state!.outputDir, state!.name, settings);
+    return await repo.installTheme(state!.outputDir, state!.name, settings);
   }
 
   Future<void> exportZip() async {
@@ -123,13 +123,17 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
     encoder.create(zipPath);
 
     final cursorsDir = p.join(state!.outputDir, 'cursors');
-    final themeFile = p.join(state!.outputDir, 'cursor.theme');
+    final indexTheme = p.join(state!.outputDir, 'index.theme');
+    final cursorTheme = p.join(state!.outputDir, 'cursor.theme');
 
     if (Directory(cursorsDir).existsSync()) {
       encoder.addDirectory(Directory(cursorsDir));
     }
-    if (File(themeFile).existsSync()) {
-      encoder.addFile(File(themeFile));
+    if (File(indexTheme).existsSync()) {
+      encoder.addFile(File(indexTheme));
+    }
+    if (File(cursorTheme).existsSync()) {
+      encoder.addFile(File(cursorTheme));
     }
 
     encoder.close();

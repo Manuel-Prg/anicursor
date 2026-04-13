@@ -103,8 +103,9 @@ class MockScanner {
         final parts = trimmed.split('=');
         final key = parts[0].trim().toLowerCase();
         var value = parts[1].trim();
-        if (value.startsWith('"') && value.endsWith('"'))
+        if (value.startsWith('"') && value.endsWith('"')) {
           value = value.substring(1, value.length - 1);
+        }
         mapping[key] = value;
       }
     }

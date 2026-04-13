@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:path/path.dart' as p;
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_file.dart';
@@ -6,103 +7,73 @@ import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 
 class ConverterRepository {
   static const List<(String, List<String>, List<String>, List<String>)>
-      _cursorRoles = [
+  _cursorRoles = [
     (
       'left_ptr',
       ['default', 'arrow'],
       ['pointer', 'arrow'],
-      ['normal', 'pointer', 'default']
+      ['normal', 'pointer', 'default'],
     ),
     (
       'hand2',
       ['pointer', 'pointing_hand'],
       ['link'],
-      ['link', 'pointing', 'hand']
+      ['link', 'pointing', 'hand'],
     ),
-    (
-      'watch',
-      ['wait', 'progress'],
-      ['busy'],
-      ['busy', 'wait', 'loading']
-    ),
+    ('watch', ['wait', 'progress'], ['busy'], ['busy', 'wait', 'loading']),
     (
       'left_ptr_watch',
       ['half-busy'],
       ['working', 'work', 'alternate'],
-      ['working', 'work', 'progress', 'loading']
+      ['working', 'work', 'progress', 'loading'],
     ),
-    (
-      'question_arrow',
-      ['help'],
-      ['help'],
-      ['help', 'question']
-    ),
-    (
-      'xterm',
-      ['text', 'ibeam'],
-      ['text'],
-      ['text', 'ibeam', 'select']
-    ),
-    (
-      'pencil',
-      [],
-      ['hand'],
-      ['handwriting', 'pencil', 'pen']
-    ),
+    ('question_arrow', ['help'], ['help'], ['help', 'question']),
+    ('xterm', ['text', 'ibeam'], ['text'], ['text', 'ibeam', 'select']),
+    ('pencil', [], ['hand'], ['handwriting', 'pencil', 'pen']),
     (
       'cross',
       ['crosshair'],
       ['precision', 'cross'],
-      ['precision', 'cross', 'crosshair']
+      ['precision', 'cross', 'crosshair'],
     ),
     (
       'not-allowed',
       ['forbidden'],
       ['unavailable'],
-      ['unavailable', 'not-allowed', 'forbidden', 'no']
+      ['unavailable', 'not-allowed', 'forbidden', 'no'],
     ),
     (
       'sb_v_double_arrow',
       ['n-resize', 's-resize', 'ns-resize'],
       ['vert'],
-      ['vertical', 'ns-resize', 'v-resize']
+      ['vertical', 'ns-resize', 'v-resize'],
     ),
     (
       'sb_h_double_arrow',
       ['e-resize', 'w-resize', 'ew-resize'],
       ['horz'],
-      ['horizontal', 'ew-resize', 'h-resize']
+      ['horizontal', 'ew-resize', 'h-resize'],
     ),
     (
       'top_left_corner',
       ['nw-resize', 'se-resize', 'nwse-resize'],
       ['dgn1'],
-      ['diagonal1', 'nwse', 'top_left']
+      ['diagonal1', 'nwse', 'top_left'],
     ),
     (
       'top_right_corner',
       ['ne-resize', 'sw-resize', 'nesw-resize'],
       ['dgn2'],
-      ['diagonal2', 'nesw', 'top_right']
+      ['diagonal2', 'nesw', 'top_right'],
     ),
     (
       'fleur',
       ['move', 'all-scroll'],
       ['move'],
-      ['move', 'all-scroll', 'fleur']
+      ['move', 'all-scroll', 'fleur'],
     ),
-    (
-      'alias',
-      [],
-      ['person'],
-      ['person', 'alias']
-    ),
-    (
-      'crosshair',
-      [],
-      ['pin'],
-      ['pin', 'location']
-    ),
+    ('alias', [], ['person'], ['person', 'alias']),
+    ('crosshair', [], ['pin'], ['pin', 'location']),
   ];
 
   /// Escanea la carpeta y retorna los cursores encontrados
@@ -241,7 +212,14 @@ class ConverterRepository {
     // Soporte para archivos .cur (no animados)
     if (ext == '.cur') {
       final data = await File(fileOrAniPath).readAsBytes();
-      final frame = await _parseCurFrame(fileOrAniPath, framesDir, name, 0, data, defaultDelay);
+      final frame = await _parseCurFrame(
+        fileOrAniPath,
+        framesDir,
+        name,
+        0,
+        data,
+        defaultDelay,
+      );
       return frame != null ? [frame] : [];
     }
 
@@ -264,14 +242,31 @@ class ConverterRepository {
     int frameNum = 0;
 
     while (true) {
-      final iconPos = _findChunkFrom(data, 'icon', pos);
+      // Buscamos tanto 'icon' como 'ICON' para máxima compatibilidad
+      int iconPosLower = _findChunkFrom(data, 'icon', pos);
+      int iconPosUpper = _findChunkFrom(data, 'ICON', pos);
+
+      int iconPos;
+      if (iconPosLower == -1) {
+        iconPos = iconPosUpper;
+      } else if (iconPosUpper == -1) {
+        iconPos = iconPosLower;
+      } else {
+        iconPos = min(iconPosLower, iconPosUpper);
+      }
       if (iconPos == -1) break;
 
       final size = _readUint32(data, iconPos + 4);
       final frameData = data.sublist(iconPos + 8, iconPos + 8 + size);
 
       final frame = await _parseCurFrame(
-          null, framesDir, name, frameNum, frameData, delay);
+        null,
+        framesDir,
+        name,
+        frameNum,
+        frameData,
+        delay,
+      );
       if (frame != null) {
         frames.add(frame);
         frameNum++;
@@ -287,14 +282,16 @@ class ConverterRepository {
 
       if (result.exitCode == 0 && await File(fallbackPng).exists()) {
         // En fallback no podemos saber el hotspot fácilmente sin identificar
-        frames.add(CursorFrame(
-          imagePath: fallbackPng,
-          delay: defaultDelay,
-          hotspotX: 0,
-          hotspotY: 0,
-          width: 32,
-          height: 32,
-        ));
+        frames.add(
+          CursorFrame(
+            imagePath: fallbackPng,
+            delay: defaultDelay,
+            hotspotX: 0,
+            hotspotY: 0,
+            width: 32,
+            height: 32,
+          ),
+        );
       }
     }
 
@@ -316,8 +313,10 @@ class ConverterRepository {
     for (final frame in frames) {
       for (final size in sizes) {
         // Redimensionar frame para cada tamaño solicitado
-        final resizedPath =
-            p.join(framesDir, 'res_${size}_${p.basename(frame.imagePath)}');
+        final resizedPath = p.join(
+          framesDir,
+          'res_${size}_${p.basename(frame.imagePath)}',
+        );
 
         final res = await Process.run('convert', [
           frame.imagePath,
@@ -353,11 +352,24 @@ class ConverterRepository {
     }
 
     final result = await Process.run('xcursorgen', [confPath, outputPath]);
-    
+
     if (result.exitCode != 0) {
       print('Error en xcursorgen: ${result.stderr}');
+      return false;
     } else {
-      print('Cursor generado con éxito: $outputPath');
+      final outputFile = File(outputPath);
+      if (await outputFile.exists()) {
+        final size = await outputFile.length();
+        if (size > 0) {
+          print('Cursor generado con éxito: $outputPath ($size bytes)');
+        } else {
+          print('Error: xcursorgen generó un archivo vacío para $outputPath');
+          return false;
+        }
+      } else {
+        print('Error: xcursorgen falló al crear el archivo $outputPath');
+        return false;
+      }
     }
 
     print('Limpiando archivos redimensionados basura para $outputPath...');
@@ -368,7 +380,7 @@ class ConverterRepository {
         for (var file in files) {
           final fileName = p.basename(file.path);
           // Borramos solo los archivos que empiezan con 'res_' y pertenecen a este cursor
-          if (fileName.startsWith('res_') && 
+          if (fileName.startsWith('res_') &&
               fileName.contains(p.basenameWithoutExtension(outputPath))) {
             await file.delete();
           }
@@ -403,7 +415,7 @@ class ConverterRepository {
       print('Error: Datos de frame insuficientes (${data.length} bytes)');
       return null;
     }
-    
+
     int width = data[6];
     int height = data[7];
     if (width == 0) width = 256;
@@ -419,7 +431,9 @@ class ConverterRepository {
     }
 
     if (result.exitCode == 0 && await File(pngPath).exists()) {
-      print('Frame extraído: ${p.basename(pngPath)} (${width}x$height) Hotspot: ($hX, $hY)');
+      print(
+        'Frame extraído: ${p.basename(pngPath)} (${width}x$height) Hotspot: ($hX, $hY)',
+      );
       return CursorFrame(
         imagePath: pngPath,
         delay: delay,
@@ -444,12 +458,12 @@ class ConverterRepository {
       try {
         final linkPath = p.join(cursorsDir, alias);
         final link = Link(linkPath);
-        
+
         // Si ya existe algo ahí, lo borramos para poder crear el link
         if (await File(linkPath).exists() || await Link(linkPath).exists()) {
           await Process.run('rm', ['-f', linkPath]);
         }
-        
+
         print('Creando alias: $alias -> $linuxName');
         await link.create(linuxName);
       } catch (e) {
@@ -458,14 +472,18 @@ class ConverterRepository {
     }
   }
 
-  /// Crea el archivo cursor.theme
+  /// Crea los archivos de metadatos del tema
   Future<void> createThemeFile(String themeDir, String themeName) async {
     final content =
         '''
 [Icon Theme]
 Name=$themeName
 Comment=$themeName cursor theme for Linux - converted with ANI to XCursor
+Inherits=core
+Example=left_ptr
 ''';
+    await File(p.join(themeDir, 'index.theme')).writeAsString(content);
+    // Para compatibilidad con algunos sistemas, también creamos cursor.theme
     await File(p.join(themeDir, 'cursor.theme')).writeAsString(content);
   }
 
@@ -483,41 +501,59 @@ Comment=$themeName cursor theme for Linux - converted with ANI to XCursor
 
     bool success = true;
     final cursorsSrc = p.join(themeDir, 'cursors');
-    final themeSrc = p.join(themeDir, 'cursor.theme');
+    final indexThemeSrc = p.join(themeDir, 'index.theme');
 
     if (settings.systemInstall) {
-      await Process.run('pkexec', ['rm', '-rf', dest]);
-      await Process.run('pkexec', ['mkdir', '-p', dest]);
+      final commands = [
+        "rm -rf '$dest'",
+        "mkdir -p '$dest'",
+        "cp -a '$cursorsSrc' '$dest'",
+        "cp -a '$indexThemeSrc' '$dest'",
+        "chmod -R 755 '$dest'",
+        "sync",
+      ];
 
-      if (await Directory(cursorsSrc).exists()) {
-        final res = await Process.run('pkexec', ['cp', '-r', cursorsSrc, dest]);
-        if (res.exitCode != 0) success = false;
-      }
-      if (await File(themeSrc).exists()) {
-        final res = await Process.run('pkexec', ['cp', themeSrc, dest]);
-        if (res.exitCode != 0) success = false;
-      }
+      final res = await Process.run('pkexec', [
+        'sh',
+        '-c',
+        commands.join(' && '),
+      ]);
+      if (res.exitCode != 0) success = false;
     } else {
-      await Process.run('rm', '-rf $dest'.split(' '));
-      await Directory(dest).create(recursive: true);
+      // Instalación local
+      try {
+        if (await Directory(dest).exists() || await Link(dest).exists()) {
+          await Process.run('rm', ['-rf', dest]);
+        }
+        await Directory(dest).create(recursive: true);
 
-      if (await Directory(cursorsSrc).exists()) {
-        final res = await Process.run('cp', ['-r', cursorsSrc, dest]);
-        if (res.exitCode != 0) success = false;
-      }
-      if (await File(themeSrc).exists()) {
-        final res = await Process.run('cp', [themeSrc, dest]);
-        if (res.exitCode != 0) success = false;
+        if (await Directory(cursorsSrc).exists()) {
+          final res = await Process.run('cp', ['-a', cursorsSrc, dest]);
+          if (res.exitCode != 0) success = false;
+        }
+        if (await File(indexThemeSrc).exists()) {
+          final res = await Process.run('cp', ['-a', indexThemeSrc, dest]);
+          if (res.exitCode != 0) success = false;
+        }
+        // También aplicamos chmod 755 de forma local para mayor robustez
+        await Process.run('chmod', ['-R', '755', dest]);
+        await Process.run('sync', []);
+      } catch (e) {
+        print('Error en instalación local: $e');
+        success = false;
       }
     }
 
     if (success && settings.autoApplyCursor) {
-      await Process.run('gsettings', [
+      final res = await Process.run('gsettings', [
         'set',
         'org.gnome.desktop.interface',
         'cursor-theme',
         themeName,
       ]);
+      if (res.exitCode != 0) {
+        print('No se pudo auto-aplicar el cursor: ${res.stderr}');
+      }
     }
 
     return success;
