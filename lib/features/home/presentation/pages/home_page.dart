@@ -205,7 +205,7 @@ class HomePage extends ConsumerWidget {
                   icon: const Icon(Icons.coffee),
                   tooltip: 'Apóyame en Ko-fi',
                   onPressed: () =>
-                      launchUrl(Uri.parse('https://ko-fi.com/manuelprz0180')),
+                      launchUrl(Uri.parse('https://ko-fi.com/manuelprz')),
                 ),
               ],
             ),
