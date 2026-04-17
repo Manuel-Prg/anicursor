@@ -60,10 +60,7 @@ class SandboxedEnvironmentsSection extends StatelessWidget {
                           const SnackBar(
                             content: Row(
                               children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  color: Colors.orange,
-                                ),
+                                Icon(Icons.error_outline, color: Colors.orange),
                                 SizedBox(width: 12),
                                 Text('No se detectó Flatpak o hubo un error'),
                               ],

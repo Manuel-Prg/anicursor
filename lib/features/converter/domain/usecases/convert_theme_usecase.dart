@@ -45,7 +45,11 @@ class ConvertThemeUsecase {
 
         // Generar cursor
         final outputPath = p.join(cursorsDir, cursor.linuxName);
-        final success = await _repository.generateCursor(frames, outputPath, settings.cursorSizes);
+        final success = await _repository.generateCursor(
+          frames,
+          outputPath,
+          settings.cursorSizes,
+        );
 
         // Crear aliases
         if (success && cursor.aliases.isNotEmpty) {
@@ -61,7 +65,9 @@ class ConvertThemeUsecase {
           framesData: frames,
         );
       } catch (e, stack) {
-        print('Error crítico detectado en conversion de ${cursor.windowsName}: $e');
+        print(
+          'Error crítico detectado en conversion de ${cursor.windowsName}: $e',
+        );
         print(stack);
         updatedCursors[i] = cursor.copyWith(status: ConversionStatus.error);
       }
@@ -83,10 +89,7 @@ class ConvertThemeUsecase {
       );
     } catch (e) {
       print('Error al finalizar el tema: $e');
-      current = current.copyWith(
-        status: ThemeStatus.error,
-        progress: 100,
-      );
+      current = current.copyWith(status: ThemeStatus.error, progress: 100);
     }
     yield current;
   }

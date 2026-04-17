@@ -5,7 +5,8 @@ import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 class ThemeInstallationDataSource {
   /// Crea los archivos de metadatos del tema
   Future<void> createThemeFile(String themeDir, String themeName) async {
-    final content = '''
+    final content =
+        '''
 [Icon Theme]
 Name=$themeName
 Comment=$themeName cursor theme for Linux - converted with ANI to XCursor

@@ -42,7 +42,9 @@ class Settings {
     return Settings(
       cursorSizes: cursorSizes ?? this.cursorSizes,
       defaultDelay: defaultDelay ?? this.defaultDelay,
-      customOutputDir: clearCustomOutputDir ? null : (customOutputDir ?? this.customOutputDir),
+      customOutputDir: clearCustomOutputDir
+          ? null
+          : (customOutputDir ?? this.customOutputDir),
       systemInstall: systemInstall ?? this.systemInstall,
       autoApplyCursor: autoApplyCursor ?? this.autoApplyCursor,
       primaryColor: primaryColor ?? this.primaryColor,
@@ -70,16 +72,18 @@ class SettingsNotifier extends Notifier<Settings> {
 
   Settings _loadSettings() {
     final sizesStr = _prefs.getStringList(_sizesKey);
-    final sizes = sizesStr != null ? sizesStr.map(int.parse).toList() : [24, 32, 48];
-    
+    final sizes = sizesStr != null
+        ? sizesStr.map(int.parse).toList()
+        : [24, 32, 48];
+
     final delay = _prefs.getInt(_delayKey) ?? 100;
     final outDir = _prefs.getString(_outDirKey);
     final systemInst = _prefs.getBool(_systemInstallKey) ?? false;
     final autoApply = _prefs.getBool(_autoApplyKey) ?? false;
-    
+
     final colorVal = _prefs.getInt(_colorKey);
     final color = colorVal != null ? Color(colorVal) : const Color(0xFFE91E8C);
-    
+
     final modeIdx = _prefs.getInt(_themeModeKey);
     final mode = modeIdx != null ? ThemeMode.values[modeIdx] : ThemeMode.dark;
 
@@ -105,7 +109,10 @@ class SettingsNotifier extends Notifier<Settings> {
   }
 
   void updateCustomOutputDir(String? dir) {
-    state = state.copyWith(customOutputDir: dir, clearCustomOutputDir: dir == null);
+    state = state.copyWith(
+      customOutputDir: dir,
+      clearCustomOutputDir: dir == null,
+    );
     if (dir != null) {
       _prefs.setString(_outDirKey, dir);
     } else {

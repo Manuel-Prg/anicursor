@@ -22,7 +22,7 @@ class ColorPickerRow extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: _availableColors.map((color) {
-        final isSelected = settings.primaryColor.value == color.value;
+        final isSelected = settings.primaryColor.toARGB32() == color.toARGB32();
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: InkWell(

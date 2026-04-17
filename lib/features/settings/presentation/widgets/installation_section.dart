@@ -27,9 +27,7 @@ class InstallationSection extends ConsumerWidget {
             children: [
               SwitchListTile(
                 title: const Text('Instalar globalmente'),
-                subtitle: const Text(
-                  'Requiere pkexec/root (/usr/share/icons)',
-                ),
+                subtitle: const Text('Requiere pkexec/root (/usr/share/icons)'),
                 value: settings.systemInstall,
                 onChanged: notifier.updateSystemInstall,
               ),

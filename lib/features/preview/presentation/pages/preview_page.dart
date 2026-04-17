@@ -23,10 +23,12 @@ class PreviewPage extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final doneCursors =
-        cursorTheme.cursors.where((c) => c.status == ConversionStatus.done).toList();
-    final errorCursors =
-        cursorTheme.cursors.where((c) => c.status == ConversionStatus.error).toList();
+    final doneCursors = cursorTheme.cursors
+        .where((c) => c.status == ConversionStatus.done)
+        .toList();
+    final errorCursors = cursorTheme.cursors
+        .where((c) => c.status == ConversionStatus.error)
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -39,8 +41,10 @@ class PreviewPage extends ConsumerWidget {
           FilledButton.icon(
             onPressed: () async {
               final settings = ref.read(settingsProvider);
-              final success = await ref.read(cursorThemeProvider.notifier).install();
-              
+              final success = await ref
+                  .read(cursorThemeProvider.notifier)
+                  .install();
+
               if (context.mounted) {
                 if (success) {
                   // Si no se auto-aplica, mostrar un dialogo guiando al usuario
@@ -56,7 +60,7 @@ class PreviewPage extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
+                                color: Colors.green.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -121,7 +125,9 @@ class PreviewPage extends ConsumerWidget {
                         children: [
                           Icon(Icons.error_outline, color: Colors.white),
                           SizedBox(width: 12),
-                          Text('Error al instalar el tema. Revisa los permisos.'),
+                          Text(
+                            'Error al instalar el tema. Revisa los permisos.',
+                          ),
                         ],
                       ),
                       backgroundColor: Colors.red,
@@ -183,11 +189,13 @@ class PreviewPage extends ConsumerWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: errorCursors
-                    .map((c) => Chip(
-                          label: Text(c.windowsName),
-                          backgroundColor: Colors.red.withOpacity(0.1),
-                          side: const BorderSide(color: Colors.red),
-                        ))
+                    .map(
+                      (c) => Chip(
+                        label: Text(c.windowsName),
+                        backgroundColor: Colors.red.withValues(alpha: 0.1),
+                        side: const BorderSide(color: Colors.red),
+                      ),
+                    )
                     .toList(),
               ),
             ],
@@ -245,9 +253,9 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -261,10 +269,7 @@ class _StatChip extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Text(
-            label,
-            style: TextStyle(color: color.withOpacity(0.7)),
-          ),
+          Text(label, style: TextStyle(color: color.withValues(alpha: 0.7))),
         ],
       ),
     );
@@ -337,14 +342,16 @@ class _AnimatedCursorPreviewState extends State<_AnimatedCursorPreview> {
   }
 
   void _startAnimation() {
-    if (widget.cursor.framesData.isEmpty || widget.cursor.framesData.length == 1) return;
+    if (widget.cursor.framesData.isEmpty ||
+        widget.cursor.framesData.length == 1)
+      return;
     _scheduleNextFrame();
   }
 
   void _scheduleNextFrame() {
     int delay = widget.cursor.framesData[_currentIndex].delay;
     if (delay <= 0) delay = 100;
-    
+
     _timer = Timer(Duration(milliseconds: delay), () {
       if (!mounted) return;
       setState(() {
@@ -365,14 +372,15 @@ class _AnimatedCursorPreviewState extends State<_AnimatedCursorPreview> {
     if (widget.cursor.framesData.isEmpty) {
       return const Icon(Icons.mouse, color: Colors.white38, size: 32);
     }
-    
+
     final currentFrame = widget.cursor.framesData[_currentIndex];
     return Image.file(
       File(currentFrame.imagePath),
       width: 32,
       height: 32,
       filterQuality: FilterQuality.high,
-      errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, color: Colors.red, size: 32),
+      errorBuilder: (context, error, stackTrace) =>
+          const Icon(Icons.error, color: Colors.red, size: 32),
     );
   }
 }

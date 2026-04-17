@@ -53,7 +53,7 @@ class HomePage extends ConsumerWidget {
             Text(
               'Convierte cursores de Windows a Linux',
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.54),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
               ),
             ),
             const SizedBox(height: 48),
@@ -65,9 +65,9 @@ class HomePage extends ConsumerWidget {
                 width: 400,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   border: Border.all(
-                    color: Colors.red.withOpacity(0.5),
+                    color: Colors.red.withValues(alpha: 0.5),
                     width: 2,
                   ),
                   borderRadius: BorderRadius.circular(16),
@@ -213,7 +213,7 @@ class HomePage extends ConsumerWidget {
             Text(
               'Made with ♥ by manuelprz',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.38),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
               ),
             ),
           ],
@@ -261,13 +261,13 @@ class _DropZoneState extends State<_DropZone> {
           height: 200,
           decoration: BoxDecoration(
             color: _hovering
-                ? theme.colorScheme.primary.withOpacity(0.1)
+                ? theme.colorScheme.primary.withValues(alpha: 0.1)
                 : theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: _hovering
                   ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface.withOpacity(0.15),
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.15),
               width: 2,
             ),
           ),
@@ -279,7 +279,7 @@ class _DropZoneState extends State<_DropZone> {
                 size: 48,
                 color: _hovering
                     ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurface.withOpacity(0.38),
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.38),
               ),
               const SizedBox(height: 12),
               Text(
@@ -287,14 +287,14 @@ class _DropZoneState extends State<_DropZone> {
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: _hovering
                       ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurface.withOpacity(0.54),
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.54),
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 'o haz clic para seleccionar',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.38),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
                 ),
               ),
             ],

@@ -4,7 +4,11 @@ class SizesDialog extends StatefulWidget {
   final List<int> initialSizes;
   final ValueChanged<List<int>> onSaved;
 
-  const SizesDialog({super.key, required this.initialSizes, required this.onSaved});
+  const SizesDialog({
+    super.key,
+    required this.initialSizes,
+    required this.onSaved,
+  });
 
   @override
   State<SizesDialog> createState() => _SizesDialogState();

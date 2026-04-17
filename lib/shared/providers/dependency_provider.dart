@@ -40,11 +40,11 @@ class DependencyNotifier extends Notifier<DependencyState> {
 
   Future<void> checkDependencies() async {
     state = state.copyWith(status: DependencyStatus.checking);
-    
+
     // Revisa existencia de binarios
     final magickRes = await Process.run('which', ['convert']);
     final isMagickMissing = magickRes.exitCode != 0;
-    
+
     final xcursorRes = await Process.run('which', ['xcursorgen']);
     final isXcursorMissing = xcursorRes.exitCode != 0;
 
@@ -56,10 +56,7 @@ class DependencyNotifier extends Notifier<DependencyState> {
         isInstalling: false,
       );
     } else {
-      state = state.copyWith(
-        status: DependencyStatus.ok,
-        isInstalling: false,
-      );
+      state = state.copyWith(status: DependencyStatus.ok, isInstalling: false);
     }
   }
 
@@ -68,24 +65,25 @@ class DependencyNotifier extends Notifier<DependencyState> {
     state = state.copyWith(isInstalling: true);
     try {
       final res = await Process.run('pkexec', [
-        'apt-get', 
-        'install', 
-        '-y', 
-        'imagemagick', 
-        'x11-apps'
+        'apt-get',
+        'install',
+        '-y',
+        'imagemagick',
+        'x11-apps',
       ]);
-      
+
       if (res.exitCode == 0) {
         await checkDependencies();
         return state.status == DependencyStatus.ok;
       }
     } catch (_) {}
-    
+
     state = state.copyWith(isInstalling: false);
     return false;
   }
 }
 
-final dependencyProvider = NotifierProvider<DependencyNotifier, DependencyState>(() {
-  return DependencyNotifier();
-});
+final dependencyProvider =
+    NotifierProvider<DependencyNotifier, DependencyState>(() {
+      return DependencyNotifier();
+    });

@@ -10,13 +10,8 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       colorSchemeSeed: primaryColor,
-      cardTheme: const CardThemeData(
-        elevation: 0,
-      ),
-      appBarTheme: const AppBarTheme(
-        elevation: 0,
-        centerTitle: false,
-      ),
+      cardTheme: const CardThemeData(elevation: 0),
+      appBarTheme: const AppBarTheme(elevation: 0, centerTitle: false),
       snackBarTheme: const SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -32,10 +27,7 @@ class AppTheme {
       brightness: Brightness.dark,
       colorSchemeSeed: primaryColor,
       scaffoldBackgroundColor: backgroundColorDark,
-      cardTheme: const CardThemeData(
-        color: cardColorDark,
-        elevation: 0,
-      ),
+      cardTheme: const CardThemeData(color: cardColorDark, elevation: 0),
       appBarTheme: const AppBarTheme(
         backgroundColor: backgroundColorDark,
         elevation: 0,

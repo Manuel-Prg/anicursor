@@ -237,8 +237,10 @@ class _ActionButtons extends ConsumerWidget {
           FilledButton.icon(
             onPressed: () async {
               final settings = ref.read(settingsProvider);
-              final success = await ref.read(cursorThemeProvider.notifier).install();
-              
+              final success = await ref
+                  .read(cursorThemeProvider.notifier)
+                  .install();
+
               if (context.mounted) {
                 if (success) {
                   if (!settings.autoApplyCursor) {
@@ -253,7 +255,7 @@ class _ActionButtons extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
+                                color: Colors.green.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -318,7 +320,9 @@ class _ActionButtons extends ConsumerWidget {
                         children: [
                           Icon(Icons.error_outline, color: Colors.white),
                           SizedBox(width: 12),
-                          Text('Error al instalar el tema. Revisa los permisos.'),
+                          Text(
+                            'Error al instalar el tema. Revisa los permisos.',
+                          ),
                         ],
                       ),
                       backgroundColor: Colors.red,

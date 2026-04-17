@@ -36,14 +36,10 @@ class CursorTheme {
   }
 
   int get total => cursors.length;
-  int get done => cursors.where((c) => c.status == ConversionStatus.done).length;
-  int get errors => cursors.where((c) => c.status == ConversionStatus.error).length;
+  int get done =>
+      cursors.where((c) => c.status == ConversionStatus.done).length;
+  int get errors =>
+      cursors.where((c) => c.status == ConversionStatus.error).length;
 }
 
-enum ThemeStatus {
-  idle,
-  scanning,
-  converting,
-  done,
-  error,
-}
+enum ThemeStatus { idle, scanning, converting, done, error }

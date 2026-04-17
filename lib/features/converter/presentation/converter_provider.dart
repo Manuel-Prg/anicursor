@@ -19,15 +19,21 @@ final mappingDataSourceProvider = Provider<CursorMappingDataSource>((ref) {
   return CursorMappingDataSource();
 });
 
-final extractionDataSourceProvider = Provider<CursorExtractionDataSource>((ref) {
+final extractionDataSourceProvider = Provider<CursorExtractionDataSource>((
+  ref,
+) {
   return CursorExtractionDataSource();
 });
 
-final generationDataSourceProvider = Provider<CursorGenerationDataSource>((ref) {
+final generationDataSourceProvider = Provider<CursorGenerationDataSource>((
+  ref,
+) {
   return CursorGenerationDataSource();
 });
 
-final installationDataSourceProvider = Provider<ThemeInstallationDataSource>((ref) {
+final installationDataSourceProvider = Provider<ThemeInstallationDataSource>((
+  ref,
+) {
   return ThemeInstallationDataSource();
 });
 
@@ -104,21 +110,23 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
     try {
       // 1. Extraer el asset a un archivo temporal (el sistema no lee assets directamente)
       final byteData = await rootBundle.load(assetPath);
-      final cacheDir = Directory(p.join(Directory.systemTemp.path, 'anicursor_audio'));
+      final cacheDir = Directory(
+        p.join(Directory.systemTemp.path, 'anicursor_audio'),
+      );
       if (!await cacheDir.exists()) await cacheDir.create();
-      
+
       final tempFile = File(p.join(cacheDir.path, p.basename(assetPath)));
       await tempFile.writeAsBytes(byteData.buffer.asUint8List());
 
       // 2. Ejecutar comando de sistema de forma asíncrona para no bloquear y evitar crashes
       // Intentamos con gst-launch-1.0 que es el estándar de Linux/GTK
       await Process.run('gst-launch-1.0', [
-        'playbin', 
+        'playbin',
         'uri=file://${tempFile.path}',
         'video-sink=fakesink',
-        'audio-sink=autoaudiosink'
+        'audio-sink=autoaudiosink',
       ]);
-      
+
       print('Sonido sistema ejecutado: $assetPath');
     } catch (e) {
       print('Audio del sistema no disponible o falló: $e');
