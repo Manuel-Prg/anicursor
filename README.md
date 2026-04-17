@@ -1,25 +1,55 @@
 # AniCursor 🐁✨
 
-**AniCursor** es una elegante aplicación de escritorio para Linux construida con *Flutter*, diseñada para deconstruir, exportar y convertir fácilmente paquetes de cursores animados de Windows (`.ani` o `.cur`) al formato nativo `XCursor` compatible con entornos de escritorio en Linux (GNOME, Plasma, XFCE).
+<img width="1281" height="719" alt="inicio" src="https://github.com/user-attachments/assets/16530704-59f7-4b9f-bb55-6ccd825cf46e" />
+<br>
+<br>
+**AniCursor** es una aplicación de escritorio para Linux que te permite convertir fácilmente cursores animados de Windows (`.ani` / `.cur`) al formato nativo de Linux (`XCursor`) en segundos.
+
+Arrastra tu carpeta de cursores, conviértelos automáticamente y aplícalos a tu sistema sin configuraciones complicadas.
 
 ---
 
-## Características Principales 🚀
+## ¿Por qué AniCursor? 🤔
 
-- **Interfaz Moderna y Fluida**: Creada con componentes Material 3. Soporta temas Claro, Oscuro e integración de colores de contraste dinámico.
-- **Soporte Drag & Drop**: Simplemente arrastra y suelta el directorio de cursores, la herramienta procesará recursivamente la carga.
-- **Personalización de Destino**: Selecciona los tamaños de cursor resultantes que necesites (ej. 24, 32, 48px), ajusta el delay predeterminado o elige una ruta personalizada de compilación.
-- **Vista Previa Animada**: Revisa el muestreo animado de los cursores obtenidos en tiempo real antes de instalar.
-- **Exportación en un Clic**: Extrae tus resultados empaquetados en un archivo `.zip` perfecto para compartir en *GNOME-Look* o *Pling*.
-- **Instalación de Raíz y Sandboxing**: Posibilidad de instalar localmente o globalmente (`pkexec`), y una herramienta integrada para otorgar permisos automáticos de visualización a sistemas aislados como **Flatpak**.
+Convertir cursores de Windows a Linux siempre ha sido un proceso manual, tedioso y propenso a errores.
+
+AniCursor automatiza todo el proceso:
+- Extrae frames automáticamente
+- Genera configuraciones compatibles
+- Aplica el tema al sistema
+
+Todo en una interfaz moderna y simple.
+---
+
+## Características 🚀
+
+- 🎨 Interfaz moderna (Material 3, modo claro/oscuro)
+- 🖱️ Drag & Drop para conversión rápida
+- 👀 Vista previa animada en tiempo real
+- 📦 Exportación lista para compartir (.zip)
+- ⚙️ Instalación local o global (pkexec)
+- 🧠 Auto-mapeo de cursores Windows → Linux
+- 🧪 Validación automática post-conversión
 
 ---
 
+### Interfaz principal
 
-<img width="1904" height="1038" alt="imagen_1_anicursor" src="https://github.com/user-attachments/assets/2cc7aa3c-1df0-4358-aaa6-5ffaf567f5d9" />
-<img width="1904" height="1038" alt="imagen_2_anicursor" src="https://github.com/user-attachments/assets/7d4067fa-97bd-42c8-9fd3-61e38c3c4edb" />
-<img width="1904" height="1038" alt="imagen_3_anicursor" src="https://github.com/user-attachments/assets/c7859a5a-6f5e-4b27-95e0-f1dcbe57a82d" />
+<img width="1282" height="762" alt="app_inicio" src="https://github.com/user-attachments/assets/06a985be-e6cc-4304-8571-b88c4423e2bf" />
 
+### Vista previa animada
+
+<img width="1282" height="762" alt="app_previsualización" src="https://github.com/user-attachments/assets/e0692b3b-96ec-481f-8a6b-47e70ba4e131" />
+
+### Proceso de conversión
+
+<img width="1282" height="762" alt="app_proceso" src="https://github.com/user-attachments/assets/007e777e-a0aa-4dec-8a8c-0616b6a12e6d" />
+
+### Cursores instalados 
+
+<img width="1282" height="762" alt="app_cursores" src="https://github.com/user-attachments/assets/1a60354f-6f89-46be-8fce-c03e1e5a9f33" />
+
+---
 ## Requisitos y Dependencias ⚙️
 
 Como el motor detrás de la app funciona de la mano del sistema operativo nativo, debes asegurarte de tener instaladas las siguientes herramientas clásicas en Linux:
@@ -35,28 +65,26 @@ sudo apt install imagemagick x11-apps
 
 ---
 
-## Descarga e Instalación 🛠️
+## Instalación 🛠️
 
-**AniCursor** se distribuye de manera sencilla y portátil.
-
-1. Navega a la pestaña de **[Releases](https://github.com/Manuel-Prg/anicursor/releases)** en GitHub.
-2. Descarga la última versión del archivo (usualmente un `.zip` o archivo ejecutable con las librerías integradas).
-3. Una vez extraído, dale permisos de ejecución al binario desde tu gestor de archivos o en la terminal:
+1. Descarga la última versión desde [Releases](https://github.com/Manuel-Prg/anicursor/releases)
+2. Da permisos de ejecución:
    ```bash
    chmod +x anicursor
-   ```
-4. ¡Y listo! Ya puedes abrir la aplicación con doble clic o ejecutándola directamente:
+3. Ejecuta
    ```bash
    ./anicursor
-   ```
-
-*(Nota: Si como desarrollador deseas compilar la aplicación tú mismo desde el código fuente, asegúrate de tener entornos de Flutter activados e instalar las librerías de audio ejecutando `sudo apt install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev` antes de correr `flutter build linux`).*
-
+   
 ---
 
-## Motivación 💡
+## Demo rápido ⚡
+<img width="1281" height="719" alt="cursores" src="https://github.com/user-attachments/assets/e80e50b9-990d-4259-944a-7379e66bcd11" />
 
-Las grandes bibliotecas históricas de cursores hermosos para ratón están hechas bajo entornos Windows en archivos RIFF (`.ani`). Llevarlos a Linux requería mucho tiempo dividiendo frames a mano e ideando un archivo `.conf`. **AniCursor** automatiza el ciclo de vida, mapea los nombramientos "Windows -> Linux" y genera alias para asegurar un soporte transversal completo, devolviéndole vida a viejos artes en escritorios actuales.
-
+1. Arrastra una carpeta con cursores `.ani`
+2. AniCursor los procesa automáticamente
+3. Previsualiza el resultado
+4. Instala el tema en tu sistema
 ---
-Hecho con ♥ por **manuelprz**
+
+Hecho con ❤️ por **manuelprz**  
+Si te gusta el proyecto, dale ⭐ en GitHub**
