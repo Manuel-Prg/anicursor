@@ -36,8 +36,16 @@ class PreviewPage extends ConsumerWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Vista Previa', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-            Text(cursorTheme.name, style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38)),
+            Text(
+              'Vista Previa',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              cursorTheme.name,
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38),
+            ),
           ],
         ),
         actions: [
@@ -57,7 +65,7 @@ class PreviewPage extends ConsumerWidget {
         children: [
           // Stats Row
           _StatsSection(cursorTheme: cursorTheme),
-          
+
           const Divider(height: 1, color: Colors.white10),
 
           // Main Content
@@ -77,7 +85,9 @@ class PreviewPage extends ConsumerWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(success ? 'Tema instalado con éxito' : 'Error al instalar el tema'),
+          content: Text(
+            success ? 'Tema instalado con éxito' : 'Error al instalar el tema',
+          ),
           backgroundColor: success ? Colors.green : Colors.red,
         ),
       );
@@ -152,9 +162,19 @@ class _StatBadge extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: color),
           const SizedBox(width: 8),
-          Text(value, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16)),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: color,
+              fontSize: 16,
+            ),
+          ),
           const SizedBox(width: 6),
-          Text(label, style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 12)),
+          Text(
+            label,
+            style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 12),
+          ),
         ],
       ),
     );
@@ -206,10 +226,14 @@ class _PreviewCardState extends State<_PreviewCard> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: _isHovered ? 0.4 : 0.2),
+          color: theme.colorScheme.surfaceContainerHighest.withValues(
+            alpha: _isHovered ? 0.4 : 0.2,
+          ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: _isHovered ? accentColor : Colors.white.withValues(alpha: 0.05),
+            color: _isHovered
+                ? accentColor
+                : Colors.white.withValues(alpha: 0.05),
             width: 1.5,
           ),
         ),
@@ -235,13 +259,17 @@ class _PreviewCardState extends State<_PreviewCard> {
                 children: [
                   Text(
                     widget.cursor.linuxName,
-                    style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(
                     widget.cursor.windowsName,
-                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.white38,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -306,7 +334,7 @@ class _AnimatedCursorState extends State<_AnimatedCursor> {
     return Image.file(
       File(currentFrame.imagePath),
       filterQuality: FilterQuality.high,
-      errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 16),
+      errorBuilder: (_, _, _) => const Icon(Icons.broken_image, size: 16),
     );
   }
 }
@@ -320,7 +348,10 @@ class _NoPreviewResult extends StatelessWidget {
         children: [
           Icon(Icons.visibility_off_outlined, size: 64, color: Colors.white10),
           const SizedBox(height: 16),
-          const Text('No hay cursores para previsualizar', style: TextStyle(color: Colors.white38)),
+          const Text(
+            'No hay cursores para previsualizar',
+            style: TextStyle(color: Colors.white38),
+          ),
         ],
       ),
     );

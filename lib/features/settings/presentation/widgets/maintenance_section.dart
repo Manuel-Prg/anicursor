@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ani_to_xcursor/shared/services/logger_service.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:path/path.dart' as p;
 
 class MaintenanceSection extends ConsumerWidget {
   const MaintenanceSection({super.key});
@@ -37,17 +36,24 @@ class MaintenanceSection extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.description_outlined, color: Colors.blueAccent),
+                    const Icon(
+                      Icons.description_outlined,
+                      color: Colors.blueAccent,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Registros de la aplicación (Logs)',
-                              style: TextStyle(fontWeight: FontWeight.w500)),
+                          const Text(
+                            'Registros de la aplicación (Logs)',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
                           Text(
                             'Contiene información técnica sobre el proceso de conversión.',
-                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.white38,
+                            ),
                           ),
                         ],
                       ),
@@ -71,7 +77,11 @@ class MaintenanceSection extends ConsumerWidget {
                         } else {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('No hay registros disponibles aún.')),
+                              const SnackBar(
+                                content: Text(
+                                  'No hay registros disponibles aún.',
+                                ),
+                              ),
                             );
                           }
                         }
@@ -100,7 +110,11 @@ class MaintenanceSection extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              const Icon(Icons.privacy_tip_outlined, size: 20, color: Colors.blue),
+              const Icon(
+                Icons.privacy_tip_outlined,
+                size: 20,
+                color: Colors.blue,
+              ),
               const SizedBox(width: 12),
               const Expanded(
                 child: Text(
@@ -118,7 +132,7 @@ class MaintenanceSection extends ConsumerWidget {
   Future<void> _exportLogs(BuildContext context) async {
     final logPath = await LoggerService.getLogPath();
     final file = File(logPath);
-    
+
     if (!await file.exists()) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -172,7 +186,10 @@ class MaintenanceSection extends ConsumerWidget {
               await LoggerService.clearLogs();
               if (context.mounted) Navigator.pop(context);
             },
-            child: const Text('Limpiar logs', style: TextStyle(color: Colors.red)),
+            child: const Text(
+              'Limpiar logs',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),

@@ -24,7 +24,11 @@ class HomePage extends ConsumerWidget {
     // Si es la primera vez, mostramos onboarding después del primer frame
     if (settings.showedOnboarding != true) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) OnboardingDialog.show(context);
+        // Doble verificación con el estado actual del notifier para evitar race conditions
+        if (context.mounted && ref.read(settingsProvider).showedOnboarding != true) {
+          ref.read(settingsProvider.notifier).updateShowedOnboarding(true);
+          OnboardingDialog.show(context);
+        }
       });
     }
 

@@ -138,9 +138,6 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
   }
 
   void _finish(BuildContext context, [WidgetRef? ref]) {
-    if (ref != null) {
-      ref.read(settingsProvider.notifier).updateShowedOnboarding(true);
-    }
     Navigator.pop(context);
   }
 }
