@@ -26,9 +26,6 @@ class PreviewPage extends ConsumerWidget {
     final doneCursors = cursorTheme.cursors
         .where((c) => c.status == ConversionStatus.done)
         .toList();
-    final errorCursors = cursorTheme.cursors
-        .where((c) => c.status == ConversionStatus.error)
-        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -36,216 +33,109 @@ class PreviewPage extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
-        title: Text(cursorTheme.name),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Vista Previa', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            Text(cursorTheme.name, style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38)),
+          ],
+        ),
         actions: [
           FilledButton.icon(
-            onPressed: () async {
-              final settings = ref.read(settingsProvider);
-              final success = await ref
-                  .read(cursorThemeProvider.notifier)
-                  .install();
-
-              if (context.mounted) {
-                if (success) {
-                  // Si no se auto-aplica, mostrar un dialogo guiando al usuario
-                  if (!settings.autoApplyCursor) {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        title: Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.check_circle_rounded,
-                                color: Colors.green,
-                                size: 48,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              '¡Tema Instalado!',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                        content: const Text(
-                          'El tema se ha instalado correctamente en el sistema.\n\n'
-                          'Para activarlo, selecciónalo manualmente en la aplicación de '
-                          'Retoques (Tweaks) o en la configuración de apariencia.',
-                          textAlign: TextAlign.center,
-                        ),
-                        actionsAlignment: MainAxisAlignment.center,
-                        actions: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: FilledButton(
-                              onPressed: () => Navigator.pop(context),
-                              style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: const Text('Entendido'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Row(
-                          children: [
-                            Icon(Icons.check, color: Colors.white),
-                            SizedBox(width: 12),
-                            Text('Tema instalado y aplicado con éxito'),
-                          ],
-                        ),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Row(
-                        children: [
-                          Icon(Icons.error_outline, color: Colors.white),
-                          SizedBox(width: 12),
-                          Text(
-                            'Error al instalar el tema. Revisa los permisos.',
-                          ),
-                        ],
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            },
-            icon: const Icon(Icons.download),
-            label: const Text('Instalar'),
+            onPressed: () => _handleInstall(context, ref),
+            icon: const Icon(Icons.system_update_alt_outlined),
+            label: const Text('Instalar Tema'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.green.shade700,
+              foregroundColor: Colors.white,
+            ),
           ),
           const SizedBox(width: 16),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Stats
-            _StatsRow(cursorTheme: cursorTheme),
-            const SizedBox(height: 24),
+      body: Column(
+        children: [
+          // Stats Row
+          _StatsSection(cursorTheme: cursorTheme),
+          
+          const Divider(height: 1, color: Colors.white10),
 
-            // Cursores convertidos
-            Text(
-              'Cursores convertidos',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 2,
-                ),
-                itemCount: doneCursors.length,
-                itemBuilder: (context, index) {
-                  return _CursorCard(cursor: doneCursors[index]);
-                },
-              ),
-            ),
+          // Main Content
+          Expanded(
+            child: doneCursors.isEmpty
+                ? _NoPreviewResult()
+                : _PreviewGrid(cursors: doneCursors),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // Errores
-            if (errorCursors.isNotEmpty) ...[
-              const SizedBox(height: 24),
-              Text(
-                'Con errores (${errorCursors.length})',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: errorCursors
-                    .map(
-                      (c) => Chip(
-                        label: Text(c.windowsName),
-                        backgroundColor: Colors.red.withValues(alpha: 0.1),
-                        side: const BorderSide(color: Colors.red),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ],
-          ],
+  Future<void> _handleInstall(BuildContext context, WidgetRef ref) async {
+    final notifier = ref.read(cursorThemeProvider.notifier);
+    final success = await notifier.install();
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(success ? 'Tema instalado con éxito' : 'Error al instalar el tema'),
+          backgroundColor: success ? Colors.green : Colors.red,
         ),
+      );
+    }
+  }
+}
+
+class _StatsSection extends StatelessWidget {
+  final CursorTheme cursorTheme;
+
+  const _StatsSection({required this.cursorTheme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      color: Theme.of(context).colorScheme.surface,
+      child: Row(
+        children: [
+          _StatBadge(
+            label: 'Total',
+            value: '${cursorTheme.total}',
+            color: Colors.blueGrey,
+            icon: Icons.list_alt,
+          ),
+          const SizedBox(width: 12),
+          _StatBadge(
+            label: 'Visibles',
+            value: '${cursorTheme.done}',
+            color: Colors.green,
+            icon: Icons.remove_red_eye_outlined,
+          ),
+          if (cursorTheme.errors > 0) ...[
+            const SizedBox(width: 12),
+            _StatBadge(
+              label: 'Errores',
+              value: '${cursorTheme.errors}',
+              color: Colors.red,
+              icon: Icons.error_outline,
+            ),
+          ],
+        ],
       ),
     );
   }
 }
 
-class _StatsRow extends StatelessWidget {
-  final CursorTheme cursorTheme;
-
-  const _StatsRow({required this.cursorTheme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _StatChip(
-          label: 'Total',
-          value: '${cursorTheme.total}',
-          color: Colors.white54,
-        ),
-        const SizedBox(width: 12),
-        _StatChip(
-          label: 'Convertidos',
-          value: '${cursorTheme.done}',
-          color: Colors.green,
-        ),
-        const SizedBox(width: 12),
-        _StatChip(
-          label: 'Errores',
-          value: '${cursorTheme.errors}',
-          color: Colors.red,
-        ),
-      ],
-    );
-  }
-}
-
-class _StatChip extends StatelessWidget {
+class _StatBadge extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
+  final IconData icon;
 
-  const _StatChip({
+  const _StatBadge({
     required this.label,
     required this.value,
     required this.color,
+    required this.icon,
   });
 
   @override
@@ -254,67 +144,109 @@ class _StatChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
+          Icon(icon, size: 16, color: color),
           const SizedBox(width: 8),
-          Text(label, style: TextStyle(color: color.withValues(alpha: 0.7))),
+          Text(value, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16)),
+          const SizedBox(width: 6),
+          Text(label, style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 12)),
         ],
       ),
     );
   }
 }
 
-class _CursorCard extends StatelessWidget {
+class _PreviewGrid extends StatelessWidget {
+  final List<CursorFile> cursors;
+
+  const _PreviewGrid({required this.cursors});
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(24),
+      physics: const BouncingScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 260,
+        mainAxisExtent: 100,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: cursors.length,
+      itemBuilder: (context, index) => _PreviewCard(cursor: cursors[index]),
+    );
+  }
+}
+
+class _PreviewCard extends StatefulWidget {
   final CursorFile cursor;
 
-  const _CursorCard({required this.cursor});
+  const _PreviewCard({required this.cursor});
+
+  @override
+  State<_PreviewCard> createState() => _PreviewCardState();
+}
+
+class _PreviewCardState extends State<_PreviewCard> {
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final accentColor = theme.colorScheme.primary;
 
-    return Card(
-      child: Padding(
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: _isHovered ? 0.4 : 0.2),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: _isHovered ? accentColor : Colors.white.withValues(alpha: 0.05),
+            width: 1.5,
+          ),
+        ),
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            _AnimatedCursorPreview(cursor: cursor),
-            const SizedBox(width: 12),
+            // Animation Preview Circle
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(8),
+              child: _AnimatedCursor(cursor: widget.cursor),
+            ),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    cursor.linuxName,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    widget.cursor.linuxName,
+                    style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (cursor.aliases.isNotEmpty)
-                    Text(
-                      '+${cursor.aliases.length} aliases',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
+                  const SizedBox(height: 2),
+                  Text(
+                    widget.cursor.windowsName,
+                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
-            const Icon(Icons.check_circle, color: Colors.green, size: 16),
           ],
         ),
       ),
@@ -322,16 +254,15 @@ class _CursorCard extends StatelessWidget {
   }
 }
 
-class _AnimatedCursorPreview extends StatefulWidget {
+class _AnimatedCursor extends StatefulWidget {
   final CursorFile cursor;
-
-  const _AnimatedCursorPreview({required this.cursor});
+  const _AnimatedCursor({required this.cursor});
 
   @override
-  State<_AnimatedCursorPreview> createState() => _AnimatedCursorPreviewState();
+  State<_AnimatedCursor> createState() => _AnimatedCursorState();
 }
 
-class _AnimatedCursorPreviewState extends State<_AnimatedCursorPreview> {
+class _AnimatedCursorState extends State<_AnimatedCursor> {
   int _currentIndex = 0;
   Timer? _timer;
 
@@ -342,9 +273,7 @@ class _AnimatedCursorPreviewState extends State<_AnimatedCursorPreview> {
   }
 
   void _startAnimation() {
-    if (widget.cursor.framesData.isEmpty ||
-        widget.cursor.framesData.length == 1)
-      return;
+    if (widget.cursor.framesData.length <= 1) return;
     _scheduleNextFrame();
   }
 
@@ -370,17 +299,30 @@ class _AnimatedCursorPreviewState extends State<_AnimatedCursorPreview> {
   @override
   Widget build(BuildContext context) {
     if (widget.cursor.framesData.isEmpty) {
-      return const Icon(Icons.mouse, color: Colors.white38, size: 32);
+      return const Icon(Icons.mouse, color: Colors.white24);
     }
 
     final currentFrame = widget.cursor.framesData[_currentIndex];
     return Image.file(
       File(currentFrame.imagePath),
-      width: 32,
-      height: 32,
       filterQuality: FilterQuality.high,
-      errorBuilder: (context, error, stackTrace) =>
-          const Icon(Icons.error, color: Colors.red, size: 32),
+      errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 16),
+    );
+  }
+}
+
+class _NoPreviewResult extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.visibility_off_outlined, size: 64, color: Colors.white10),
+          const SizedBox(height: 16),
+          const Text('No hay cursores para previsualizar', style: TextStyle(color: Colors.white38)),
+        ],
+      ),
     );
   }
 }

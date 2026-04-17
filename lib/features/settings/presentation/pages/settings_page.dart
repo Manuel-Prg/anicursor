@@ -4,6 +4,7 @@ import '../widgets/conversion_section.dart';
 import '../widgets/installation_section.dart';
 import '../widgets/sandboxed_environments_section.dart';
 import '../widgets/appearance_section.dart';
+import '../widgets/maintenance_section.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -28,6 +29,8 @@ class SettingsPage extends StatelessWidget {
           SandboxedEnvironmentsSection(),
           SizedBox(height: 32),
           AppearanceSection(),
+          SizedBox(height: 32),
+          MaintenanceSection(),
         ],
       ),
     );

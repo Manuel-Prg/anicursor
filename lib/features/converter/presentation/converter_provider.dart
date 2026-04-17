@@ -134,10 +134,15 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
     }
   }
 
+
   Future<bool> install() async {
     if (state == null) return false;
     final repo = ref.read(converterRepositoryProvider);
     final settings = ref.read(settingsProvider);
+    
+    // Al instalar, nos aseguramos de que los metadatos index.theme estén actualizados con el nombre actual (por si se renombró por conflicto)
+    await repo.createThemeFile(state!.outputDir, state!.name);
+    
     return await repo.installTheme(state!.outputDir, state!.name, settings);
   }
 
@@ -171,6 +176,53 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
     }
 
     encoder.close();
+  }
+
+  Future<void> exportTarGz() async {
+    if (state == null) return;
+
+    final tarPath = await FilePicker.saveFile(
+      dialogTitle: 'Exportar tema como TAR.GZ',
+      fileName: '${state!.name}.tar.gz',
+      type: FileType.custom,
+      allowedExtensions: ['tar.gz', 'gz'],
+    );
+
+    if (tarPath == null) return;
+
+    final cursorsDir = p.join(state!.outputDir, 'cursors');
+    final indexTheme = p.join(state!.outputDir, 'index.theme');
+    final cursorTheme = p.join(state!.outputDir, 'cursor.theme');
+
+    // TarFileEncoder en archive_io maneja gzip si el nombre termina en .gz o .tar.gz? 
+    // No, normalmente TarFileEncoder crea el tar. Para gzip necesitamos envolverlo.
+    // Pero TarFileEncoder tiene un constructor que acepta un archivo y podemos comprimir después.
+    
+    final tmpTar = File(p.join(Directory.systemTemp.path, '${state!.name}.tar'));
+    final encoder = TarFileEncoder();
+    encoder.create(tmpTar.path);
+
+    if (Directory(cursorsDir).existsSync()) {
+      encoder.addDirectory(Directory(cursorsDir));
+    }
+    if (File(indexTheme).existsSync()) {
+      encoder.addFile(File(indexTheme));
+    }
+    if (File(cursorTheme).existsSync()) {
+      encoder.addFile(File(cursorTheme));
+    }
+
+    encoder.close();
+
+    // Comprimir Tar a GZip
+    final tarBytes = await tmpTar.readAsBytes();
+    final gzipBytes = GZipEncoder().encode(tarBytes);
+    if (gzipBytes != null) {
+      await File(tarPath).writeAsBytes(gzipBytes);
+    }
+    
+    // Limpiar temporal
+    if (await tmpTar.exists()) await tmpTar.delete();
   }
 
   void reset() => state = null;

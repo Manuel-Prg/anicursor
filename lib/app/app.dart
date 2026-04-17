@@ -10,13 +10,14 @@ class App extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
+    final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
       title: 'AniCursor',
       theme: AppTheme.light(settings.primaryColor),
       darkTheme: AppTheme.dark(settings.primaryColor),
       themeMode: settings.themeMode,
-      routerConfig: appRouter,
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
     );
   }

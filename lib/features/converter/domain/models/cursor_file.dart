@@ -25,6 +25,7 @@ class CursorFile {
   final List<String> aliases;
   final ConversionStatus status;
   final List<CursorFrame> framesData;
+  final String? errorMessage;
 
   const CursorFile({
     required this.windowsName,
@@ -33,6 +34,7 @@ class CursorFile {
     this.aliases = const [],
     this.status = ConversionStatus.pending,
     this.framesData = const [],
+    this.errorMessage,
   });
 
   CursorFile copyWith({
@@ -42,6 +44,7 @@ class CursorFile {
     List<String>? aliases,
     ConversionStatus? status,
     List<CursorFrame>? framesData,
+    String? errorMessage,
   }) {
     return CursorFile(
       windowsName: windowsName ?? this.windowsName,
@@ -50,6 +53,7 @@ class CursorFile {
       aliases: aliases ?? this.aliases,
       status: status ?? this.status,
       framesData: framesData ?? this.framesData,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 }

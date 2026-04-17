@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_file.dart';
+import 'package:ani_to_xcursor/shared/services/logger_service.dart';
 
 class CursorGenerationDataSource {
   /// Genera el cursor Linux desde los frames
@@ -31,7 +32,10 @@ class CursorGenerationDataSource {
         ]);
 
         if (res.exitCode != 0) {
-          print('Error redimensionando a $size px: ${res.stderr}');
+          await LoggerService.log(
+            'Error redimensionando a $size px para $outputPath: ${res.stderr}',
+            severity: LogSeverity.error,
+          );
           return false;
         }
 
@@ -45,8 +49,8 @@ class CursorGenerationDataSource {
       }
     }
 
-    print('Generando .conf en: $confPath');
-    print('Contenido .conf:\n${conf.toString()}');
+    await LoggerService.log('Generando .conf en: $confPath');
+    await LoggerService.log('Contenido .conf:\n${conf.toString()}', severity: LogSeverity.debug);
 
     await File(confPath).writeAsString(conf.toString());
 
@@ -59,20 +63,20 @@ class CursorGenerationDataSource {
     final result = await Process.run('xcursorgen', [confPath, outputPath]);
 
     if (result.exitCode != 0) {
-      print('Error en xcursorgen: ${result.stderr}');
+      await LoggerService.log('Error en xcursorgen para $outputPath: ${result.stderr}', severity: LogSeverity.error);
       return false;
     } else {
       final outputFile = File(outputPath);
       if (await outputFile.exists()) {
         final size = await outputFile.length();
         if (size > 0) {
-          print('Cursor generado con éxito: $outputPath ($size bytes)');
+          await LoggerService.log('Cursor generado con éxito: $outputPath ($size bytes)');
         } else {
-          print('Error: xcursorgen generó un archivo vacío para $outputPath');
+          await LoggerService.log('Error: xcursorgen generó un archivo vacío para $outputPath', severity: LogSeverity.error);
           return false;
         }
       } else {
-        print('Error: xcursorgen falló al crear el archivo $outputPath');
+        await LoggerService.log('Error: xcursorgen falló al crear el archivo $outputPath', severity: LogSeverity.error);
         return false;
       }
     }
@@ -115,10 +119,10 @@ class CursorGenerationDataSource {
           await Process.run('rm', ['-f', linkPath]);
         }
 
-        print('Creando alias: $alias -> $linuxName');
+        await LoggerService.log('Creando alias: $alias -> $linuxName');
         await link.create(linuxName);
       } catch (e) {
-        print('Error no fatal al crear alias $alias: $e');
+        await LoggerService.log('Error no fatal al crear alias $alias: $e', severity: LogSeverity.warning);
       }
     }
   }

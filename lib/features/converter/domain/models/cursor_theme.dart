@@ -6,7 +6,9 @@ class CursorTheme {
   final String outputDir;
   final List<CursorFile> cursors;
   final ThemeStatus status;
-  final int progress;
+  final int progress; // Cantidad de cursores completados
+  final double overallProgress; // Progreso global 0.0 - 1.0
+  final String statusMessage; // Mensaje de estado ("Extrayendo...", etc)
 
   const CursorTheme({
     required this.name,
@@ -15,6 +17,8 @@ class CursorTheme {
     this.cursors = const [],
     this.status = ThemeStatus.idle,
     this.progress = 0,
+    this.overallProgress = 0.0,
+    this.statusMessage = '',
   });
 
   CursorTheme copyWith({
@@ -24,6 +28,8 @@ class CursorTheme {
     List<CursorFile>? cursors,
     ThemeStatus? status,
     int? progress,
+    double? overallProgress,
+    String? statusMessage,
   }) {
     return CursorTheme(
       name: name ?? this.name,
@@ -32,6 +38,8 @@ class CursorTheme {
       cursors: cursors ?? this.cursors,
       status: status ?? this.status,
       progress: progress ?? this.progress,
+      overallProgress: overallProgress ?? this.overallProgress,
+      statusMessage: statusMessage ?? this.statusMessage,
     );
   }
 

@@ -18,8 +18,9 @@ class Settings {
   final bool autoApplyCursor;
   final Color primaryColor;
   final ThemeMode themeMode;
+  final bool? showedOnboarding;
 
-  const Settings({
+  Settings({
     required this.cursorSizes,
     required this.defaultDelay,
     this.customOutputDir,
@@ -27,6 +28,7 @@ class Settings {
     required this.autoApplyCursor,
     required this.primaryColor,
     required this.themeMode,
+    this.showedOnboarding,
   });
 
   Settings copyWith({
@@ -37,6 +39,7 @@ class Settings {
     bool? autoApplyCursor,
     Color? primaryColor,
     ThemeMode? themeMode,
+    bool? showedOnboarding,
     bool clearCustomOutputDir = false,
   }) {
     return Settings(
@@ -49,6 +52,7 @@ class Settings {
       autoApplyCursor: autoApplyCursor ?? this.autoApplyCursor,
       primaryColor: primaryColor ?? this.primaryColor,
       themeMode: themeMode ?? this.themeMode,
+      showedOnboarding: showedOnboarding ?? this.showedOnboarding,
     );
   }
 }
@@ -61,6 +65,7 @@ class SettingsNotifier extends Notifier<Settings> {
   static const _autoApplyKey = 'auto_apply';
   static const _colorKey = 'primary_color';
   static const _themeModeKey = 'theme_mode';
+  static const _onboardingKey = 'showed_onboarding';
 
   late final SharedPreferences _prefs;
 
@@ -87,6 +92,8 @@ class SettingsNotifier extends Notifier<Settings> {
     final modeIdx = _prefs.getInt(_themeModeKey);
     final mode = modeIdx != null ? ThemeMode.values[modeIdx] : ThemeMode.dark;
 
+    final onboarding = _prefs.getBool(_onboardingKey) ?? false;
+
     return Settings(
       cursorSizes: sizes,
       defaultDelay: delay,
@@ -95,6 +102,7 @@ class SettingsNotifier extends Notifier<Settings> {
       autoApplyCursor: autoApply,
       primaryColor: color,
       themeMode: mode,
+      showedOnboarding: onboarding,
     );
   }
 
@@ -138,5 +146,10 @@ class SettingsNotifier extends Notifier<Settings> {
   void updateThemeMode(ThemeMode mode) {
     state = state.copyWith(themeMode: mode);
     _prefs.setInt(_themeModeKey, mode.index);
+  }
+
+  void updateShowedOnboarding(bool showed) {
+    state = state.copyWith(showedOnboarding: showed);
+    _prefs.setBool(_onboardingKey, showed);
   }
 }

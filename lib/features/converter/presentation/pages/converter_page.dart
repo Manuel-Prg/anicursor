@@ -23,6 +23,7 @@ class ConverterPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        titleSpacing: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -30,163 +31,290 @@ class ConverterPage extends ConsumerWidget {
             context.go('/');
           },
         ),
-        title: const Text('Convertir tema'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Nombre del tema
-            _ThemeNameField(cursorTheme: cursorTheme),
-            const SizedBox(height: 24),
-
-            // Info del directorio
             Text(
-              'Directorio: ${cursorTheme.inputDir}',
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38),
+              cursorTheme.name,
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 24),
+            Text(
+              'En progreso: ${cursorTheme.inputDir}',
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+        actions: [
+          _ActionButtons(cursorTheme: cursorTheme),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Header / Summary Section
+          _HeaderSection(cursorTheme: cursorTheme),
+          
+          const Divider(height: 1, color: Colors.white10),
 
-            // Progress bar
-            if (cursorTheme.status == ThemeStatus.converting) ...[
-              LinearProgressIndicator(
-                value: cursorTheme.progress / 100,
-                backgroundColor: Colors.white12,
+          // Grid of Cursors
+          Expanded(
+            child: _CursorGrid(cursors: cursorTheme.cursors),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeaderSection extends StatelessWidget {
+  final CursorTheme cursorTheme;
+
+  const _HeaderSection({required this.cursorTheme});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isConverting = cursorTheme.status == ThemeStatus.converting;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              _StatusBadge(
+                label: 'Total',
+                value: '${cursorTheme.total}',
+                color: Colors.blueGrey,
+                icon: Icons.list_alt,
+              ),
+              const SizedBox(width: 12),
+              _StatusBadge(
+                label: 'Listos',
+                value: '${cursorTheme.done}',
+                color: Colors.green,
+                icon: Icons.check_circle_outlined,
+              ),
+              const SizedBox(width: 12),
+              _StatusBadge(
+                label: 'Errores',
+                value: '${cursorTheme.cursors.where((c) => c.status == ConversionStatus.error).length}',
+                color: Colors.red,
+                icon: Icons.error_outline,
+              ),
+            ],
+          ),
+          if (isConverting || cursorTheme.status == ThemeStatus.done) ...[
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  cursorTheme.statusMessage,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '${(cursorTheme.overallProgress * 100).round()}%',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: cursorTheme.overallProgress,
+                minHeight: 6,
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
                 color: theme.colorScheme.primary,
               ),
-              const SizedBox(height: 8),
-              Text(
-                '${cursorTheme.progress}% — ${cursorTheme.done}/${cursorTheme.total} cursores',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.white54,
-                ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+  final IconData icon;
+
+  const _StatusBadge({
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 8),
+          Text(
+            value,
+            style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CursorGrid extends StatelessWidget {
+  final List<CursorFile> cursors;
+
+  const _CursorGrid({required this.cursors});
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(24),
+      physics: const BouncingScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 240,
+        mainAxisExtent: 130,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: cursors.length,
+      itemBuilder: (context, index) {
+        final cursor = cursors[index];
+        return _CursorCard(cursor: cursor);
+      },
+    );
+  }
+}
+
+class _CursorCard extends StatefulWidget {
+  final CursorFile cursor;
+
+  const _CursorCard({required this.cursor});
+
+  @override
+  State<_CursorCard> createState() => _CursorCardState();
+}
+
+class _CursorCardState extends State<_CursorCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final statusColor = _getStatusColor(widget.cursor.status);
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: _isHovered ? 0.4 : 0.2),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: _isHovered ? statusColor : Colors.white.withValues(alpha: 0.05),
+            width: 1.5,
+          ),
+          boxShadow: [
+            if (_isHovered)
+              BoxShadow(
+                color: statusColor.withValues(alpha: 0.1),
+                blurRadius: 10,
+                spreadRadius: 0,
               ),
-              const SizedBox(height: 24),
-            ],
-
-            // Lista de cursores
-            Expanded(child: _CursorList(cursors: cursorTheme.cursors)),
-
-            const SizedBox(height: 24),
-
-            // Botones
-            _ActionButtons(cursorTheme: cursorTheme),
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            // Text section
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.cursor.linuxName,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: statusColor,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.link, size: 12, color: Colors.white38),
+                      const SizedBox(width: 4),
+                      Text(
+                        '+${widget.cursor.aliases.length} aliases',
+                        style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Status Icon / Result
+            _StatusIcon(status: widget.cursor.status, size: 18),
           ],
         ),
       ),
     );
   }
-}
 
-class _ThemeNameField extends ConsumerStatefulWidget {
-  final CursorTheme cursorTheme;
-
-  const _ThemeNameField({required this.cursorTheme});
-
-  @override
-  ConsumerState<_ThemeNameField> createState() => _ThemeNameFieldState();
-}
-
-class _ThemeNameFieldState extends ConsumerState<_ThemeNameField> {
-  late final TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.cursorTheme.name);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: _controller,
-      decoration: const InputDecoration(
-        labelText: 'Nombre del tema',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.palette),
-      ),
-      onChanged: (value) {
-        ref.read(cursorThemeProvider.notifier).updateThemeName(value);
-      },
-    );
-  }
-}
-
-class _CursorList extends StatelessWidget {
-  final List<CursorFile> cursors;
-
-  const _CursorList({required this.cursors});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      itemCount: cursors.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final cursor = cursors[index];
-        return _CursorTile(cursor: cursor);
-      },
-    );
-  }
-}
-
-class _CursorTile extends StatelessWidget {
-  final CursorFile cursor;
-
-  const _CursorTile({required this.cursor});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: ListTile(
-        leading: _StatusIcon(status: cursor.status),
-        title: Text(cursor.windowsName),
-        subtitle: Text(
-          cursor.linuxName,
-          style: TextStyle(color: theme.colorScheme.primary),
-        ),
-        trailing: cursor.aliases.isNotEmpty
-            ? Tooltip(
-                message: 'Aliases: ${cursor.aliases.join(', ')}',
-                child: const Icon(Icons.link, color: Colors.white38),
-              )
-            : null,
-      ),
-    );
+  Color _getStatusColor(ConversionStatus status) {
+    return switch (status) {
+      ConversionStatus.pending => Colors.white38,
+      ConversionStatus.converting => Colors.blue,
+      ConversionStatus.done => Colors.green,
+      ConversionStatus.error => Colors.red,
+    };
   }
 }
 
 class _StatusIcon extends StatelessWidget {
   final ConversionStatus status;
+  final double size;
 
-  const _StatusIcon({required this.status});
+  const _StatusIcon({required this.status, this.size = 24});
 
   @override
   Widget build(BuildContext context) {
     return switch (status) {
-      ConversionStatus.pending => const Icon(
-        Icons.hourglass_empty,
-        color: Colors.white38,
-      ),
-      ConversionStatus.converting => const SizedBox(
-        width: 24,
-        height: 24,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      ),
-      ConversionStatus.done => const Icon(
-        Icons.check_circle,
-        color: Colors.green,
-      ),
-      ConversionStatus.error => const Icon(Icons.error, color: Colors.red),
+      ConversionStatus.pending => Icon(Icons.hourglass_empty, color: Colors.white38, size: size),
+      ConversionStatus.converting => SizedBox(
+          width: size,
+          height: size,
+          child: const CircularProgressIndicator(strokeWidth: 2.5),
+        ),
+      ConversionStatus.done => Icon(Icons.mouse_outlined, color: Colors.green, size: size),
+      ConversionStatus.error => Icon(Icons.error_outline, color: Colors.red, size: size),
     };
   }
 }
@@ -199,159 +327,84 @@ class _ActionButtons extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isConverting = cursorTheme.status == ThemeStatus.converting;
-    final isFinished =
-        cursorTheme.status == ThemeStatus.done ||
-        cursorTheme.status == ThemeStatus.error;
+    final isFinished = cursorTheme.status == ThemeStatus.done || cursorTheme.status == ThemeStatus.error;
+
+    if (!isFinished) {
+      return FilledButton.icon(
+        onPressed: isConverting ? null : () => ref.read(cursorThemeProvider.notifier).convert(),
+        icon: isConverting
+            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+            : const Icon(Icons.play_arrow),
+        label: Text(isConverting ? 'Convirtiendo...' : 'Convertir'),
+      );
+    }
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (isFinished) ...[
-          OutlinedButton.icon(
-            onPressed: () => context.push('/preview'),
-            icon: const Icon(Icons.preview),
-            label: const Text('Vista previa'),
+        IconButton.filledTonal(
+          onPressed: () => context.push('/preview'),
+          icon: const Icon(Icons.remove_red_eye_outlined),
+          tooltip: 'Vista previa',
+        ),
+        const SizedBox(width: 8),
+        MenuAnchor(
+          menuChildren: [
+            MenuItemButton(
+              onPressed: () => ref.read(cursorThemeProvider.notifier).exportZip(),
+              leadingIcon: const Icon(Icons.folder_zip_outlined),
+              child: const Text('Exportar como .zip'),
+            ),
+            MenuItemButton(
+              onPressed: () => ref.read(cursorThemeProvider.notifier).exportTarGz(),
+              leadingIcon: const Icon(Icons.compress),
+              child: const Text('Exportar como .tar.gz'),
+            ),
+          ],
+          builder: (context, controller, child) => IconButton.filledTonal(
+            onPressed: () => controller.isOpen ? controller.close() : controller.open(),
+            icon: const Icon(Icons.download_for_offline_outlined),
+            tooltip: 'Exportar temas',
           ),
-          const SizedBox(width: 12),
-          OutlinedButton.icon(
-            onPressed: () async {
-              await ref.read(cursorThemeProvider.notifier).exportZip();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Row(
-                      children: [
-                        Icon(Icons.folder_zip_outlined, color: Colors.white),
-                        SizedBox(width: 12),
-                        Text('Exportado en archivo ZIP correctamente'),
-                      ],
-                    ),
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.archive),
-            label: const Text('Exportar ZIP'),
+        ),
+        const SizedBox(width: 8),
+        FilledButton.icon(
+          onPressed: () => _handleInstall(context, ref),
+          icon: const Icon(Icons.system_update_alt_outlined),
+          label: const Text('Instalar'),
+          style: FilledButton.styleFrom(
+            backgroundColor: Colors.green.shade700,
+            foregroundColor: Colors.white,
           ),
-          const SizedBox(width: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              final settings = ref.read(settingsProvider);
-              final success = await ref
-                  .read(cursorThemeProvider.notifier)
-                  .install();
-
-              if (context.mounted) {
-                if (success) {
-                  if (!settings.autoApplyCursor) {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        title: Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.check_circle_rounded,
-                                color: Colors.green,
-                                size: 48,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              '¡Tema Instalado!',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                        content: const Text(
-                          'El tema se ha instalado correctamente en el sistema.\n\n'
-                          'Para activarlo, selecciónalo manualmente en la aplicación de '
-                          'Retoques (Tweaks) o en la configuración de apariencia.',
-                          textAlign: TextAlign.center,
-                        ),
-                        actionsAlignment: MainAxisAlignment.center,
-                        actions: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: FilledButton(
-                              onPressed: () => Navigator.pop(context),
-                              style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: const Text('Entendido'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Row(
-                          children: [
-                            Icon(Icons.check, color: Colors.white),
-                            SizedBox(width: 12),
-                            Text('Tema instalado y aplicado con éxito'),
-                          ],
-                        ),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Row(
-                        children: [
-                          Icon(Icons.error_outline, color: Colors.white),
-                          SizedBox(width: 12),
-                          Text(
-                            'Error al instalar el tema. Revisa los permisos.',
-                          ),
-                        ],
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            },
-            icon: const Icon(Icons.download),
-            label: const Text('Instalar tema'),
-          ),
-        ] else
-          FilledButton.icon(
-            onPressed: isConverting
-                ? null
-                : () => ref.read(cursorThemeProvider.notifier).convert(),
-            icon: isConverting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Icon(Icons.play_arrow),
-            label: Text(isConverting ? 'Convirtiendo...' : 'Convertir'),
-          ),
+        ),
       ],
     );
+  }
+
+  Future<void> _handleInstall(BuildContext context, WidgetRef ref) async {
+    final notifier = ref.read(cursorThemeProvider.notifier);
+    final settings = ref.read(settingsProvider);
+    final installationSource = ref.read(installationDataSourceProvider);
+    
+    bool exists = await installationSource.themeExists(notifier.state!.name, settings.systemInstall);
+    
+    if (exists && context.mounted) {
+      final result = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Tema ya existe'),
+          content: Text('Ya hay un tema con el nombre "${notifier.state!.name}". ¿Deseas reemplazarlo?'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context, 'cancel'), child: const Text('Cancelar')),
+            FilledButton(onPressed: () => Navigator.pop(context, 'replace'), child: const Text('Reemplazar')),
+          ],
+        ),
+      );
+      if (result != 'replace') return;
+    }
+
+    await notifier.install();
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tema instalado correctamente')));
+    }
   }
 }

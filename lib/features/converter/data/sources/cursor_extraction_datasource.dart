@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:path/path.dart' as p;
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_file.dart';
+import 'package:ani_to_xcursor/shared/services/logger_service.dart';
 
 class CursorExtractionDataSource {
   /// Extrae frames de un archivo .ani o .cur
@@ -12,6 +13,7 @@ class CursorExtractionDataSource {
     String name,
     int defaultDelay,
   ) async {
+    await LoggerService.log('Extrayendo frames de: $fileOrAniPath');
     final ext = p.extension(fileOrAniPath).toLowerCase();
 
     // Soporte para archivos .cur (no animados)
@@ -86,6 +88,7 @@ class CursorExtractionDataSource {
       final result = await Process.run('convert', [fileOrAniPath, fallbackPng]);
 
       if (result.exitCode == 0 && await File(fallbackPng).exists()) {
+        await LoggerService.log('Fallback: Imagen extraída con ImageMagick para $name');
         // En fallback no podemos saber el hotspot fácilmente sin identificar
         frames.add(
           CursorFrame(
@@ -97,6 +100,8 @@ class CursorExtractionDataSource {
             height: 32,
           ),
         );
+      } else {
+        await LoggerService.log('Error en fallback convert para $name: ${result.stderr}', severity: LogSeverity.error);
       }
     }
 
@@ -140,7 +145,7 @@ class CursorExtractionDataSource {
     }
 
     if (result.exitCode == 0 && await File(pngPath).exists()) {
-      print(
+      await LoggerService.log(
         'Frame extraído: ${p.basename(pngPath)} (${width}x$height) Hotspot: ($hX, $hY)',
       );
       return CursorFrame(
@@ -152,7 +157,10 @@ class CursorExtractionDataSource {
         height: height,
       );
     } else {
-      print('Error al convertir frame $frameNum a PNG: ${result.stderr}');
+      await LoggerService.log(
+        'Error al convertir frame $frameNum de $name a PNG: ${result.stderr}',
+        severity: LogSeverity.error,
+      );
     }
     return null;
   }
