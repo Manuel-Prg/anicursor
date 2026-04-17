@@ -33,7 +33,7 @@ class ConvertThemeUsecase {
       // Marcar como convirtiendo
       final updatedCursors = List<CursorFile>.from(current.cursors);
       updatedCursors[i] = cursor.copyWith(status: ConversionStatus.converting);
-      
+
       final cursorProgress = (i / current.cursors.length);
       final overall = 0.05 + (cursorProgress * 0.85); // 5% to 90%
 
@@ -80,7 +80,9 @@ class ConvertThemeUsecase {
           updatedCursors[i] = cursor.copyWith(
             status: success ? ConversionStatus.done : ConversionStatus.error,
             framesData: frames,
-            errorMessage: success ? null : 'Error en la generación del cursor (xcursorgen).',
+            errorMessage: success
+                ? null
+                : 'Error en la generación del cursor (xcursorgen).',
           );
         }
       } catch (e, stack) {
@@ -117,14 +119,17 @@ class ConvertThemeUsecase {
         status: current.errors > 0 ? ThemeStatus.error : ThemeStatus.done,
         progress: 100,
         overallProgress: 1.0,
-        statusMessage: current.errors > 0 
-            ? "Conversión finalizada con algunos errores" 
+        statusMessage: current.errors > 0
+            ? "Conversión finalizada con algunos errores"
             : "¡Conversión completada con éxito!",
       );
     } catch (e) {
-      await LoggerService.log('Error al finalizar el tema: $e', severity: LogSeverity.error);
+      await LoggerService.log(
+        'Error al finalizar el tema: $e',
+        severity: LogSeverity.error,
+      );
       current = current.copyWith(
-        status: ThemeStatus.error, 
+        status: ThemeStatus.error,
         progress: 100,
         overallProgress: 1.0,
         statusMessage: "Error al generar archivos finales",

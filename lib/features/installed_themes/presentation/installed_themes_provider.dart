@@ -4,14 +4,19 @@ import 'package:ani_to_xcursor/features/installed_themes/domain/models/installed
 import 'package:ani_to_xcursor/features/converter/presentation/converter_provider.dart';
 import 'package:ani_to_xcursor/shared/services/logger_service.dart';
 
-final installedThemesScannerProvider = Provider((ref) => InstalledThemesScanner());
+final installedThemesScannerProvider = Provider(
+  (ref) => InstalledThemesScanner(),
+);
 
 final installedThemesProvider =
-    NotifierProvider<InstalledThemesNotifier, AsyncValue<List<InstalledTheme>>>(() {
-  return InstalledThemesNotifier();
-});
+    NotifierProvider<InstalledThemesNotifier, AsyncValue<List<InstalledTheme>>>(
+      () {
+        return InstalledThemesNotifier();
+      },
+    );
 
-class InstalledThemesNotifier extends Notifier<AsyncValue<List<InstalledTheme>>> {
+class InstalledThemesNotifier
+    extends Notifier<AsyncValue<List<InstalledTheme>>> {
   late final InstalledThemesScanner _scanner;
 
   @override
@@ -40,10 +45,15 @@ class InstalledThemesNotifier extends Notifier<AsyncValue<List<InstalledTheme>>>
     try {
       final installationSource = ref.read(installationDataSourceProvider);
       await installationSource.applyTheme(theme.name);
-      await LoggerService.log('Tema ${theme.displayName} aplicado desde el gestor');
+      await LoggerService.log(
+        'Tema ${theme.displayName} aplicado desde el gestor',
+      );
       return true;
     } catch (e) {
-      await LoggerService.log('Error al aplicar tema ${theme.name}: $e', severity: LogSeverity.error);
+      await LoggerService.log(
+        'Error al aplicar tema ${theme.name}: $e',
+        severity: LogSeverity.error,
+      );
       return false;
     }
   }
@@ -52,12 +62,17 @@ class InstalledThemesNotifier extends Notifier<AsyncValue<List<InstalledTheme>>>
     try {
       final success = await _scanner.deleteTheme(theme.path);
       if (success) {
-        await LoggerService.log('Tema ${theme.displayName} eliminado del sistema');
+        await LoggerService.log(
+          'Tema ${theme.displayName} eliminado del sistema',
+        );
         await refresh();
       }
       return success;
     } catch (e) {
-      await LoggerService.log('Error al eliminar tema ${theme.name}: $e', severity: LogSeverity.error);
+      await LoggerService.log(
+        'Error al eliminar tema ${theme.name}: $e',
+        severity: LogSeverity.error,
+      );
       return false;
     }
   }

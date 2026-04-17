@@ -15,7 +15,7 @@ class LoggerService {
         await appSupportDir.create(recursive: true);
       }
       _logFile = File(p.join(appSupportDir.path, 'app.log'));
-      
+
       // Rotar log si es muy grande (> 5MB)
       if (await _logFile!.exists()) {
         final size = await _logFile!.length();
@@ -24,16 +24,22 @@ class LoggerService {
         }
       }
 
-      await log('--- Sesión iniciada: ${DateTime.now()} ---', severity: LogSeverity.info);
+      await log(
+        '--- Sesión iniciada: ${DateTime.now()} ---',
+        severity: LogSeverity.info,
+      );
     } catch (e) {
       print('Error inicializando LoggerService: $e');
     }
   }
 
-  static Future<void> log(String message, {LogSeverity severity = LogSeverity.info}) async {
+  static Future<void> log(
+    String message, {
+    LogSeverity severity = LogSeverity.info,
+  }) async {
     final timestamp = DateTime.now().toIso8601String();
     final logLine = '[$timestamp] [${severity.name.toUpperCase()}] $message\n';
-    
+
     // Imprimir en consola siempre
     print(logLine.trim());
 

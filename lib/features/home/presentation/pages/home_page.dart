@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ani_to_xcursor/features/converter/presentation/converter_provider.dart';
 import 'package:ani_to_xcursor/shared/providers/dependency_provider.dart';
@@ -25,7 +23,8 @@ class HomePage extends ConsumerWidget {
     if (settings.showedOnboarding != true) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // Doble verificación con el estado actual del notifier para evitar race conditions
-        if (context.mounted && ref.read(settingsProvider).showedOnboarding != true) {
+        if (context.mounted &&
+            ref.read(settingsProvider).showedOnboarding != true) {
           ref.read(settingsProvider.notifier).updateShowedOnboarding(true);
           OnboardingDialog.show(context);
         }
@@ -84,7 +83,9 @@ class HomePage extends ConsumerWidget {
                   Text(
                     'Convierte cursores de Windows a Linux',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.7,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 48),
@@ -96,7 +97,9 @@ class HomePage extends ConsumerWidget {
                   else ...[
                     _DropZone(
                       onFilesDropped: (paths) {
-                        ref.read(cursorThemeProvider.notifier).scanDirectory(paths.first);
+                        ref
+                            .read(cursorThemeProvider.notifier)
+                            .scanDirectory(paths.first);
                         context.push('/converter');
                       },
                     ),
@@ -105,7 +108,9 @@ class HomePage extends ConsumerWidget {
                       onPressed: () async {
                         final result = await FilePicker.getDirectoryPath();
                         if (result != null) {
-                          ref.read(cursorThemeProvider.notifier).scanDirectory(result);
+                          ref
+                              .read(cursorThemeProvider.notifier)
+                              .scanDirectory(result);
                           if (context.mounted) context.push('/converter');
                         }
                       },
@@ -116,7 +121,9 @@ class HomePage extends ConsumerWidget {
                           horizontal: 32,
                           vertical: 16,
                         ),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ],
@@ -153,7 +160,10 @@ class _DependencyMissingCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'Dependencias Faltantes',
-            style: theme.textTheme.titleLarge?.copyWith(color: Colors.red, fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
@@ -165,16 +175,20 @@ class _DependencyMissingCard extends StatelessWidget {
           if (deps.isInstalling)
             const CircularProgressIndicator(color: Colors.red)
           else
-            Consumer(builder: (context, ref, _) {
-              return FilledButton.icon(
-                style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () async {
-                  await ref.read(dependencyProvider.notifier).installDependencies();
-                },
-                icon: const Icon(Icons.download),
-                label: const Text('Instalar automáticamente (Apt)'),
-              );
-            }),
+            Consumer(
+              builder: (context, ref, _) {
+                return FilledButton.icon(
+                  style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                  onPressed: () async {
+                    await ref
+                        .read(dependencyProvider.notifier)
+                        .installDependencies();
+                  },
+                  icon: const Icon(Icons.download),
+                  label: const Text('Instalar automáticamente (Apt)'),
+                );
+              },
+            ),
         ],
       ),
     );
@@ -199,7 +213,8 @@ class _DropZoneState extends State<_DropZone> {
     return DropTarget(
       onDragEntered: (_) => setState(() => _hovering = true),
       onDragExited: (_) => setState(() => _hovering = false),
-      onDragDone: (detail) => widget.onFilesDropped(detail.files.map((f) => f.path).toList()),
+      onDragDone: (detail) =>
+          widget.onFilesDropped(detail.files.map((f) => f.path).toList()),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutBack,
@@ -209,7 +224,9 @@ class _DropZoneState extends State<_DropZone> {
         decoration: BoxDecoration(
           color: _hovering
               ? theme.colorScheme.primary.withValues(alpha: 0.1)
-              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+              : theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.4,
+                ),
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
             color: _hovering
@@ -232,15 +249,17 @@ class _DropZoneState extends State<_DropZone> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: _hovering 
-                    ? theme.colorScheme.primary.withValues(alpha: 0.1) 
+                color: _hovering
+                    ? theme.colorScheme.primary.withValues(alpha: 0.1)
                     : Colors.white.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.move_to_inbox_rounded,
                 size: 64,
-                color: _hovering ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                color: _hovering
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.3),
               ),
             ),
             const SizedBox(height: 20),
@@ -248,7 +267,9 @@ class _DropZoneState extends State<_DropZone> {
               'Suelta la carpeta aquí',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: _hovering ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                color: _hovering
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.8),
               ),
             ),
             const SizedBox(height: 8),

@@ -18,14 +18,20 @@ class InstalledThemesScanner {
     final allThemes = <InstalledTheme>[];
 
     for (final basePath in paths) {
-      final themesInPath = await _scanDirectory(basePath, basePath == '/usr/share/icons');
+      final themesInPath = await _scanDirectory(
+        basePath,
+        basePath == '/usr/share/icons',
+      );
       allThemes.addAll(themesInPath);
     }
 
     return _deduplicate(allThemes);
   }
 
-  Future<List<InstalledTheme>> _scanDirectory(String basePath, bool isSystem) async {
+  Future<List<InstalledTheme>> _scanDirectory(
+    String basePath,
+    bool isSystem,
+  ) async {
     final dir = Directory(basePath);
     if (!await dir.exists()) return [];
 
@@ -41,13 +47,19 @@ class InstalledThemesScanner {
         }
       }
     } catch (e) {
-      await LoggerService.log('Error escaneando $basePath: $e', severity: LogSeverity.error);
+      await LoggerService.log(
+        'Error escaneando $basePath: $e',
+        severity: LogSeverity.error,
+      );
     }
 
     return themes;
   }
 
-  Future<InstalledTheme?> _validateTheme(String themePath, bool isSystem) async {
+  Future<InstalledTheme?> _validateTheme(
+    String themePath,
+    bool isSystem,
+  ) async {
     final indexThemeFile = File(p.join(themePath, 'index.theme'));
     final cursorsDir = Directory(p.join(themePath, 'cursors'));
 
@@ -73,11 +85,11 @@ class InstalledThemesScanner {
       }
 
       final themeName = p.basename(themePath);
-      
+
       // 3. Metadatos para desduplicación
       int cursorCount = 0;
       int totalSize = 0;
-      
+
       await for (final file in cursorsDir.list(followLinks: true)) {
         if (file is File) {
           cursorCount++;
@@ -117,8 +129,10 @@ class InstalledThemesScanner {
       }
     }
 
-    return uniqueThemes.values.toList()
-      ..sort((a, b) => a.displayName!.toLowerCase().compareTo(b.displayName!.toLowerCase()));
+    return uniqueThemes.values.toList()..sort(
+      (a, b) =>
+          a.displayName!.toLowerCase().compareTo(b.displayName!.toLowerCase()),
+    );
   }
 
   Future<bool> deleteTheme(String path) async {
@@ -129,7 +143,10 @@ class InstalledThemesScanner {
         return true;
       }
     } catch (e) {
-      await LoggerService.log('Error eliminando tema en $path: $e', severity: LogSeverity.error);
+      await LoggerService.log(
+        'Error eliminando tema en $path: $e',
+        severity: LogSeverity.error,
+      );
     }
     return false;
   }

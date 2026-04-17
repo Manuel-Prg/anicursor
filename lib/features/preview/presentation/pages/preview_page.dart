@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_file.dart';
 import 'package:ani_to_xcursor/features/converter/presentation/converter_provider.dart';
-import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 
 class PreviewPage extends ConsumerWidget {
   const PreviewPage({super.key});

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 
 class OnboardingDialog extends StatefulWidget {
   const OnboardingDialog({super.key});
@@ -24,19 +23,22 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
   final List<OnboardingStep> _steps = [
     OnboardingStep(
       title: 'Bienvenido a AniCursor',
-      description: 'Convierte tus cursores favoritos de Windows (.ani) a Linux en segundos con total fidelidad.',
+      description:
+          'Convierte tus cursores favoritos de Windows (.ani) a Linux en segundos con total fidelidad.',
       icon: Icons.mouse_rounded,
       color: Colors.pinkAccent,
     ),
     OnboardingStep(
       title: 'Arrastra y Suelta',
-      description: 'Solo tienes que arrastrar una carpeta con archivos .ani a la pantalla principal para empezar.',
+      description:
+          'Solo tienes que arrastrar una carpeta con archivos .ani a la pantalla principal para empezar.',
       icon: Icons.auto_fix_high_rounded,
       color: Colors.blueAccent,
     ),
     OnboardingStep(
       title: 'Gestión Inteligente',
-      description: 'Detección automática de cursores instalados, aplicación directa en GNOME/KDE y exportación compartible.',
+      description:
+          'Detección automática de cursores instalados, aplicación directa en GNOME/KDE y exportación compartible.',
       icon: Icons.layers_outlined,
       color: Colors.orangeAccent,
     ),
@@ -76,13 +78,17 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
                       Text(
                         step.title,
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         step.description,
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white60),
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: Colors.white60,
+                        ),
                       ),
                     ],
                   );
@@ -98,7 +104,9 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
                   width: _currentPage == index ? 24 : 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: _currentPage == index ? theme.colorScheme.primary : Colors.white24,
+                    color: _currentPage == index
+                        ? theme.colorScheme.primary
+                        : Colors.white24,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -125,7 +133,11 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
                           _finish(context, ref);
                         }
                       },
-                      child: Text(_currentPage < _steps.length - 1 ? 'Siguiente' : 'Comenzar'),
+                      child: Text(
+                        _currentPage < _steps.length - 1
+                            ? 'Siguiente'
+                            : 'Comenzar',
+                      ),
                     );
                   },
                 ),
@@ -148,5 +160,10 @@ class OnboardingStep {
   final IconData icon;
   final Color color;
 
-  OnboardingStep({required this.title, required this.description, required this.icon, required this.color});
+  OnboardingStep({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.color,
+  });
 }

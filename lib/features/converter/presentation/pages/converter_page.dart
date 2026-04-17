@@ -36,7 +36,9 @@ class ConverterPage extends ConsumerWidget {
           children: [
             Text(
               cursorTheme.name,
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Text(
               'En progreso: ${cursorTheme.inputDir}',
@@ -55,13 +57,11 @@ class ConverterPage extends ConsumerWidget {
         children: [
           // Header / Summary Section
           _HeaderSection(cursorTheme: cursorTheme),
-          
+
           const Divider(height: 1, color: Colors.white10),
 
           // Grid of Cursors
-          Expanded(
-            child: _CursorGrid(cursors: cursorTheme.cursors),
-          ),
+          Expanded(child: _CursorGrid(cursors: cursorTheme.cursors)),
         ],
       ),
     );
@@ -80,9 +80,7 @@ class _HeaderSection extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-      ),
+      decoration: BoxDecoration(color: theme.colorScheme.surface),
       child: Column(
         children: [
           Row(
@@ -103,7 +101,8 @@ class _HeaderSection extends StatelessWidget {
               const SizedBox(width: 12),
               _StatusBadge(
                 label: 'Errores',
-                value: '${cursorTheme.cursors.where((c) => c.status == ConversionStatus.error).length}',
+                value:
+                    '${cursorTheme.cursors.where((c) => c.status == ConversionStatus.error).length}',
                 color: Colors.red,
                 icon: Icons.error_outline,
               ),
@@ -123,7 +122,10 @@ class _HeaderSection extends StatelessWidget {
                 ),
                 Text(
                   '${(cursorTheme.overallProgress * 100).round()}%',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'monospace',
+                  ),
                 ),
               ],
             ),
@@ -173,7 +175,11 @@ class _StatusBadge extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             value,
-            style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: color,
+              fontSize: 16,
+            ),
           ),
           const SizedBox(width: 6),
           Text(
@@ -234,10 +240,14 @@ class _CursorCardState extends State<_CursorCard> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: _isHovered ? 0.4 : 0.2),
+          color: theme.colorScheme.surfaceContainerHighest.withValues(
+            alpha: _isHovered ? 0.4 : 0.2,
+          ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: _isHovered ? statusColor : Colors.white.withValues(alpha: 0.05),
+            color: _isHovered
+                ? statusColor
+                : Colors.white.withValues(alpha: 0.05),
             width: 1.5,
           ),
           boxShadow: [
@@ -273,7 +283,9 @@ class _CursorCardState extends State<_CursorCard> {
                       const SizedBox(width: 4),
                       Text(
                         '+${widget.cursor.aliases.length} aliases',
-                        style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.white38,
+                        ),
                       ),
                     ],
                   ),
@@ -307,14 +319,26 @@ class _StatusIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (status) {
-      ConversionStatus.pending => Icon(Icons.hourglass_empty, color: Colors.white38, size: size),
+      ConversionStatus.pending => Icon(
+        Icons.hourglass_empty,
+        color: Colors.white38,
+        size: size,
+      ),
       ConversionStatus.converting => SizedBox(
-          width: size,
-          height: size,
-          child: const CircularProgressIndicator(strokeWidth: 2.5),
-        ),
-      ConversionStatus.done => Icon(Icons.mouse_outlined, color: Colors.green, size: size),
-      ConversionStatus.error => Icon(Icons.error_outline, color: Colors.red, size: size),
+        width: size,
+        height: size,
+        child: const CircularProgressIndicator(strokeWidth: 2.5),
+      ),
+      ConversionStatus.done => Icon(
+        Icons.mouse_outlined,
+        color: Colors.green,
+        size: size,
+      ),
+      ConversionStatus.error => Icon(
+        Icons.error_outline,
+        color: Colors.red,
+        size: size,
+      ),
     };
   }
 }
@@ -327,13 +351,24 @@ class _ActionButtons extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isConverting = cursorTheme.status == ThemeStatus.converting;
-    final isFinished = cursorTheme.status == ThemeStatus.done || cursorTheme.status == ThemeStatus.error;
+    final isFinished =
+        cursorTheme.status == ThemeStatus.done ||
+        cursorTheme.status == ThemeStatus.error;
 
     if (!isFinished) {
       return FilledButton.icon(
-        onPressed: isConverting ? null : () => ref.read(cursorThemeProvider.notifier).convert(),
+        onPressed: isConverting
+            ? null
+            : () => ref.read(cursorThemeProvider.notifier).convert(),
         icon: isConverting
-            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
             : const Icon(Icons.play_arrow),
         label: Text(isConverting ? 'Convirtiendo...' : 'Convertir'),
       );
@@ -350,18 +385,21 @@ class _ActionButtons extends ConsumerWidget {
         MenuAnchor(
           menuChildren: [
             MenuItemButton(
-              onPressed: () => ref.read(cursorThemeProvider.notifier).exportZip(),
+              onPressed: () =>
+                  ref.read(cursorThemeProvider.notifier).exportZip(),
               leadingIcon: const Icon(Icons.folder_zip_outlined),
               child: const Text('Exportar como .zip'),
             ),
             MenuItemButton(
-              onPressed: () => ref.read(cursorThemeProvider.notifier).exportTarGz(),
+              onPressed: () =>
+                  ref.read(cursorThemeProvider.notifier).exportTarGz(),
               leadingIcon: const Icon(Icons.compress),
               child: const Text('Exportar como .tar.gz'),
             ),
           ],
           builder: (context, controller, child) => IconButton.filledTonal(
-            onPressed: () => controller.isOpen ? controller.close() : controller.open(),
+            onPressed: () =>
+                controller.isOpen ? controller.close() : controller.open(),
             icon: const Icon(Icons.download_for_offline_outlined),
             tooltip: 'Exportar temas',
           ),
@@ -384,18 +422,29 @@ class _ActionButtons extends ConsumerWidget {
     final notifier = ref.read(cursorThemeProvider.notifier);
     final settings = ref.read(settingsProvider);
     final installationSource = ref.read(installationDataSourceProvider);
-    
-    bool exists = await installationSource.themeExists(notifier.state!.name, settings.systemInstall);
-    
+
+    bool exists = await installationSource.themeExists(
+      notifier.state!.name,
+      settings.systemInstall,
+    );
+
     if (exists && context.mounted) {
       final result = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Tema ya existe'),
-          content: Text('Ya hay un tema con el nombre "${notifier.state!.name}". ¿Deseas reemplazarlo?'),
+          content: Text(
+            'Ya hay un tema con el nombre "${notifier.state!.name}". ¿Deseas reemplazarlo?',
+          ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context, 'cancel'), child: const Text('Cancelar')),
-            FilledButton(onPressed: () => Navigator.pop(context, 'replace'), child: const Text('Reemplazar')),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'cancel'),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, 'replace'),
+              child: const Text('Reemplazar'),
+            ),
           ],
         ),
       );
@@ -404,7 +453,9 @@ class _ActionButtons extends ConsumerWidget {
 
     await notifier.install();
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tema instalado correctamente')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tema instalado correctamente')),
+      );
     }
   }
 }

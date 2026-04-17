@@ -88,7 +88,9 @@ class CursorExtractionDataSource {
       final result = await Process.run('convert', [fileOrAniPath, fallbackPng]);
 
       if (result.exitCode == 0 && await File(fallbackPng).exists()) {
-        await LoggerService.log('Fallback: Imagen extraída con ImageMagick para $name');
+        await LoggerService.log(
+          'Fallback: Imagen extraída con ImageMagick para $name',
+        );
         // En fallback no podemos saber el hotspot fácilmente sin identificar
         frames.add(
           CursorFrame(
@@ -101,7 +103,10 @@ class CursorExtractionDataSource {
           ),
         );
       } else {
-        await LoggerService.log('Error en fallback convert para $name: ${result.stderr}', severity: LogSeverity.error);
+        await LoggerService.log(
+          'Error en fallback convert para $name: ${result.stderr}',
+          severity: LogSeverity.error,
+        );
       }
     }
 

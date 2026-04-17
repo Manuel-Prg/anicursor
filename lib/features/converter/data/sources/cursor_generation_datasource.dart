@@ -50,7 +50,10 @@ class CursorGenerationDataSource {
     }
 
     await LoggerService.log('Generando .conf en: $confPath');
-    await LoggerService.log('Contenido .conf:\n${conf.toString()}', severity: LogSeverity.debug);
+    await LoggerService.log(
+      'Contenido .conf:\n${conf.toString()}',
+      severity: LogSeverity.debug,
+    );
 
     await File(confPath).writeAsString(conf.toString());
 
@@ -63,20 +66,31 @@ class CursorGenerationDataSource {
     final result = await Process.run('xcursorgen', [confPath, outputPath]);
 
     if (result.exitCode != 0) {
-      await LoggerService.log('Error en xcursorgen para $outputPath: ${result.stderr}', severity: LogSeverity.error);
+      await LoggerService.log(
+        'Error en xcursorgen para $outputPath: ${result.stderr}',
+        severity: LogSeverity.error,
+      );
       return false;
     } else {
       final outputFile = File(outputPath);
       if (await outputFile.exists()) {
         final size = await outputFile.length();
         if (size > 0) {
-          await LoggerService.log('Cursor generado con éxito: $outputPath ($size bytes)');
+          await LoggerService.log(
+            'Cursor generado con éxito: $outputPath ($size bytes)',
+          );
         } else {
-          await LoggerService.log('Error: xcursorgen generó un archivo vacío para $outputPath', severity: LogSeverity.error);
+          await LoggerService.log(
+            'Error: xcursorgen generó un archivo vacío para $outputPath',
+            severity: LogSeverity.error,
+          );
           return false;
         }
       } else {
-        await LoggerService.log('Error: xcursorgen falló al crear el archivo $outputPath', severity: LogSeverity.error);
+        await LoggerService.log(
+          'Error: xcursorgen falló al crear el archivo $outputPath',
+          severity: LogSeverity.error,
+        );
         return false;
       }
     }
@@ -122,7 +136,10 @@ class CursorGenerationDataSource {
         await LoggerService.log('Creando alias: $alias -> $linuxName');
         await link.create(linuxName);
       } catch (e) {
-        await LoggerService.log('Error no fatal al crear alias $alias: $e', severity: LogSeverity.warning);
+        await LoggerService.log(
+          'Error no fatal al crear alias $alias: $e',
+          severity: LogSeverity.warning,
+        );
       }
     }
   }

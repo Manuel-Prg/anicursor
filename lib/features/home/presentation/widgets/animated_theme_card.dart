@@ -35,12 +35,14 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
-    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.9,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+    _opacityAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
     _controller.forward();
   }
 
@@ -95,8 +97,8 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                         child: Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: _hovering 
-                                ? colorScheme.primary.withValues(alpha: 0.1) 
+                            color: _hovering
+                                ? colorScheme.primary.withValues(alpha: 0.1)
                                 : colorScheme.onSurface.withValues(alpha: 0.03),
                             shape: BoxShape.circle,
                           ),
@@ -105,7 +107,9 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                             size: 40,
                             color: _hovering
                                 ? colorScheme.primary
-                                : colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                                : colorScheme.onSurfaceVariant.withValues(
+                                    alpha: 0.4,
+                                  ),
                           ),
                         ),
                       ),
@@ -116,7 +120,9 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                           child: Icon(
                             Icons.lock_outline,
                             size: 16,
-                            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                            color: colorScheme.onSurfaceVariant.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                         ),
                     ],
@@ -126,8 +132,12 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.3,
+                    ),
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(24),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +155,9 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                       Text(
                         '${widget.theme.cursorCount} cursores',
                         style: themeData.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                          color: colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.6,
+                          ),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -154,24 +166,50 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                         children: [
                           Expanded(
                             child: widget.isApplying
-                                ? const Center(child: SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)))
+                                ? const Center(
+                                    child: SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  )
                                 : FilledButton(
                                     onPressed: widget.onApply,
                                     style: FilledButton.styleFrom(
                                       minimumSize: Size.zero,
-                                      padding: const EdgeInsets.symmetric(vertical: 10),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                      backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 10,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      backgroundColor: colorScheme.primary
+                                          .withValues(alpha: 0.1),
                                       foregroundColor: colorScheme.primary,
                                       elevation: 0,
                                     ),
-                                    child: const Text('Aplicar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                    child: const Text(
+                                      'Aplicar',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                           ),
                           if (!widget.theme.isSystem) ...[
                             const SizedBox(width: 8),
                             widget.isDeleting
-                                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red))
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.red,
+                                    ),
+                                  )
                                 : Container(
                                     decoration: BoxDecoration(
                                       color: Colors.red.withValues(alpha: 0.1),
@@ -179,7 +217,10 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                                     ),
                                     child: IconButton(
                                       onPressed: widget.onDelete,
-                                      icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                                      icon: const Icon(
+                                        Icons.delete_outline_rounded,
+                                        size: 20,
+                                      ),
                                       color: Colors.red.shade400,
                                       tooltip: 'Eliminar tema',
                                     ),

@@ -88,7 +88,10 @@ Example=left_ptr
         await Process.run('chmod', ['-R', '755', dest]);
         await Process.run('sync', []);
       } catch (e) {
-        await LoggerService.log('Error en instalación local: $e', severity: LogSeverity.error);
+        await LoggerService.log(
+          'Error en instalación local: $e',
+          severity: LogSeverity.error,
+        );
         success = false;
       }
     }
@@ -146,14 +149,14 @@ Example=left_ptr
           '/KWin',
           'org.kde.KWin.reconfigure',
         ]);
-        
+
         // Fallback para Plasma 5/6 si el anterior no tiene efecto inmediato en aplicaciones GTK
         await Process.run('dbus-send', [
           '--type=method_call',
           '--dest=org.kde.GtkConfig',
           '/GtkConfig',
           'org.kde.GtkConfig.setCursorTheme',
-          'string:$themeName'
+          'string:$themeName',
         ]);
       } else if (de == DesktopEnvironment.xfce) {
         final res1 = await Process.run('xfconf-query', [
@@ -176,7 +179,9 @@ Example=left_ptr
       }
 
       if (success) {
-        await LoggerService.log('Tema aplicado con éxito en $de (o mediante comandos directos)');
+        await LoggerService.log(
+          'Tema aplicado con éxito en $de (o mediante comandos directos)',
+        );
       } else {
         await LoggerService.log(
           'Fallo al auto-aplicar en $de tras intentar fallbacks',
@@ -184,7 +189,10 @@ Example=left_ptr
         );
       }
     } catch (e) {
-      await LoggerService.log('Error aplicando tema: $e', severity: LogSeverity.error);
+      await LoggerService.log(
+        'Error aplicando tema: $e',
+        severity: LogSeverity.error,
+      );
     }
     return success;
   }
