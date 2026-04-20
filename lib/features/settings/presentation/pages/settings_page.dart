@@ -19,19 +19,24 @@ class SettingsPage extends StatelessWidget {
         ),
         title: const Text('Configuración'),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(24),
-        children: const [
-          ConversionSection(),
-          SizedBox(height: 32),
-          InstallationSection(),
-          SizedBox(height: 32),
-          SandboxedEnvironmentsSection(),
-          SizedBox(height: 32),
-          AppearanceSection(),
-          SizedBox(height: 32),
-          MaintenanceSection(),
-        ],
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            children: const [
+              ConversionSection(),
+              SizedBox(height: 32),
+              InstallationSection(),
+              SizedBox(height: 32),
+              SandboxedEnvironmentsSection(),
+              SizedBox(height: 32),
+              AppearanceSection(),
+              SizedBox(height: 32),
+              MaintenanceSection(),
+            ],
+          ),
+        ),
       ),
     );
   }

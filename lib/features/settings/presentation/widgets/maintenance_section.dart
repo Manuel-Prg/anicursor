@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ani_to_xcursor/shared/services/logger_service.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:ani_to_xcursor/shared/utils/snackbar_utils.dart';
 
 class MaintenanceSection extends ConsumerWidget {
   const MaintenanceSection({super.key});
@@ -76,12 +77,9 @@ class MaintenanceSection extends ConsumerWidget {
                           }
                         } else {
                           if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'No hay registros disponibles aún.',
-                                ),
-                              ),
+                            SnackBarUtils.show(
+                              context,
+                              'No hay registros disponibles aún.',
                             );
                           }
                         }
@@ -135,9 +133,7 @@ class MaintenanceSection extends ConsumerWidget {
 
     if (!await file.exists()) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No hay logs para exportar.')),
-        );
+        SnackBarUtils.show(context, 'No hay logs para exportar.');
       }
       return;
     }
@@ -152,12 +148,7 @@ class MaintenanceSection extends ConsumerWidget {
     if (result != null) {
       await file.copy(result);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Logs exportados correctamente'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        SnackBarUtils.show(context, 'Logs exportados correctamente');
       }
     }
   }

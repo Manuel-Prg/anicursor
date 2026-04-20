@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:path/path.dart' as p;
+import 'package:ani_to_xcursor/shared/utils/string_utils.dart';
 import 'package:ani_to_xcursor/features/converter/data/repositories/converter_repository.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_file.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dart';
@@ -50,7 +51,7 @@ class ConvertThemeUsecase {
         final frames = await _repository.extractFrames(
           cursor.aniPath,
           framesDir,
-          cursor.linuxName,
+          StringUtils.sanitizeFilename(cursor.windowsName),
           settings.defaultDelay,
         );
 
@@ -114,6 +115,18 @@ class ConvertThemeUsecase {
 
       // Crear archivo cursor.theme
       await _repository.createThemeFile(theme.outputDir, theme.name);
+
+      // Guardar vista previa para el gestor
+      try {
+        final leftPtr = current.cursors.firstWhere(
+          (c) => c.linuxName == 'left_ptr',
+          orElse: () => current.cursors.first,
+        );
+        if (leftPtr.framesData.isNotEmpty) {
+          final firstFrame = leftPtr.framesData.first.imagePath;
+          await File(firstFrame).copy(p.join(theme.outputDir, 'preview.png'));
+        }
+      } catch (_) {}
 
       current = current.copyWith(
         status: current.errors > 0 ? ThemeStatus.error : ThemeStatus.done,

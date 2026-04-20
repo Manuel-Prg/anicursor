@@ -14,6 +14,9 @@ import 'package:ani_to_xcursor/features/converter/data/sources/cursor_mapping_da
 import 'package:ani_to_xcursor/features/converter/data/sources/cursor_extraction_datasource.dart';
 import 'package:ani_to_xcursor/features/converter/data/sources/cursor_generation_datasource.dart';
 import 'package:ani_to_xcursor/features/converter/data/sources/theme_installation_datasource.dart';
+import 'package:ani_to_xcursor/shared/utils/string_utils.dart';
+
+import '../domain/models/cursor_file.dart';
 
 final mappingDataSourceProvider = Provider<CursorMappingDataSource>((ref) {
   return CursorMappingDataSource();
@@ -60,7 +63,7 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
   @override
   CursorTheme? build() => null;
 
-  void scanDirectory(String dirPath) {
+  Future<void> scanDirectory(String dirPath) async {
     final repo = ref.read(converterRepositoryProvider);
     final settings = ref.read(settingsProvider);
     final cursors = repo.scanDirectory(dirPath);
@@ -74,6 +77,28 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
           : p.join(dirPath, '..', '$themeName-Linux'),
       cursors: cursors,
     );
+
+    // Extraer previews en segundo plano
+    for (int i = 0; i < cursors.length; i++) {
+      final cursor = cursors[i];
+      final previewPath = await repo.extractPreview(
+        cursor.aniPath,
+        StringUtils.sanitizeFilename(cursor.windowsName),
+      );
+
+      // Verificamos que sigamos en el mismo tema antes de actualizar
+      if (previewPath != null && state != null && state!.inputDir == dirPath) {
+        final updatedCursors = List<CursorFile>.from(state!.cursors);
+        // Doble verificación del índice por si acaso el estado cambió
+        if (i < updatedCursors.length &&
+            updatedCursors[i].windowsName == cursor.windowsName) {
+          updatedCursors[i] = updatedCursors[i].copyWith(
+            previewPath: previewPath,
+          );
+          state = state!.copyWith(cursors: updatedCursors);
+        }
+      }
+    }
   }
 
   void updateThemeName(String name) {

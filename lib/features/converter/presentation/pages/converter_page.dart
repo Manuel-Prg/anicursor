@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +6,7 @@ import 'package:ani_to_xcursor/features/converter/domain/models/cursor_file.dart
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dart';
 import 'package:ani_to_xcursor/features/converter/presentation/converter_provider.dart';
 import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
+import 'package:ani_to_xcursor/shared/utils/snackbar_utils.dart';
 
 class ConverterPage extends ConsumerWidget {
   const ConverterPage({super.key});
@@ -262,6 +264,9 @@ class _CursorCardState extends State<_CursorCard> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
+            // Preview section
+            _CursorPreview(cursor: widget.cursor, size: 40),
+            const SizedBox(width: 16),
             // Text section
             Expanded(
               child: Column(
@@ -292,8 +297,8 @@ class _CursorCardState extends State<_CursorCard> {
                 ],
               ),
             ),
-            // Status Icon / Result
-            _StatusIcon(status: widget.cursor.status, size: 18),
+            // Status Indicator
+            _StatusIndicator(status: widget.cursor.status, size: 14),
           ],
         ),
       ),
@@ -310,32 +315,82 @@ class _CursorCardState extends State<_CursorCard> {
   }
 }
 
-class _StatusIcon extends StatelessWidget {
+class _CursorPreview extends StatelessWidget {
+  final CursorFile cursor;
+  final double size;
+
+  const _CursorPreview({required this.cursor, this.size = 40});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    // Prioridad: framesData[0] (ya convertido) > previewPath (pre-extracción)
+    String? imagePath;
+    if (cursor.framesData.isNotEmpty) {
+      imagePath = cursor.framesData.first.imagePath;
+    } else {
+      imagePath = cursor.previewPath;
+    }
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Center(
+        child: imagePath != null
+            ? Image.file(
+                File(imagePath),
+                width: size * 0.8,
+                height: size * 0.8,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.medium,
+              )
+            : Icon(
+                Icons.mouse_outlined,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                size: size * 0.5,
+              ),
+      ),
+    );
+  }
+}
+
+class _StatusIndicator extends StatelessWidget {
   final ConversionStatus status;
   final double size;
 
-  const _StatusIcon({required this.status, this.size = 24});
+  const _StatusIndicator({required this.status, this.size = 24});
 
   @override
   Widget build(BuildContext context) {
     return switch (status) {
-      ConversionStatus.pending => Icon(
-        Icons.hourglass_empty,
-        color: Colors.white38,
-        size: size,
+      ConversionStatus.pending => Container(
+        width: size,
+        height: size,
+        decoration: const BoxDecoration(
+          color: Colors.white10,
+          shape: BoxShape.circle,
+        ),
       ),
       ConversionStatus.converting => SizedBox(
         width: size,
         height: size,
-        child: const CircularProgressIndicator(strokeWidth: 2.5),
+        child: const CircularProgressIndicator(strokeWidth: 2),
       ),
       ConversionStatus.done => Icon(
-        Icons.mouse_outlined,
+        Icons.check_circle,
         color: Colors.green,
         size: size,
       ),
       ConversionStatus.error => Icon(
-        Icons.error_outline,
+        Icons.error,
         color: Colors.red,
         size: size,
       ),
@@ -453,9 +508,7 @@ class _ActionButtons extends ConsumerWidget {
 
     await notifier.install();
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tema instalado correctamente')),
-      );
+      SnackBarUtils.show(context, 'Tema instalado correctamente');
     }
   }
 }

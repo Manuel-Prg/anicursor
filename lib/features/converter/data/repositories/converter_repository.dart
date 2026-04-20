@@ -39,6 +39,11 @@ class ConverterRepository {
     );
   }
 
+  /// Extrae solo el primer frame para vista previa rápida
+  Future<String?> extractPreview(String fileOrAniPath, String name) {
+    return _extractionDataSource.extractPreview(fileOrAniPath, name);
+  }
+
   /// Genera el cursor Linux desde los frames
   Future<bool> generateCursor(
     List<CursorFrame> frames,

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:ani_to_xcursor/shared/utils/snackbar_utils.dart';
 
 class SandboxedEnvironmentsSection extends StatelessWidget {
   const SandboxedEnvironmentsSection({super.key});
@@ -23,10 +24,11 @@ class SandboxedEnvironmentsSection extends StatelessWidget {
           child: Column(
             children: [
               ListTile(
-                leading: const Icon(Icons.security),
+                dense: true,
+                leading: const Icon(Icons.security, size: 20),
                 title: const Text('Evitar cursor fantasma en Flatpak'),
                 subtitle: const Text(
-                  'Otorga permiso de lectura a Flatpak para poder ver tus cursores personalizados.',
+                  'Otorga permiso de lectura a Flatpak.',
                 ),
                 trailing: FilledButton.tonal(
                   onPressed: () async {
@@ -39,33 +41,17 @@ class SandboxedEnvironmentsSection extends StatelessWidget {
                         '--filesystem=$iconsPath:ro',
                       ]);
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Row(
-                              children: [
-                                Icon(
-                                  Icons.check_circle_outline,
-                                  color: Colors.green,
-                                ),
-                                SizedBox(width: 12),
-                                Text('Permisos de Flatpak actualizados'),
-                              ],
-                            ),
-                          ),
+                        SnackBarUtils.show(
+                          context,
+                          'Permisos de Flatpak actualizados',
                         );
                       }
                     } catch (e) {
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Row(
-                              children: [
-                                Icon(Icons.error_outline, color: Colors.orange),
-                                SizedBox(width: 12),
-                                Text('No se detectó Flatpak o hubo un error'),
-                              ],
-                            ),
-                          ),
+                        SnackBarUtils.show(
+                          context,
+                          'No se detectó Flatpak o hubo un error',
+                          isError: true,
                         );
                       }
                     }

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:ani_to_xcursor/features/installed_themes/domain/models/installed_theme.dart';
 
@@ -67,22 +68,32 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
-              color: _hovering
-                  ? colorScheme.surfaceContainerHigh
-                  : colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: _hovering
+                    ? [
+                        colorScheme.surfaceContainerHigh,
+                        colorScheme.surfaceContainerHighest.withValues(alpha: 0.8),
+                      ]
+                    : [
+                        colorScheme.surfaceContainerLow.withValues(alpha: 0.8),
+                        colorScheme.surfaceContainerLow.withValues(alpha: 0.4),
+                      ],
+              ),
+              borderRadius: BorderRadius.circular(28),
               border: Border.all(
                 color: _hovering
-                    ? colorScheme.primary.withValues(alpha: 0.5)
-                    : colorScheme.outlineVariant.withValues(alpha: 0.2),
+                    ? colorScheme.primary.withValues(alpha: 0.3)
+                    : colorScheme.onSurface.withValues(alpha: 0.05),
                 width: 1.5,
               ),
               boxShadow: [
                 if (_hovering)
                   BoxShadow(
-                    color: colorScheme.primary.withValues(alpha: 0.08),
-                    blurRadius: 20,
-                    spreadRadius: 0,
+                    color: colorScheme.primary.withValues(alpha: 0.1),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
                   ),
               ],
             ),
@@ -94,34 +105,71 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                   child: Stack(
                     children: [
                       Center(
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: 86,
+                          height: 86,
                           decoration: BoxDecoration(
                             color: _hovering
-                                ? colorScheme.primary.withValues(alpha: 0.1)
-                                : colorScheme.onSurface.withValues(alpha: 0.03),
+                                ? colorScheme.primary.withValues(alpha: 0.18)
+                                : colorScheme.onSurface.withValues(alpha: 0.08),
                             shape: BoxShape.circle,
+                            border: Border.all(
+                              color: _hovering
+                                  ? colorScheme.primary.withValues(alpha: 0.4)
+                                  : colorScheme.onSurface.withValues(alpha: 0.1),
+                              width: 1,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.mouse_outlined,
-                            size: 40,
-                            color: _hovering
-                                ? colorScheme.primary
-                                : colorScheme.onSurfaceVariant.withValues(
-                                    alpha: 0.4,
-                                  ),
+                          child: Center(
+                            child: AnimatedScale(
+                              duration: const Duration(milliseconds: 300),
+                              scale: _hovering ? 1.15 : 1.0,
+                              curve: Curves.easeOutBack,
+                              child: widget.theme.previewPath != null
+                                  ? Image.file(
+                                      File(widget.theme.previewPath!),
+                                      width: 52,
+                                      height: 52,
+                                      fit: BoxFit.contain,
+                                      filterQuality: FilterQuality.medium,
+                                      errorBuilder: (context, _, __) => Icon(
+                                        Icons.mouse_outlined,
+                                        size: 32,
+                                        color: _hovering
+                                            ? colorScheme.primary
+                                            : colorScheme.onSurfaceVariant
+                                                .withValues(alpha: 0.4),
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.mouse_outlined,
+                                      size: 32,
+                                      color: _hovering
+                                          ? colorScheme.primary
+                                          : colorScheme.onSurfaceVariant
+                                              .withValues(alpha: 0.4),
+                                    ),
+                            ),
                           ),
                         ),
                       ),
                       if (widget.theme.isSystem)
                         Positioned(
-                          top: 16,
-                          right: 16,
-                          child: Icon(
-                            Icons.lock_outline,
-                            size: 16,
-                            color: colorScheme.onSurfaceVariant.withValues(
-                              alpha: 0.3,
+                          top: 18,
+                          right: 18,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: colorScheme.onSurface.withValues(alpha: 0.05),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.lock_outline,
+                              size: 14,
+                              color: colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.4,
+                              ),
                             ),
                           ),
                         ),
@@ -130,13 +178,11 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                 ),
                 // Info & Actions Area
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withValues(
-                      alpha: 0.3,
-                    ),
+                    color: colorScheme.onSurface.withValues(alpha: 0.03),
                     borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(24),
+                      bottom: Radius.circular(28),
                     ),
                   ),
                   child: Column(
@@ -148,17 +194,18 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                         overflow: TextOverflow.ellipsis,
                         style: themeData.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          letterSpacing: 0.2,
+                          letterSpacing: -0.2,
+                          fontSize: 14,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         '${widget.theme.cursorCount} cursores',
                         style: themeData.textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.6,
+                            alpha: 0.5,
                           ),
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -166,12 +213,13 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                         children: [
                           Expanded(
                             child: widget.isApplying
-                                ? const Center(
+                                ? Center(
                                     child: SizedBox(
                                       height: 20,
                                       width: 20,
                                       child: CircularProgressIndicator(
-                                        strokeWidth: 2,
+                                        strokeWidth: 2.5,
+                                        color: colorScheme.primary,
                                       ),
                                     ),
                                   )
@@ -180,21 +228,25 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                                     style: FilledButton.styleFrom(
                                       minimumSize: Size.zero,
                                       padding: const EdgeInsets.symmetric(
-                                        vertical: 10,
+                                        vertical: 12,
                                       ),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(14),
                                       ),
-                                      backgroundColor: colorScheme.primary
-                                          .withValues(alpha: 0.1),
-                                      foregroundColor: colorScheme.primary,
+                                      backgroundColor: _hovering
+                                          ? colorScheme.primary
+                                          : colorScheme.primary
+                                              .withValues(alpha: 0.1),
+                                      foregroundColor: _hovering
+                                          ? colorScheme.onPrimary
+                                          : colorScheme.primary,
                                       elevation: 0,
                                     ),
                                     child: const Text(
                                       'Aplicar',
                                       style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w900,
                                       ),
                                     ),
                                   ),
@@ -210,20 +262,21 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                                       color: Colors.red,
                                     ),
                                   )
-                                : Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.red.withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(12),
+                                : IconButton.filledTonal(
+                                    onPressed: widget.onDelete,
+                                    icon: const Icon(
+                                      Icons.delete_outline_rounded,
+                                      size: 18,
                                     ),
-                                    child: IconButton(
-                                      onPressed: widget.onDelete,
-                                      icon: const Icon(
-                                        Icons.delete_outline_rounded,
-                                        size: 20,
+                                    style: IconButton.styleFrom(
+                                      backgroundColor:
+                                          Colors.red.withValues(alpha: 0.1),
+                                      foregroundColor: Colors.red.shade400,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                      color: Colors.red.shade400,
-                                      tooltip: 'Eliminar tema',
                                     ),
+                                    tooltip: 'Eliminar tema',
                                   ),
                           ],
                         ],

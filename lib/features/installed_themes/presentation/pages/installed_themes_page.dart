@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ani_to_xcursor/features/installed_themes/domain/models/installed_theme.dart';
 import 'package:ani_to_xcursor/features/installed_themes/presentation/installed_themes_provider.dart';
 import 'package:ani_to_xcursor/features/home/presentation/widgets/animated_theme_card.dart';
+import 'package:ani_to_xcursor/shared/utils/snackbar_utils.dart';
 
 class InstalledThemesPage extends ConsumerStatefulWidget {
   const InstalledThemesPage({super.key});
@@ -44,27 +45,39 @@ class _InstalledThemesPageState extends ConsumerState<InstalledThemesPage> {
         children: [
           // Barra de búsqueda
           Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             child: SearchBar(
               controller: _searchController,
               hintText: 'Buscar tema...',
-              leading: const Icon(
-                Icons.search,
-                size: 20,
-                color: Colors.white38,
+              hintStyle: WidgetStatePropertyAll(
+                themeData.textTheme.bodyLarge?.copyWith(
+                  color: themeData.colorScheme.onSurface.withValues(alpha: 0.3),
+                ),
+              ),
+              leading: Icon(
+                Icons.search_rounded,
+                size: 22,
+                color: themeData.colorScheme.primary.withValues(alpha: 0.5),
               ),
               onChanged: (value) => setState(() => _searchQuery = value),
               backgroundColor: WidgetStatePropertyAll(
-                themeData.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.3,
-                ),
+                themeData.colorScheme.surfaceContainer.withValues(alpha: 0.5),
               ),
               elevation: const WidgetStatePropertyAll(0),
+              padding: const WidgetStatePropertyAll(
+                EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              ),
               shape: WidgetStatePropertyAll(
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: themeData.colorScheme.onSurface.withValues(alpha: 0.05),
+                  ),
+                ),
               ),
             ),
           ),
+          const SizedBox(height: 16),
 
           Expanded(
             child: themeState.when(
@@ -138,30 +151,12 @@ class _InstalledThemesPageState extends ConsumerState<InstalledThemesPage> {
         .read(installedThemesProvider.notifier)
         .apply(theme);
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          content: Row(
-            children: [
-              Icon(
-                success ? Icons.check_circle_outline : Icons.error_outline,
-                color: Colors.white,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                success
-                    ? 'Tema ${theme.displayName} aplicado con éxito'
-                    : 'Fallo al aplicar el tema',
-              ),
-            ],
-          ),
-          backgroundColor: success
-              ? Colors.green.shade700
-              : Colors.red.shade700,
-        ),
+      SnackBarUtils.show(
+        context,
+        success
+            ? 'Tema ${theme.displayName} aplicado con éxito'
+            : 'Fallo al aplicar el tema',
+        isError: !success,
       );
     }
   }

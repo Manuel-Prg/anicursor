@@ -29,20 +29,21 @@ class AppearanceSection extends ConsumerWidget {
             child: Column(
               children: [
                 ListTile(
+                  dense: true,
                   title: const Text('Modo de pantalla'),
                   trailing: SegmentedButton<ThemeMode>(
                     segments: const [
                       ButtonSegment(
                         value: ThemeMode.system,
-                        icon: Icon(Icons.computer),
+                        icon: Icon(Icons.computer, size: 18),
                       ),
                       ButtonSegment(
                         value: ThemeMode.light,
-                        icon: Icon(Icons.light_mode),
+                        icon: Icon(Icons.light_mode, size: 18),
                       ),
                       ButtonSegment(
                         value: ThemeMode.dark,
-                        icon: Icon(Icons.dark_mode),
+                        icon: Icon(Icons.dark_mode, size: 18),
                       ),
                     ],
                     selected: {settings.themeMode},
@@ -53,6 +54,7 @@ class AppearanceSection extends ConsumerWidget {
                 ),
                 const Divider(height: 1),
                 const ListTile(
+                  dense: true,
                   title: Text('Color Primario'),
                   trailing: ColorPickerRow(),
                 ),

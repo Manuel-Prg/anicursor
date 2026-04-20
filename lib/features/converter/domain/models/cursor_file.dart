@@ -25,6 +25,7 @@ class CursorFile {
   final List<String> aliases;
   final ConversionStatus status;
   final List<CursorFrame> framesData;
+  final String? previewPath;
   final String? errorMessage;
 
   const CursorFile({
@@ -34,6 +35,7 @@ class CursorFile {
     this.aliases = const [],
     this.status = ConversionStatus.pending,
     this.framesData = const [],
+    this.previewPath,
     this.errorMessage,
   });
 
@@ -44,6 +46,7 @@ class CursorFile {
     List<String>? aliases,
     ConversionStatus? status,
     List<CursorFrame>? framesData,
+    String? previewPath,
     String? errorMessage,
   }) {
     return CursorFile(
@@ -53,6 +56,7 @@ class CursorFile {
       aliases: aliases ?? this.aliases,
       status: status ?? this.status,
       framesData: framesData ?? this.framesData,
+      previewPath: previewPath ?? this.previewPath,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }

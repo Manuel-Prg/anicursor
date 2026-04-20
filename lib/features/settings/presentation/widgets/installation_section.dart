@@ -26,6 +26,7 @@ class InstallationSection extends ConsumerWidget {
           child: Column(
             children: [
               SwitchListTile(
+                dense: true,
                 title: const Text('Instalar globalmente'),
                 subtitle: const Text('Requiere pkexec/root (/usr/share/icons)'),
                 value: settings.systemInstall,
@@ -33,9 +34,10 @@ class InstallationSection extends ConsumerWidget {
               ),
               const Divider(height: 1),
               SwitchListTile(
+                dense: true,
                 title: const Text('Auto-Aplicar Cursor'),
                 subtitle: const Text(
-                  'Forzar inmediatamente vía gsettings x-cursor',
+                  'Forzar inmediatamente vía gsettings',
                 ),
                 value: settings.autoApplyCursor,
                 onChanged: notifier.updateAutoApply,

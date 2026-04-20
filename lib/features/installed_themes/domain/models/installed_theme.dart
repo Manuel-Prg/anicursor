@@ -5,6 +5,7 @@ class InstalledTheme {
   final int totalSize;
   final bool isSystem;
   final String? displayName;
+  final String? previewPath;
 
   const InstalledTheme({
     required this.name,
@@ -13,6 +14,7 @@ class InstalledTheme {
     required this.totalSize,
     required this.isSystem,
     this.displayName,
+    this.previewPath,
   });
 
   @override
@@ -34,6 +36,7 @@ class InstalledTheme {
     int? totalSize,
     bool? isSystem,
     String? displayName,
+    String? previewPath,
   }) {
     return InstalledTheme(
       name: name ?? this.name,
@@ -42,6 +45,7 @@ class InstalledTheme {
       totalSize: totalSize ?? this.totalSize,
       isSystem: isSystem ?? this.isSystem,
       displayName: displayName ?? this.displayName,
+      previewPath: previewPath ?? this.previewPath,
     );
   }
 }

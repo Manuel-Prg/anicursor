@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as p;
 import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 import 'sizes_dialog.dart';
 
@@ -28,9 +29,10 @@ class ConversionSection extends ConsumerWidget {
           child: Column(
             children: [
               ListTile(
+                dense: true,
                 title: const Text('Tamaños de Cursor'),
                 subtitle: Text('${settings.cursorSizes.join('px, ')}px'),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(Icons.chevron_right, size: 20),
                 onTap: () {
                   showDialog(
                     context: context,
@@ -45,12 +47,13 @@ class ConversionSection extends ConsumerWidget {
               ),
               const Divider(height: 1),
               ListTile(
+                dense: true,
                 title: const Text('Delay por defecto (ms)'),
                 subtitle: Text(
-                  'Usado cuando el archivo orginal no provee retardos: ${settings.defaultDelay}ms',
+                  'Usado si no hay retardos: ${settings.defaultDelay}ms',
                 ),
                 trailing: SizedBox(
-                  width: 200,
+                  width: 140,
                   child: Slider(
                     value: settings.defaultDelay.toDouble(),
                     min: 10,
@@ -64,21 +67,25 @@ class ConversionSection extends ConsumerWidget {
               ),
               const Divider(height: 1),
               ListTile(
-                title: const Text('Directorio de Salida Perso.'),
+                dense: true,
+                title: const Text('Directorio de Salida'),
                 subtitle: Text(
-                  settings.customOutputDir ??
-                      'Automático (junto a la carpeta de entrada)',
+                  settings.customOutputDir != null 
+                    ? p.basename(settings.customOutputDir!)
+                    : 'Carpeta de entrada (automático)',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (settings.customOutputDir != null)
                       IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(Icons.clear, size: 20),
                         onPressed: () => notifier.updateCustomOutputDir(null),
                       ),
                     IconButton(
-                      icon: const Icon(Icons.folder_open),
+                      icon: const Icon(Icons.folder_open, size: 20),
                       onPressed: () async {
                         final dir = await FilePicker.getDirectoryPath();
                         if (dir != null) {

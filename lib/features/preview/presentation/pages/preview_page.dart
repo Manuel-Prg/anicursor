@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dart';
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_file.dart';
 import 'package:ani_to_xcursor/features/converter/presentation/converter_provider.dart';
+import 'package:ani_to_xcursor/shared/utils/snackbar_utils.dart';
 
 class PreviewPage extends ConsumerWidget {
   const PreviewPage({super.key});
@@ -82,13 +83,10 @@ class PreviewPage extends ConsumerWidget {
     final notifier = ref.read(cursorThemeProvider.notifier);
     final success = await notifier.install();
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            success ? 'Tema instalado con éxito' : 'Error al instalar el tema',
-          ),
-          backgroundColor: success ? Colors.green : Colors.red,
-        ),
+      SnackBarUtils.show(
+        context,
+        success ? 'Tema instalado con éxito' : 'Error al instalar el tema',
+        isError: !success,
       );
     }
   }
@@ -296,7 +294,14 @@ class _AnimatedCursorState extends State<_AnimatedCursor> {
   @override
   void initState() {
     super.initState();
+    _precacheFrames();
     _startAnimation();
+  }
+
+  Future<void> _precacheFrames() async {
+    for (final frame in widget.cursor.framesData) {
+      precacheImage(FileImage(File(frame.imagePath)), context);
+    }
   }
 
   void _startAnimation() {
@@ -332,7 +337,8 @@ class _AnimatedCursorState extends State<_AnimatedCursor> {
     final currentFrame = widget.cursor.framesData[_currentIndex];
     return Image.file(
       File(currentFrame.imagePath),
-      filterQuality: FilterQuality.high,
+      filterQuality: FilterQuality.medium,
+      gaplessPlayback: true,
       errorBuilder: (_, _, _) => const Icon(Icons.broken_image, size: 16),
     );
   }

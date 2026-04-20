@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:ani_to_xcursor/features/installed_themes/domain/models/installed_theme.dart';
 import 'package:ani_to_xcursor/shared/services/logger_service.dart';
+import 'package:ani_to_xcursor/shared/utils/xcursor_parser.dart';
 
 class InstalledThemesScanner {
   /// Escanea los directorios estándar de cursores en Linux
@@ -99,6 +100,9 @@ class InstalledThemesScanner {
 
       if (cursorCount == 0) return null;
 
+      // 4. Intentar encontrar o generar una vista previa
+      final previewPath = await _getOrGeneratePreview(themePath, themeName);
+
       return InstalledTheme(
         name: themeName,
         path: themePath,
@@ -106,10 +110,47 @@ class InstalledThemesScanner {
         isSystem: isSystem,
         cursorCount: cursorCount,
         totalSize: totalSize,
+        previewPath: previewPath,
       );
     } catch (e) {
       return null;
     }
+  }
+
+  Future<String?> _getOrGeneratePreview(String themePath, String name) async {
+    // 1. Ver si ya existe un preview.png (creado por nuestra app)
+    final existingPreview = File(p.join(themePath, 'preview.png'));
+    if (await existingPreview.exists()) {
+      return existingPreview.path;
+    }
+
+    // 2. Intentar extraer del cursor 'left_ptr' o 'default'
+    final cursorsDir = p.join(themePath, 'cursors');
+    final possibleCursors = ['left_ptr', 'default', 'arrow', 'pointer'];
+    
+    File? cursorFile;
+    for (final c in possibleCursors) {
+      final f = File(p.join(cursorsDir, c));
+      if (await f.exists()) {
+        cursorFile = f;
+        break;
+      }
+    }
+
+    // Si no encontramos los estándar, tomamos el primero que haya
+    if (cursorFile == null) {
+      final dir = Directory(cursorsDir);
+      if (await dir.exists()) {
+        final first = await dir.list().firstWhere((e) => e is File, orElse: () => File(''));
+        if (await (first as File).exists()) {
+          cursorFile = first;
+        }
+      }
+    }
+
+    if (cursorFile == null) return null;
+
+    return await XCursorParser.extractFirstFrame(cursorFile.path, name);
   }
 
   List<InstalledTheme> _deduplicate(List<InstalledTheme> themes) {
