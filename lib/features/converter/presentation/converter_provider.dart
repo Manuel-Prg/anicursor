@@ -9,6 +9,7 @@ import 'package:ani_to_xcursor/features/converter/data/repositories/converter_re
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dart';
 import 'package:ani_to_xcursor/features/converter/domain/usecases/convert_theme_usecase.dart';
 import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
+import 'package:ani_to_xcursor/shared/services/logger_service.dart';
 
 import 'package:ani_to_xcursor/features/converter/data/sources/cursor_mapping_datasource.dart';
 import 'package:ani_to_xcursor/features/converter/data/sources/cursor_extraction_datasource.dart';
@@ -65,7 +66,7 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
 
   Future<void> scanDirectory(String dirPath) async {
     final repo = ref.read(converterRepositoryProvider);
-    final settings = ref.read(settingsProvider);
+    final settings = ref.read(settingsProvider).current;
     final cursors = repo.scanDirectory(dirPath);
     final themeName = dirPath.split('/').last;
 
@@ -110,7 +111,7 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
     if (state == null) return;
 
     final usecase = ref.read(convertThemeUsecaseProvider);
-    final settings = ref.read(settingsProvider);
+    final settings = ref.read(settingsProvider).current;
 
     try {
       await for (final theme in usecase.execute(state!, settings)) {
@@ -127,7 +128,7 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
         }
       }
     } catch (e) {
-      print('Error durante la conversion (UI): $e');
+      await LoggerService.log('Error durante la conversión (UI): $e', severity: LogSeverity.error);
     }
   }
 
@@ -152,9 +153,9 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
         'audio-sink=autoaudiosink',
       ]);
 
-      print('Sonido sistema ejecutado: $assetPath');
+      await LoggerService.log('Sonido sistema ejecutado: $assetPath', severity: LogSeverity.debug);
     } catch (e) {
-      print('Audio del sistema no disponible o falló: $e');
+      await LoggerService.log('Audio del sistema no disponible o falló: $e', severity: LogSeverity.warning);
       // No hacemos nada más, la app sigue funcionando perfectamente
     }
   }
@@ -162,7 +163,7 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
   Future<bool> install() async {
     if (state == null) return false;
     final repo = ref.read(converterRepositoryProvider);
-    final settings = ref.read(settingsProvider);
+    final settings = ref.read(settingsProvider).current;
 
     // Al instalar, nos aseguramos de que los metadatos index.theme estén actualizados con el nombre actual (por si se renombró por conflicto)
     await repo.createThemeFile(state!.outputDir, state!.name);

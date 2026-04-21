@@ -131,7 +131,10 @@ class CursorExtractionDataSource {
     // Parsear header CUR básica
     // Offset 6: Width, 7: Height, 10: HotspotX, 12: HotspotY
     if (data.length < 14) {
-      print('Error: Datos de frame insuficientes (${data.length} bytes)');
+      await LoggerService.log(
+        'Error: Datos de frame insuficientes (${data.length} bytes)',
+        severity: LogSeverity.error,
+      );
       return null;
     }
 

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ani_to_xcursor/features/converter/presentation/converter_provider.dart';
 import 'package:ani_to_xcursor/shared/providers/dependency_provider.dart';
 import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
@@ -17,14 +19,14 @@ class HomePage extends ConsumerWidget {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
     final deps = ref.watch(dependencyProvider);
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.watch(settingsProvider).current;
 
     // Si es la primera vez, mostramos onboarding después del primer frame
     if (settings.showedOnboarding != true) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // Doble verificación con el estado actual del notifier para evitar race conditions
         if (context.mounted &&
-            ref.read(settingsProvider).showedOnboarding != true) {
+            ref.read(settingsProvider).current.showedOnboarding != true) {
           ref.read(settingsProvider.notifier).updateShowedOnboarding(true);
           OnboardingDialog.show(context);
         }
@@ -127,7 +129,10 @@ class HomePage extends ConsumerWidget {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 64),
+                  const SizedBox(height: 48),
+                  // ─── Footer social links ──────────────────────────────────
+                  _SocialFooter(),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -282,6 +287,155 @@ class _DropZoneState extends State<_DropZone> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ─── Social Footer ────────────────────────────────────────────────────────────
+
+class _SocialFooter extends StatelessWidget {
+  const _SocialFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final iconColor = theme.colorScheme.onSurface.withValues(alpha: 0.45);
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _SocialIcon(
+              tooltip: 'GitHub',
+              iconWidget: const FaIcon(FontAwesomeIcons.github, size: 19),
+              onTap: () => launchUrl(
+                Uri.parse('https://github.com/Manuel-Prg/anicursor'),
+              ),
+            ),
+            const SizedBox(width: 4),
+            _SocialIcon(
+              tooltip: 'Acerca de',
+              iconWidget: const Icon(Icons.info_outline, size: 20),
+              onTap: () => _showAboutDialog(context),
+            ),
+            const SizedBox(width: 4),
+            _SocialIcon(
+              tooltip: 'Ko-fi — Apoyar el proyecto',
+              iconWidget: const Icon(Icons.coffee_outlined, size: 20),
+              onTap: () => launchUrl(
+                Uri.parse('https://ko-fi.com/manuelprz'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Made with ♥ by manuelprz',
+          style: theme.textTheme.bodySmall?.copyWith(color: iconColor),
+        ),
+      ],
+    );
+  }
+
+  void _showAboutDialog(BuildContext context) {
+    final theme = Theme.of(context);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.mouse_outlined, color: theme.colorScheme.primary),
+            const SizedBox(width: 10),
+            const Text('AniCursor'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Convierte cursores animados de Windows (.ani) al formato XCursor de Linux, manteniendo animaciones y generando symlinks.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            _AboutRow(icon: Icons.person_outline, label: 'manuelprz'),
+            const SizedBox(height: 6),
+            _AboutRow(icon: Icons.code, label: 'github.com/manuelprz/anicursor'),
+            const SizedBox(height: 6),
+            _AboutRow(icon: Icons.build_outlined, label: 'imagemagick + xcursorgen'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cerrar'),
+          ),
+          FilledButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              launchUrl(Uri.parse('https://github.com/manuelprz/anicursor'));
+            },
+            icon: const Icon(Icons.open_in_new, size: 16),
+            label: const Text('Ver en GitHub'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SocialIcon extends StatelessWidget {
+  const _SocialIcon({
+    required this.tooltip,
+    required this.iconWidget,
+    required this.onTap,
+  });
+
+  final String tooltip;
+  final Widget iconWidget;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final iconColor = theme.colorScheme.onSurface.withValues(alpha: 0.45);
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: IconTheme(
+            data: IconThemeData(color: iconColor, size: 20),
+            child: iconWidget,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AboutRow extends StatelessWidget {
+  const _AboutRow({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+          ),
+        ),
+      ],
     );
   }
 }

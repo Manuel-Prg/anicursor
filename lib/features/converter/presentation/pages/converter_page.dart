@@ -13,7 +13,6 @@ class ConverterPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final cursorTheme = ref.watch(cursorThemeProvider);
 
     if (cursorTheme == null) {
@@ -33,23 +32,7 @@ class ConverterPage extends ConsumerWidget {
             context.go('/');
           },
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              cursorTheme.name,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              'En progreso: ${cursorTheme.inputDir}',
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+        title: _ThemeNameEditor(cursorTheme: cursorTheme),
         actions: [
           _ActionButtons(cursorTheme: cursorTheme),
           const SizedBox(width: 8),
@@ -475,11 +458,14 @@ class _ActionButtons extends ConsumerWidget {
 
   Future<void> _handleInstall(BuildContext context, WidgetRef ref) async {
     final notifier = ref.read(cursorThemeProvider.notifier);
-    final settings = ref.read(settingsProvider);
+    final settings = ref.read(settingsProvider).current;
+    final cursorThemeState = ref.read(cursorThemeProvider);
     final installationSource = ref.read(installationDataSourceProvider);
 
+    if (cursorThemeState == null) return;
+
     bool exists = await installationSource.themeExists(
-      notifier.state!.name,
+      cursorThemeState.name,
       settings.systemInstall,
     );
 
@@ -489,7 +475,7 @@ class _ActionButtons extends ConsumerWidget {
         builder: (context) => AlertDialog(
           title: const Text('Tema ya existe'),
           content: Text(
-            'Ya hay un tema con el nombre "${notifier.state!.name}". ¿Deseas reemplazarlo?',
+            'Ya hay un tema con el nombre "${cursorThemeState.name}". ¿Deseas reemplazarlo?',
           ),
           actions: [
             TextButton(
@@ -510,5 +496,176 @@ class _ActionButtons extends ConsumerWidget {
     if (context.mounted) {
       SnackBarUtils.show(context, 'Tema instalado correctamente');
     }
+  }
+}
+
+class _ThemeNameEditor extends ConsumerStatefulWidget {
+  const _ThemeNameEditor({required this.cursorTheme});
+  final CursorTheme cursorTheme;
+
+  @override
+  ConsumerState<_ThemeNameEditor> createState() => _ThemeNameEditorState();
+}
+
+class _ThemeNameEditorState extends ConsumerState<_ThemeNameEditor> {
+  late TextEditingController _controller;
+  bool _isEditing = false;
+  final _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.cursorTheme.name);
+  }
+
+  @override
+  void didUpdateWidget(_ThemeNameEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.cursorTheme.name != widget.cursorTheme.name && !_isEditing) {
+      _controller.text = widget.cursorTheme.name;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    if (_controller.text.trim().isNotEmpty) {
+      ref.read(cursorThemeProvider.notifier).updateThemeName(_controller.text.trim());
+    }
+    setState(() => _isEditing = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (_isEditing)
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: SizedBox(
+              height: 40,
+              child: TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                autofocus: true,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: primaryColor,
+                ),
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  isDense: true,
+                  filled: true,
+                  fillColor: primaryColor.withValues(alpha: 0.1),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: primaryColor),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: primaryColor.withValues(alpha: 0.5)),
+                  ),
+                  hintText: 'Nombre del tema...',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.check, size: 20),
+                    onPressed: _save,
+                    color: primaryColor,
+                  ),
+                ),
+                onSubmitted: (_) => _save(),
+                onTapOutside: (_) => _save(),
+              ),
+            ),
+          )
+        else
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Tooltip(
+              message: 'Haz clic para renombrar el tema',
+              waitDuration: const Duration(milliseconds: 500),
+              child: InkWell(
+                onTap: () {
+                  setState(() => _isEditing = true);
+                  _focusNode.requestFocus();
+                },
+                borderRadius: BorderRadius.circular(8),
+                hoverColor: primaryColor.withValues(alpha: 0.08),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.transparent,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          widget.cursorTheme.name,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.edit_rounded,
+                          size: 16,
+                          color: primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, top: 2),
+          child: Row(
+            children: [
+              Icon(
+                Icons.folder_open_outlined,
+                size: 12,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  widget.cursorTheme.inputDir,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                    letterSpacing: 0.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

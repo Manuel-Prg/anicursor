@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_file.dart';
+import 'package:ani_to_xcursor/shared/services/logger_service.dart';
 
 class CursorMappingDataSource {
   static const List<(String, List<String>, List<String>, List<String>)>
@@ -83,16 +84,16 @@ class CursorMappingDataSource {
     final files = dir.listSync().whereType<File>().toList();
 
     // 1. Intentar parsear archivo .inf para mapeo exacto
-    print('Scaneando directorio: $dirPath');
+    LoggerService.log('Escaneando directorio: $dirPath', severity: LogSeverity.debug);
     Map<String, String> infMapping = {};
     for (final file in files) {
       if (p.extension(file.path).toLowerCase() == '.inf') {
         try {
-          print('Encontrado archivo INF: ${file.path}');
+          LoggerService.log('Encontrado archivo INF: ${file.path}', severity: LogSeverity.debug);
           infMapping = _parseInfFile(file.path);
           break;
         } catch (e) {
-          print('Error al parsear INF: $e');
+          LoggerService.log('Error al parsear INF: $e', severity: LogSeverity.warning);
         }
       }
     }

@@ -8,7 +8,7 @@ class AppearanceSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.watch(settingsProvider).current;
     final notifier = ref.read(settingsProvider.notifier);
     final theme = Theme.of(context);
 

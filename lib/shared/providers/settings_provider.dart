@@ -1,14 +1,31 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError('Debe ser sobreescrito en main()');
 });
 
-final settingsProvider = NotifierProvider<SettingsNotifier, Settings>(() {
+final settingsProvider =
+    NotifierProvider<SettingsNotifier, SettingsState>(() {
   return SettingsNotifier();
 });
+
+// ─── Defaults ─────────────────────────────────────────────────────────────────
+
+class _Defaults {
+  static const List<int> cursorSizes = [24, 32, 48];
+  static const int defaultDelay = 100;
+  static const String? customOutputDir = null;
+  static const bool systemInstall = false;
+  static const bool autoApplyCursor = false;
+  static const Color primaryColor = Color(0xFFE91E8C);
+  static const ThemeMode themeMode = ThemeMode.dark;
+}
+
+// ─── Settings model ───────────────────────────────────────────────────────────
 
 class Settings {
   final List<int> cursorSizes;
@@ -20,7 +37,7 @@ class Settings {
   final ThemeMode themeMode;
   final bool? showedOnboarding;
 
-  Settings({
+  const Settings({
     required this.cursorSizes,
     required this.defaultDelay,
     this.customOutputDir,
@@ -30,6 +47,17 @@ class Settings {
     required this.themeMode,
     this.showedOnboarding,
   });
+
+  factory Settings.defaults() => const Settings(
+        cursorSizes: _Defaults.cursorSizes,
+        defaultDelay: _Defaults.defaultDelay,
+        customOutputDir: _Defaults.customOutputDir,
+        systemInstall: _Defaults.systemInstall,
+        autoApplyCursor: _Defaults.autoApplyCursor,
+        primaryColor: _Defaults.primaryColor,
+        themeMode: _Defaults.themeMode,
+        showedOnboarding: false,
+      );
 
   Settings copyWith({
     List<int>? cursorSizes,
@@ -55,9 +83,39 @@ class Settings {
       showedOnboarding: showedOnboarding ?? this.showedOnboarding,
     );
   }
+
+  bool equalTo(Settings other) {
+    return cursorSizes.join(',') == other.cursorSizes.join(',') &&
+        defaultDelay == other.defaultDelay &&
+        customOutputDir == other.customOutputDir &&
+        systemInstall == other.systemInstall &&
+        autoApplyCursor == other.autoApplyCursor &&
+        primaryColor.toARGB32() == other.primaryColor.toARGB32() &&
+        themeMode == other.themeMode;
+  }
 }
 
-class SettingsNotifier extends Notifier<Settings> {
+// ─── SettingsState (expone current + saved para que Riverpod lo rastree) ──────
+
+class SettingsState {
+  final Settings current;
+  final Settings saved;
+
+  const SettingsState({required this.current, required this.saved});
+
+  bool get hasUnsavedChanges => !current.equalTo(saved);
+
+  SettingsState copyWith({Settings? current, Settings? saved}) {
+    return SettingsState(
+      current: current ?? this.current,
+      saved: saved ?? this.saved,
+    );
+  }
+}
+
+// ─── Notifier ─────────────────────────────────────────────────────────────────
+
+class SettingsNotifier extends Notifier<SettingsState> {
   static const _sizesKey = 'cursor_sizes';
   static const _delayKey = 'default_delay';
   static const _outDirKey = 'custom_output_dir';
@@ -70,28 +128,33 @@ class SettingsNotifier extends Notifier<Settings> {
   late final SharedPreferences _prefs;
 
   @override
-  Settings build() {
+  SettingsState build() {
     _prefs = ref.watch(sharedPreferencesProvider);
-    return _loadSettings();
+    final loaded = _loadSettings();
+    return SettingsState(current: loaded, saved: loaded);
   }
+
+  // ─── Acceso directo al settings actual (shortcut) ─────────────────────────
+
+  /// Settings actualmente en pantalla (puede tener cambios sin guardar).
+  Settings get settings => state.current;
+
+  // ─── Carga ────────────────────────────────────────────────────────────────
 
   Settings _loadSettings() {
     final sizesStr = _prefs.getStringList(_sizesKey);
-    final sizes = sizesStr != null
-        ? sizesStr.map(int.parse).toList()
-        : [24, 32, 48];
-
+    final sizes =
+        sizesStr != null ? sizesStr.map(int.parse).toList() : [24, 32, 48];
     final delay = _prefs.getInt(_delayKey) ?? 100;
     final outDir = _prefs.getString(_outDirKey);
     final systemInst = _prefs.getBool(_systemInstallKey) ?? false;
     final autoApply = _prefs.getBool(_autoApplyKey) ?? false;
-
     final colorVal = _prefs.getInt(_colorKey);
-    final color = colorVal != null ? Color(colorVal) : const Color(0xFFE91E8C);
-
+    final color =
+        colorVal != null ? Color(colorVal) : const Color(0xFFE91E8C);
     final modeIdx = _prefs.getInt(_themeModeKey);
-    final mode = modeIdx != null ? ThemeMode.values[modeIdx] : ThemeMode.dark;
-
+    final mode =
+        modeIdx != null ? ThemeMode.values[modeIdx] : ThemeMode.dark;
     final onboarding = _prefs.getBool(_onboardingKey) ?? false;
 
     return Settings(
@@ -106,50 +169,86 @@ class SettingsNotifier extends Notifier<Settings> {
     );
   }
 
-  void updateSizes(List<int> sizes) {
-    state = state.copyWith(cursorSizes: sizes);
-    _prefs.setStringList(_sizesKey, sizes.map((e) => e.toString()).toList());
-  }
+  // ─── Persistencia ────────────────────────────────────────────────────────
 
-  void updateDefaultDelay(int delay) {
-    state = state.copyWith(defaultDelay: delay);
-    _prefs.setInt(_delayKey, delay);
-  }
-
-  void updateCustomOutputDir(String? dir) {
-    state = state.copyWith(
-      customOutputDir: dir,
-      clearCustomOutputDir: dir == null,
-    );
-    if (dir != null) {
-      _prefs.setString(_outDirKey, dir);
+  Future<void> _persist(Settings s) async {
+    await _prefs.setStringList(
+        _sizesKey, s.cursorSizes.map((e) => e.toString()).toList());
+    await _prefs.setInt(_delayKey, s.defaultDelay);
+    if (s.customOutputDir != null) {
+      await _prefs.setString(_outDirKey, s.customOutputDir!);
     } else {
-      _prefs.remove(_outDirKey);
+      await _prefs.remove(_outDirKey);
     }
+    await _prefs.setBool(_systemInstallKey, s.systemInstall);
+    await _prefs.setBool(_autoApplyKey, s.autoApplyCursor);
+    await _prefs.setInt(_colorKey, s.primaryColor.toARGB32());
+    await _prefs.setInt(_themeModeKey, s.themeMode.index);
   }
 
-  void updateSystemInstall(bool install) {
-    state = state.copyWith(systemInstall: install);
-    _prefs.setBool(_systemInstallKey, install);
+  // ─── Acciones de los botones del header ──────────────────────────────────
+
+  /// Guarda los cambios actuales en SharedPreferences.
+  Future<void> saveSettings() async {
+    await _persist(state.current);
+    state = state.copyWith(saved: state.current);
   }
 
-  void updateAutoApply(bool apply) {
-    state = state.copyWith(autoApplyCursor: apply);
-    _prefs.setBool(_autoApplyKey, apply);
+  /// Restaura valores por defecto y los guarda.
+  Future<void> resetToDefaults() async {
+    final defaults = Settings.defaults().copyWith(
+      showedOnboarding: state.current.showedOnboarding,
+    );
+    await _persist(defaults);
+    state = SettingsState(current: defaults, saved: defaults);
   }
 
-  void updatePrimaryColor(Color color) {
-    state = state.copyWith(primaryColor: color);
-    _prefs.setInt(_colorKey, color.value);
+  /// Descarta los cambios sin guardar.
+  void discardChanges() {
+    state = state.copyWith(current: state.saved);
   }
 
-  void updateThemeMode(ThemeMode mode) {
-    state = state.copyWith(themeMode: mode);
-    _prefs.setInt(_themeModeKey, mode.index);
+  /// Abre la carpeta de configuración con xdg-open.
+  Future<void> openConfigFolder() async {
+    final dir = await getApplicationSupportDirectory();
+    await Process.run('xdg-open', [dir.path]);
   }
+
+  // ─── Actualizaciones del borrador (sin persistir) ─────────────────────────
+
+  void _updateCurrent(Settings updated) {
+    state = state.copyWith(current: updated);
+  }
+
+  void updateSizes(List<int> sizes) =>
+      _updateCurrent(state.current.copyWith(cursorSizes: sizes));
+
+  void updateDefaultDelay(int delay) =>
+      _updateCurrent(state.current.copyWith(defaultDelay: delay));
+
+  void updateCustomOutputDir(String? dir) => _updateCurrent(
+        state.current.copyWith(
+          customOutputDir: dir,
+          clearCustomOutputDir: dir == null,
+        ),
+      );
+
+  void updateSystemInstall(bool install) =>
+      _updateCurrent(state.current.copyWith(systemInstall: install));
+
+  void updateAutoApply(bool apply) =>
+      _updateCurrent(state.current.copyWith(autoApplyCursor: apply));
+
+  void updatePrimaryColor(Color color) =>
+      _updateCurrent(state.current.copyWith(primaryColor: color));
+
+  void updateThemeMode(ThemeMode mode) =>
+      _updateCurrent(state.current.copyWith(themeMode: mode));
 
   void updateShowedOnboarding(bool showed) {
-    state = state.copyWith(showedOnboarding: showed);
+    _updateCurrent(state.current.copyWith(showedOnboarding: showed));
+    // El onboarding se persiste inmediatamente (no es preferencia editable por el usuario).
     _prefs.setBool(_onboardingKey, showed);
+    state = state.copyWith(saved: state.current);
   }
 }

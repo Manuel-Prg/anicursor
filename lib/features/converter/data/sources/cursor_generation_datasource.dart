@@ -12,17 +12,20 @@ class CursorGenerationDataSource {
   ) async {
     if (frames.isEmpty) return false;
 
-    final confPath = '$outputPath.conf';
-    final conf = StringBuffer();
     final framesDir = p.dirname(frames.first.imagePath);
+
+    // El .conf se escribe en framesDir (directorio temporal sin espacios)
+    // y usa SOLO el basename de cada PNG.
+    // xcursorgen resuelve los paths relativos al directorio del .conf,
+    // lo que evita el fallo cuando outputPath contiene espacios.
+    final confPath = p.join(framesDir, '${p.basename(outputPath)}.conf');
+    final conf = StringBuffer();
 
     for (final frame in frames) {
       for (final size in sizes) {
         // Redimensionar frame para cada tamaño solicitado
-        final resizedPath = p.join(
-          framesDir,
-          'res_${size}_${p.basename(frame.imagePath)}',
-        );
+        final resizedName = 'res_${size}_${p.basename(frame.imagePath)}';
+        final resizedPath = p.join(framesDir, resizedName);
 
         final res = await Process.run('convert', [
           frame.imagePath,
@@ -45,7 +48,8 @@ class CursorGenerationDataSource {
         final hX = (frame.hotspotX * scaleX).round();
         final hY = (frame.hotspotY * scaleY).round();
 
-        conf.writeln('$size $hX $hY $resizedPath ${frame.delay}');
+        // Usar SOLO el basename → xcursorgen lo resolverá relativo al .conf
+        conf.writeln('$size $hX $hY $resizedName ${frame.delay}');
       }
     }
 
@@ -63,7 +67,12 @@ class CursorGenerationDataSource {
       await Process.run('rm', ['-f', outputPath]);
     }
 
-    final result = await Process.run('xcursorgen', [confPath, outputPath]);
+    final result = await Process.run(
+      'xcursorgen',
+      [confPath, outputPath],
+      // xcursorgen resuelve paths relativos desde su CWD, no desde el .conf
+      workingDirectory: framesDir,
+    );
 
     if (result.exitCode != 0) {
       await LoggerService.log(
@@ -95,14 +104,16 @@ class CursorGenerationDataSource {
       }
     }
 
-    print('Limpiando archivos redimensionados basura para $outputPath...');
+    await LoggerService.log(
+      'Limpiando archivos redimensionados para $outputPath',
+      severity: LogSeverity.debug,
+    );
     try {
       final dir = Directory(framesDir);
       if (await dir.exists()) {
         final files = dir.listSync();
         for (var file in files) {
           final fileName = p.basename(file.path);
-          // Borramos solo los archivos que empiezan con 'res_' y pertenecen a este cursor
           if (fileName.startsWith('res_') &&
               fileName.contains(p.basenameWithoutExtension(outputPath))) {
             await file.delete();
@@ -110,7 +121,10 @@ class CursorGenerationDataSource {
         }
       }
     } catch (e) {
-      print('Error no fatal limpiando frames basura: $e');
+      await LoggerService.log(
+        'Error no fatal limpiando frames basura: $e',
+        severity: LogSeverity.warning,
+      );
     }
 
     await File(confPath).delete();

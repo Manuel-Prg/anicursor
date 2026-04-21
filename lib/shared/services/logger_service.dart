@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -29,7 +30,7 @@ class LoggerService {
         severity: LogSeverity.info,
       );
     } catch (e) {
-      print('Error inicializando LoggerService: $e');
+      debugPrint('Error inicializando LoggerService: $e');
     }
   }
 
@@ -40,14 +41,14 @@ class LoggerService {
     final timestamp = DateTime.now().toIso8601String();
     final logLine = '[$timestamp] [${severity.name.toUpperCase()}] $message\n';
 
-    // Imprimir en consola siempre
-    print(logLine.trim());
+    // Imprimir en consola solo en modo debug
+    if (kDebugMode) debugPrint(logLine.trim());
 
     if (_logFile != null) {
       try {
         await _logFile!.writeAsString(logLine, mode: FileMode.append);
       } catch (e) {
-        print('Error escribiendo en log: $e');
+        debugPrint('Error escribiendo en log: $e');
       }
     }
   }
