@@ -14,8 +14,8 @@ class App extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'AniCursor',
-      theme: AppTheme.light(settings.primaryColor),
-      darkTheme: AppTheme.dark(settings.primaryColor),
+      theme: AppTheme.light(primaryColor: settings.primaryColor),
+      darkTheme: AppTheme.dark(primaryColor: settings.primaryColor),
       themeMode: settings.themeMode,
       routerConfig: router,
       debugShowCheckedModeBanner: false,

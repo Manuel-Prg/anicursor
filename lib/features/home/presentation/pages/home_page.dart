@@ -10,6 +10,8 @@ import 'package:ani_to_xcursor/features/converter/presentation/converter_provide
 import 'package:ani_to_xcursor/shared/providers/dependency_provider.dart';
 import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 import 'package:ani_to_xcursor/features/home/presentation/widgets/onboarding_dialog.dart';
+import 'package:ani_to_xcursor/shared/theme/design_system.dart';
+import 'package:ani_to_xcursor/shared/theme/components.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -56,44 +58,57 @@ class HomePage extends ConsumerWidget {
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: const EdgeInsets.symmetric(
+              horizontal: SpacingTokens.xxxl,
+              vertical: SpacingTokens.xl,
+            ),
             child: Center(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Logo e info
-                  Hero(
-                    tag: 'logo',
-                    child: SvgPicture.asset(
-                      isLight
-                          ? 'assets/ani_xcursor_logo_light.svg'
-                          : 'assets/ani_xcursor_logo_v3.svg',
-                      width: 100,
-                      height: 100,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'AniCursor',
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Convierte cursores de Windows a Linux',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.7,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                  // Logo e info con animación
+                  AppAnimationStyles.fadeAnimation(
+                    child: Hero(
+                      tag: 'logo',
+                      child: SvgPicture.asset(
+                        isLight
+                            ? 'assets/ani_xcursor_logo_light.svg'
+                            : 'assets/ani_xcursor_logo_v3.svg',
+                        width: 120,
+                        height: 120,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: SpacingTokens.lg),
+                  AppAnimationStyles.slideAnimation(
+                    child: Text(
+                      'AniCursor',
+                      style: AppTextStyles.h2(
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: SpacingTokens.sm),
+                  AppAnimationStyles.slideAnimation(
+                    child: Text(
+                      'Convierte cursores animados de Windows al formato XCursor de Linux',
+                      style: AppTextStyles.bodyLarge(
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: SpacingTokens.xxl),
 
                   if (deps.status == DependencyStatus.checking)
-                    const CircularProgressIndicator()
+                    AppAnimationStyles.fadeAnimation(
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 3,
+                      ),
+                    )
                   else if (deps.status == DependencyStatus.missing)
                     _DependencyMissingCard(deps: deps)
                   else ...[
@@ -106,38 +121,37 @@ class HomePage extends ConsumerWidget {
                       },
                     ),
                     const SizedBox(height: 32),
-                    OutlinedButton.icon(
-                      onPressed: () async {
-                        final result = await FilePicker.getDirectoryPath();
-                        if (result != null) {
-                          ref
-                              .read(cursorThemeProvider.notifier)
-                              .scanDirectory(result);
-                          if (context.mounted) context.push('/converter');
-                        }
-                      },
-                      icon: const Icon(Icons.folder_open),
-                      label: const Text('Seleccionar carpeta'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    AppAnimationStyles.slideAnimation(
+                      begin: const Offset(0, 0.1),
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          final result = await FilePicker.getDirectoryPath();
+                          if (result != null) {
+                            ref
+                                .read(cursorThemeProvider.notifier)
+                                .scanDirectory(result);
+                            if (context.mounted) context.push('/converter');
+                          }
+                        },
+                        icon: const Icon(Icons.folder_open),
+                        label: const Text('Seleccionar carpeta'),
+                        style: AppButtonStyles.secondary(
+                          padding: SpacingTokens.lg,
+                          borderRadius: BorderRadius.circular(RadiusTokens.md),
                         ),
                       ),
                     ),
                   ],
-                  const SizedBox(height: 48),
+                  const SizedBox(height: SpacingTokens.xxxl),
                   // ─── Footer social links ──────────────────────────────────
                   _SocialFooter(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: SpacingTokens.lg),
                 ],
               ),
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -151,39 +165,61 @@ class _DependencyMissingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      width: 450,
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.05),
-        border: Border.all(color: Colors.red.withValues(alpha: 0.3), width: 2),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
+    return AppAnimationStyles.fadeAnimation(
+      child: Container(
+        width: 450,
+        padding: const EdgeInsets.all(SpacingTokens.xl),
+        decoration: BoxDecoration(
+          color: DesignTokens.errorColor.withValues(alpha: 0.1),
+          border: Border.all(
+            color: DesignTokens.errorColor.withValues(alpha: 0.3),
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(RadiusTokens.xxl),
+          boxShadow: [
+            BoxShadow(
+              color: DesignTokens.errorColor.withValues(alpha: 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
         children: [
-          const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 56),
-          const SizedBox(height: 16),
+          Icon(
+            Icons.warning_amber_rounded,
+            color: DesignTokens.errorColor,
+            size: 56,
+          ),
+          const SizedBox(height: SpacingTokens.md),
           Text(
             'Dependencias Faltantes',
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
+            style: AppTextStyles.h3(
+              color: DesignTokens.errorColor,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: SpacingTokens.sm),
           Text(
             'Para que la magia funcione en Linux, necesitamos ImageMagick y Xcursorgen.',
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red[200]),
+            style: AppTextStyles.body(
+              color: DesignTokens.errorColor.withValues(alpha: 0.8),
+            ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: SpacingTokens.lg),
           if (deps.isInstalling)
-            const CircularProgressIndicator(color: Colors.red)
+            const CircularProgressIndicator(
+              color: DesignTokens.errorColor,
+              strokeWidth: 3,
+            )
           else
             Consumer(
               builder: (context, ref, _) {
                 return FilledButton.icon(
-                  style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                  style: AppButtonStyles.danger(
+                    padding: SpacingTokens.lg,
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
+                  ),
                   onPressed: () async {
                     await ref
                         .read(dependencyProvider.notifier)
@@ -195,6 +231,7 @@ class _DependencyMissingCard extends StatelessWidget {
               },
             ),
         ],
+      ),
       ),
     );
   }
@@ -221,67 +258,101 @@ class _DropZoneState extends State<_DropZone> {
       onDragDone: (detail) =>
           widget.onFilesDropped(detail.files.map((f) => f.path).toList()),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutBack,
-        width: 500,
-        height: 250,
-        transform: Matrix4.identity()..scale(_hovering ? 1.02 : 1.0),
+        duration: AnimationTokens.normal,
+        curve: AnimationTokens.easeOutBack,
+        width: 520,
+        height: 280,
+        transform: Matrix4.identity()..scale(_hovering ? 1.03 : 1.0),
         decoration: BoxDecoration(
           color: _hovering
-              ? theme.colorScheme.primary.withValues(alpha: 0.1)
+              ? DesignTokens.primaryColor.withValues(alpha: 0.08)
               : theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.4,
+                  alpha: 0.6,
                 ),
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(RadiusTokens.xxl),
           border: Border.all(
             color: _hovering
-                ? theme.colorScheme.primary
-                : theme.colorScheme.onSurface.withValues(alpha: 0.1),
-            width: 2.5,
+                ? DesignTokens.primaryColor
+                : theme.colorScheme.onSurface.withValues(alpha: 0.2),
+            width: _hovering ? 3.0 : 2.0,
           ),
           boxShadow: [
             if (_hovering)
               BoxShadow(
-                color: theme.colorScheme.primary.withValues(alpha: 0.15),
-                blurRadius: 30,
-                spreadRadius: -5,
+                color: DesignTokens.primaryColor.withValues(alpha: 0.2),
+                blurRadius: 40,
+                spreadRadius: -8,
+                offset: const Offset(0, 12),
               ),
+            if (!_hovering)
+              ...ShadowTokens.sm,
           ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(20),
+            AnimatedContainer(
+              duration: AnimationTokens.normal,
+              padding: const EdgeInsets.all(SpacingTokens.lg),
               decoration: BoxDecoration(
                 color: _hovering
-                    ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                    : Colors.white.withValues(alpha: 0.05),
+                    ? DesignTokens.primaryColor.withValues(alpha: 0.1)
+                    : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
+                border: Border.all(
+                  color: _hovering
+                      ? DesignTokens.primaryColor.withValues(alpha: 0.3)
+                      : Colors.transparent,
+                  width: 2,
+                ),
               ),
-              child: Icon(
-                Icons.move_to_inbox_rounded,
-                size: 64,
-                color: _hovering
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.3),
+              child: AnimatedSwitcher(
+                duration: AnimationTokens.fast,
+                child: Icon(
+                  _hovering ? Icons.download_rounded : Icons.move_to_inbox_rounded,
+                  key: ValueKey(_hovering),
+                  size: 72,
+                  color: _hovering
+                      ? DesignTokens.primaryColor
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                ),
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Suelta la carpeta aquí',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: _hovering
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.8),
+            const SizedBox(height: SpacingTokens.lg),
+            AnimatedSwitcher(
+              duration: AnimationTokens.fast,
+              child: Text(
+                _hovering ? '¡Suelta para empezar!' : 'Suelta la carpeta aquí',
+                key: ValueKey(_hovering),
+                style: AppTextStyles.h4(
+                  color: _hovering
+                      ? DesignTokens.primaryColor
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: SpacingTokens.sm),
             Text(
               'o haz clic para seleccionar manualmente',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              style: AppTextStyles.body(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.sm),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SpacingTokens.md,
+                vertical: SpacingTokens.xs,
+              ),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(RadiusTokens.sm),
+              ),
+              child: Text(
+                'Soporta: .ani, .cur',
+                style: AppTextStyles.caption(
+                  color: theme.colorScheme.primary,
+                ),
               ),
             ),
           ],

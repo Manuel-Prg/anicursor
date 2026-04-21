@@ -7,6 +7,8 @@ import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dar
 import 'package:ani_to_xcursor/features/converter/presentation/converter_provider.dart';
 import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 import 'package:ani_to_xcursor/shared/utils/snackbar_utils.dart';
+import 'package:ani_to_xcursor/shared/theme/design_system.dart';
+import 'package:ani_to_xcursor/shared/theme/components.dart';
 
 class ConverterPage extends ConsumerWidget {
   const ConverterPage({super.key});
@@ -43,7 +45,10 @@ class ConverterPage extends ConsumerWidget {
           // Header / Summary Section
           _HeaderSection(cursorTheme: cursorTheme),
 
-          const Divider(height: 1, color: Colors.white10),
+          Divider(
+            height: 1,
+            color: Theme.of(context).dividerColor,
+          ),
 
           // Grid of Cursors
           Expanded(child: _CursorGrid(cursors: cursorTheme.cursors)),
@@ -64,8 +69,16 @@ class _HeaderSection extends StatelessWidget {
     final isConverting = cursorTheme.status == ThemeStatus.converting;
 
     return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(color: theme.colorScheme.surface),
+      padding: const EdgeInsets.all(SpacingTokens.lg),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border: Border(
+          bottom: BorderSide(
+            color: theme.dividerColor,
+            width: 1,
+          ),
+        ),
+      ),
       child: Column(
         children: [
           Row(
@@ -73,53 +86,65 @@ class _HeaderSection extends StatelessWidget {
               _StatusBadge(
                 label: 'Total',
                 value: '${cursorTheme.total}',
-                color: Colors.blueGrey,
+                color: DesignTokens.infoColor,
                 icon: Icons.list_alt,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: SpacingTokens.sm),
               _StatusBadge(
                 label: 'Listos',
                 value: '${cursorTheme.done}',
-                color: Colors.green,
+                color: DesignTokens.successColor,
                 icon: Icons.check_circle_outlined,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: SpacingTokens.sm),
               _StatusBadge(
                 label: 'Errores',
                 value:
                     '${cursorTheme.cursors.where((c) => c.status == ConversionStatus.error).length}',
-                color: Colors.red,
+                color: DesignTokens.errorColor,
                 icon: Icons.error_outline,
               ),
             ],
           ),
           if (isConverting || cursorTheme.status == ThemeStatus.done) ...[
-            const SizedBox(height: 24),
+            const SizedBox(height: SpacingTokens.lg),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  cursorTheme.statusMessage,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    cursorTheme.statusMessage,
+                    style: AppTextStyles.body(
+                      color: theme.colorScheme.primary,
+                      fontWeight: TypographyTokens.medium,
+                    ),
                   ),
                 ),
-                Text(
-                  '${(cursorTheme.overallProgress * 100).round()}%',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'monospace',
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.sm,
+                    vertical: SpacingTokens.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  ),
+                  child: Text(
+                    '${(cursorTheme.overallProgress * 100).round()}%',
+                    style: AppTextStyles.bodySmall(
+                      color: theme.colorScheme.primary,
+                      fontWeight: TypographyTokens.bold,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: SpacingTokens.sm),
             ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(RadiusTokens.xs),
               child: LinearProgressIndicator(
                 value: cursorTheme.overallProgress,
-                minHeight: 6,
+                minHeight: 8,
                 backgroundColor: theme.colorScheme.surfaceContainerHighest,
                 color: theme.colorScheme.primary,
               ),
@@ -147,29 +172,33 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.md,
+        vertical: SpacingTokens.sm,
+      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 8),
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: SpacingTokens.xs),
           Text(
             value,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
+            style: AppTextStyles.body(
               color: color,
-              fontSize: 16,
+              fontWeight: TypographyTokens.bold,
             ),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 4),
           Text(
             label,
-            style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 12),
+            style: AppTextStyles.caption(
+              color: color.withValues(alpha: 0.8),
+            ),
           ),
         ],
       ),
