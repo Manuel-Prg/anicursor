@@ -133,7 +133,7 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                                       height: 52,
                                       fit: BoxFit.contain,
                                       filterQuality: FilterQuality.medium,
-                                      errorBuilder: (context, _, __) => Icon(
+                                      errorBuilder: (context, _, _) => Icon(
                                         Icons.mouse_outlined,
                                         size: 32,
                                         color: _hovering

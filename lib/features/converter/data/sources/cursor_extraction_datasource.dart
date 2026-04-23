@@ -180,7 +180,7 @@ class CursorExtractionDataSource {
     
     // [0] le dice a ImageMagick que solo extraiga el primer frame
     final result = await Process.run('convert', [
-      '${fileOrAniPath}[0]', 
+      '$fileOrAniPath[0]', 
       'PNG32:$previewPath'
     ]);
 

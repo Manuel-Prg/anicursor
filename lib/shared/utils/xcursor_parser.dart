@@ -61,7 +61,7 @@ class XCursorParser {
 
     // Convertir raw BGRA a PNG usando ImageMagick
     final result = await Process.run('convert', [
-      '-size', '${width}x${height}',
+      '-size', '${width}x$height',
       '-depth', '8',
       'bgra:$rawPath',
       outPath,

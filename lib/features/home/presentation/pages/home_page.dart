@@ -69,89 +69,91 @@ class HomePage extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                  // Logo e info con animación
-                  AppAnimationStyles.fadeAnimation(
-                    child: Hero(
-                      tag: 'logo',
-                      child: SvgPicture.asset(
-                        isLight
-                            ? 'assets/ani_xcursor_logo_light.svg'
-                            : 'assets/ani_xcursor_logo_v3.svg',
-                        width: 120,
-                        height: 120,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: SpacingTokens.lg),
-                  AppAnimationStyles.slideAnimation(
-                    child: Text(
-                      'AniCursor',
-                      style: AppTextStyles.h2(
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: SpacingTokens.sm),
-                  AppAnimationStyles.slideAnimation(
-                    child: Text(
-                      'Convierte cursores animados de Windows al formato XCursor de Linux',
-                      style: AppTextStyles.bodyLarge(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: SpacingTokens.xxl),
-
-                  if (deps.status == DependencyStatus.checking)
+                    // Logo e info con animación
                     AppAnimationStyles.fadeAnimation(
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 3,
-                      ),
-                    )
-                  else if (deps.status == DependencyStatus.missing)
-                    _DependencyMissingCard(deps: deps)
-                  else ...[
-                    _DropZone(
-                      onFilesDropped: (paths) {
-                        ref
-                            .read(cursorThemeProvider.notifier)
-                            .scanDirectory(paths.first);
-                        context.push('/converter');
-                      },
-                    ),
-                    const SizedBox(height: 32),
-                    AppAnimationStyles.slideAnimation(
-                      begin: const Offset(0, 0.1),
-                      child: OutlinedButton.icon(
-                        onPressed: () async {
-                          final result = await FilePicker.getDirectoryPath();
-                          if (result != null) {
-                            ref
-                                .read(cursorThemeProvider.notifier)
-                                .scanDirectory(result);
-                            if (context.mounted) context.push('/converter');
-                          }
-                        },
-                        icon: const Icon(Icons.folder_open),
-                        label: const Text('Seleccionar carpeta'),
-                        style: AppButtonStyles.secondary(
-                          padding: SpacingTokens.lg,
-                          borderRadius: BorderRadius.circular(RadiusTokens.md),
+                      child: Hero(
+                        tag: 'logo',
+                        child: SvgPicture.asset(
+                          isLight
+                              ? 'assets/ani_xcursor_logo_light.svg'
+                              : 'assets/ani_xcursor_logo_v3.svg',
+                          width: 120,
+                          height: 120,
                         ),
                       ),
                     ),
+                    const SizedBox(height: SpacingTokens.lg),
+                    AppAnimationStyles.slideAnimation(
+                      child: Text(
+                        'AniCursor',
+                        style: AppTextStyles.h2(
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.sm),
+                    AppAnimationStyles.slideAnimation(
+                      child: Text(
+                        'Convierte cursores animados de Windows al formato XCursor de Linux',
+                        style: AppTextStyles.bodyLarge(
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.7,
+                          ),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.xxl),
+
+                    if (deps.status == DependencyStatus.checking)
+                      AppAnimationStyles.fadeAnimation(
+                        child: const CircularProgressIndicator(strokeWidth: 3),
+                      )
+                    else if (deps.status == DependencyStatus.missing)
+                      _DependencyMissingCard(deps: deps)
+                    else ...[
+                      _DropZone(
+                        onFilesDropped: (paths) {
+                          ref
+                              .read(cursorThemeProvider.notifier)
+                              .scanDirectory(paths.first);
+                          context.push('/converter');
+                        },
+                      ),
+                      const SizedBox(height: 32),
+                      AppAnimationStyles.slideAnimation(
+                        begin: const Offset(0, 0.1),
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final result = await FilePicker.getDirectoryPath();
+                            if (result != null) {
+                              ref
+                                  .read(cursorThemeProvider.notifier)
+                                  .scanDirectory(result);
+                              if (context.mounted) context.push('/converter');
+                            }
+                          },
+                          icon: const Icon(Icons.folder_open),
+                          label: const Text('Seleccionar carpeta'),
+                          style: AppButtonStyles.secondary(
+                            padding: SpacingTokens.lg,
+                            borderRadius: BorderRadius.circular(
+                              RadiusTokens.md,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: SpacingTokens.xxxl),
+                    // ─── Footer social links ──────────────────────────────────
+                    _SocialFooter(),
+                    const SizedBox(height: SpacingTokens.lg),
                   ],
-                  const SizedBox(height: SpacingTokens.xxxl),
-                  // ─── Footer social links ──────────────────────────────────
-                  _SocialFooter(),
-                  const SizedBox(height: SpacingTokens.lg),
-                ],
+                ),
               ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -164,7 +166,7 @@ class _DependencyMissingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final _ = Theme.of(context);
     return AppAnimationStyles.fadeAnimation(
       child: Container(
         width: 450,
@@ -185,53 +187,51 @@ class _DependencyMissingCard extends StatelessWidget {
           ],
         ),
         child: Column(
-        children: [
-          Icon(
-            Icons.warning_amber_rounded,
-            color: DesignTokens.errorColor,
-            size: 56,
-          ),
-          const SizedBox(height: SpacingTokens.md),
-          Text(
-            'Dependencias Faltantes',
-            style: AppTextStyles.h3(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
               color: DesignTokens.errorColor,
+              size: 56,
             ),
-          ),
-          const SizedBox(height: SpacingTokens.sm),
-          Text(
-            'Para que la magia funcione en Linux, necesitamos ImageMagick y Xcursorgen.',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.body(
-              color: DesignTokens.errorColor.withValues(alpha: 0.8),
+            const SizedBox(height: SpacingTokens.md),
+            Text(
+              'Dependencias Faltantes',
+              style: AppTextStyles.h3(color: DesignTokens.errorColor),
             ),
-          ),
-          const SizedBox(height: SpacingTokens.lg),
-          if (deps.isInstalling)
-            const CircularProgressIndicator(
-              color: DesignTokens.errorColor,
-              strokeWidth: 3,
-            )
-          else
-            Consumer(
-              builder: (context, ref, _) {
-                return FilledButton.icon(
-                  style: AppButtonStyles.danger(
-                    padding: SpacingTokens.lg,
-                    borderRadius: BorderRadius.circular(RadiusTokens.md),
-                  ),
-                  onPressed: () async {
-                    await ref
-                        .read(dependencyProvider.notifier)
-                        .installDependencies();
-                  },
-                  icon: const Icon(Icons.download),
-                  label: const Text('Instalar automáticamente (Apt)'),
-                );
-              },
+            const SizedBox(height: SpacingTokens.sm),
+            Text(
+              'Para que la magia funcione en Linux, necesitamos ImageMagick y Xcursorgen.',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.body(
+                color: DesignTokens.errorColor.withValues(alpha: 0.8),
+              ),
             ),
-        ],
-      ),
+            const SizedBox(height: SpacingTokens.lg),
+            if (deps.isInstalling)
+              const CircularProgressIndicator(
+                color: DesignTokens.errorColor,
+                strokeWidth: 3,
+              )
+            else
+              Consumer(
+                builder: (context, ref, _) {
+                  return FilledButton.icon(
+                    style: AppButtonStyles.danger(
+                      padding: SpacingTokens.lg,
+                      borderRadius: BorderRadius.circular(RadiusTokens.md),
+                    ),
+                    onPressed: () async {
+                      await ref
+                          .read(dependencyProvider.notifier)
+                          .installDependencies();
+                    },
+                    icon: const Icon(Icons.download),
+                    label: const Text('Instalar automáticamente (Apt)'),
+                  );
+                },
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -262,7 +262,7 @@ class _DropZoneState extends State<_DropZone> {
         curve: AnimationTokens.easeOutBack,
         width: 520,
         height: 280,
-        transform: Matrix4.identity()..scale(_hovering ? 1.03 : 1.0),
+        transform: Matrix4.identity()..scaled(_hovering ? 1.03 : 1.0),
         decoration: BoxDecoration(
           color: _hovering
               ? DesignTokens.primaryColor.withValues(alpha: 0.08)
@@ -284,8 +284,7 @@ class _DropZoneState extends State<_DropZone> {
                 spreadRadius: -8,
                 offset: const Offset(0, 12),
               ),
-            if (!_hovering)
-              ...ShadowTokens.sm,
+            if (!_hovering) ...ShadowTokens.sm,
           ],
         ),
         child: Column(
@@ -297,7 +296,9 @@ class _DropZoneState extends State<_DropZone> {
               decoration: BoxDecoration(
                 color: _hovering
                     ? DesignTokens.primaryColor.withValues(alpha: 0.1)
-                    : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    : theme.colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.3,
+                      ),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: _hovering
@@ -309,7 +310,9 @@ class _DropZoneState extends State<_DropZone> {
               child: AnimatedSwitcher(
                 duration: AnimationTokens.fast,
                 child: Icon(
-                  _hovering ? Icons.download_rounded : Icons.move_to_inbox_rounded,
+                  _hovering
+                      ? Icons.download_rounded
+                      : Icons.move_to_inbox_rounded,
                   key: ValueKey(_hovering),
                   size: 72,
                   color: _hovering
@@ -350,9 +353,7 @@ class _DropZoneState extends State<_DropZone> {
               ),
               child: Text(
                 'Soporta: .ani, .cur',
-                style: AppTextStyles.caption(
-                  color: theme.colorScheme.primary,
-                ),
+                style: AppTextStyles.caption(color: theme.colorScheme.primary),
               ),
             ),
           ],
@@ -394,9 +395,7 @@ class _SocialFooter extends StatelessWidget {
             _SocialIcon(
               tooltip: 'Ko-fi — Apoyar el proyecto',
               iconWidget: const Icon(Icons.coffee_outlined, size: 20),
-              onTap: () => launchUrl(
-                Uri.parse('https://ko-fi.com/manuelprz'),
-              ),
+              onTap: () => launchUrl(Uri.parse('https://ko-fi.com/manuelprz')),
             ),
           ],
         ),
@@ -432,9 +431,15 @@ class _SocialFooter extends StatelessWidget {
             const SizedBox(height: 16),
             _AboutRow(icon: Icons.person_outline, label: 'manuelprz'),
             const SizedBox(height: 6),
-            _AboutRow(icon: Icons.code, label: 'github.com/manuelprz/anicursor'),
+            _AboutRow(
+              icon: Icons.code,
+              label: 'github.com/manuelprz/anicursor',
+            ),
             const SizedBox(height: 6),
-            _AboutRow(icon: Icons.build_outlined, label: 'imagemagick + xcursorgen'),
+            _AboutRow(
+              icon: Icons.build_outlined,
+              label: 'imagemagick + xcursorgen',
+            ),
           ],
         ),
         actions: [
@@ -498,7 +503,11 @@ class _AboutRow extends StatelessWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(icon, size: 15, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+        Icon(
+          icon,
+          size: 15,
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+        ),
         const SizedBox(width: 8),
         Text(
           label,
