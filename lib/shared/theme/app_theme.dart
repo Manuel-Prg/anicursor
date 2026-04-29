@@ -20,7 +20,7 @@ class AppTheme {
       brightness: Brightness.light,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: DesignTokens.neutral50,
-      
+
       // Text Theme
       textTheme: TextTheme(
         displayLarge: AppTextStyles.h1(color: DesignTokens.neutral900),
@@ -39,7 +39,7 @@ class AppTheme {
         labelMedium: AppTextStyles.bodySmall(color: DesignTokens.neutral700),
         labelSmall: AppTextStyles.caption(color: DesignTokens.neutral600),
       ),
-      
+
       // Card Theme
       cardTheme: CardThemeData(
         color: DesignTokens.neutral50,
@@ -49,7 +49,7 @@ class AppTheme {
         ),
         margin: EdgeInsets.zero,
       ),
-      
+
       // AppBar Theme
       appBarTheme: AppBarTheme(
         backgroundColor: DesignTokens.neutral50,
@@ -57,16 +57,13 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
         titleTextStyle: AppTextStyles.h4(color: DesignTokens.neutral900),
-        iconTheme: IconThemeData(
-          color: DesignTokens.neutral700,
-          size: 24,
-        ),
+        iconTheme: IconThemeData(color: DesignTokens.neutral700, size: 24),
         actionsIconTheme: IconThemeData(
           color: DesignTokens.neutral700,
           size: 24,
         ),
       ),
-      
+
       // Button Themes
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: AppButtonStyles.primary(),
@@ -74,10 +71,8 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: AppButtonStyles.secondary(),
       ),
-      textButtonTheme: TextButtonThemeData(
-        style: AppButtonStyles.ghost(),
-      ),
-      
+      textButtonTheme: TextButtonThemeData(style: AppButtonStyles.ghost()),
+
       // Input Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -101,7 +96,7 @@ class AppTheme {
         hintStyle: AppTextStyles.bodySmall(color: DesignTokens.neutral500),
         labelStyle: AppTextStyles.bodySmall(color: DesignTokens.neutral600),
       ),
-      
+
       // SnackBar Theme
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
@@ -112,7 +107,7 @@ class AppTheme {
         ),
         elevation: 8,
       ),
-      
+
       // Dialog Theme
       dialogTheme: DialogThemeData(
         backgroundColor: DesignTokens.neutral50,
@@ -124,20 +119,17 @@ class AppTheme {
         contentTextStyle: AppTextStyles.body(color: DesignTokens.neutral700),
         elevation: 16,
       ),
-      
+
       // Divider Theme
       dividerTheme: DividerThemeData(
         color: DesignTokens.neutral200,
         thickness: 1,
         space: 1,
       ),
-      
+
       // Icon Theme
-      iconTheme: IconThemeData(
-        color: DesignTokens.neutral700,
-        size: 24,
-      ),
-      
+      iconTheme: IconThemeData(color: DesignTokens.neutral700, size: 24),
+
       // Progress Indicator Theme
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: DesignTokens.primaryColor,
@@ -164,7 +156,7 @@ class AppTheme {
       brightness: Brightness.dark,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: DesignTokens.surface100,
-      
+
       // Text Theme
       textTheme: TextTheme(
         displayLarge: AppTextStyles.h1(),
@@ -183,7 +175,7 @@ class AppTheme {
         labelMedium: AppTextStyles.bodySmall(),
         labelSmall: AppTextStyles.caption(),
       ),
-      
+
       // Card Theme
       cardTheme: CardThemeData(
         color: DesignTokens.surface200,
@@ -193,7 +185,7 @@ class AppTheme {
         ),
         margin: EdgeInsets.zero,
       ),
-      
+
       // AppBar Theme
       appBarTheme: AppBarTheme(
         backgroundColor: DesignTokens.surface100,
@@ -201,16 +193,13 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
         titleTextStyle: AppTextStyles.h4(),
-        iconTheme: IconThemeData(
-          color: DesignTokens.neutral300,
-          size: 24,
-        ),
+        iconTheme: IconThemeData(color: DesignTokens.neutral300, size: 24),
         actionsIconTheme: IconThemeData(
           color: DesignTokens.neutral300,
           size: 24,
         ),
       ),
-      
+
       // Button Themes
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: AppButtonStyles.primary(),
@@ -218,10 +207,8 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: AppButtonStyles.secondary(),
       ),
-      textButtonTheme: TextButtonThemeData(
-        style: AppButtonStyles.ghost(),
-      ),
-      
+      textButtonTheme: TextButtonThemeData(style: AppButtonStyles.ghost()),
+
       // Input Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -245,7 +232,7 @@ class AppTheme {
         hintStyle: AppTextStyles.bodySmall(),
         labelStyle: AppTextStyles.bodySmall(),
       ),
-      
+
       // SnackBar Theme
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
@@ -256,7 +243,7 @@ class AppTheme {
         ),
         elevation: 8,
       ),
-      
+
       // Dialog Theme
       dialogTheme: DialogThemeData(
         backgroundColor: DesignTokens.surface200,
@@ -268,20 +255,17 @@ class AppTheme {
         contentTextStyle: AppTextStyles.body(),
         elevation: 16,
       ),
-      
+
       // Divider Theme
       dividerTheme: DividerThemeData(
         color: DesignTokens.neutral700.withValues(alpha: 0.3),
         thickness: 1,
         space: 1,
       ),
-      
+
       // Icon Theme
-      iconTheme: IconThemeData(
-        color: DesignTokens.neutral300,
-        size: 24,
-      ),
-      
+      iconTheme: IconThemeData(color: DesignTokens.neutral300, size: 24),
+
       // Progress Indicator Theme
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: DesignTokens.primaryColor,

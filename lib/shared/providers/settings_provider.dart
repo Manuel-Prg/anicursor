@@ -8,8 +8,7 @@ final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError('Debe ser sobreescrito en main()');
 });
 
-final settingsProvider =
-    NotifierProvider<SettingsNotifier, SettingsState>(() {
+final settingsProvider = NotifierProvider<SettingsNotifier, SettingsState>(() {
   return SettingsNotifier();
 });
 
@@ -49,15 +48,15 @@ class Settings {
   });
 
   factory Settings.defaults() => const Settings(
-        cursorSizes: _Defaults.cursorSizes,
-        defaultDelay: _Defaults.defaultDelay,
-        customOutputDir: _Defaults.customOutputDir,
-        systemInstall: _Defaults.systemInstall,
-        autoApplyCursor: _Defaults.autoApplyCursor,
-        primaryColor: _Defaults.primaryColor,
-        themeMode: _Defaults.themeMode,
-        showedOnboarding: false,
-      );
+    cursorSizes: _Defaults.cursorSizes,
+    defaultDelay: _Defaults.defaultDelay,
+    customOutputDir: _Defaults.customOutputDir,
+    systemInstall: _Defaults.systemInstall,
+    autoApplyCursor: _Defaults.autoApplyCursor,
+    primaryColor: _Defaults.primaryColor,
+    themeMode: _Defaults.themeMode,
+    showedOnboarding: false,
+  );
 
   Settings copyWith({
     List<int>? cursorSizes,
@@ -143,18 +142,17 @@ class SettingsNotifier extends Notifier<SettingsState> {
 
   Settings _loadSettings() {
     final sizesStr = _prefs.getStringList(_sizesKey);
-    final sizes =
-        sizesStr != null ? sizesStr.map(int.parse).toList() : [24, 32, 48];
+    final sizes = sizesStr != null
+        ? sizesStr.map(int.parse).toList()
+        : [24, 32, 48];
     final delay = _prefs.getInt(_delayKey) ?? 100;
     final outDir = _prefs.getString(_outDirKey);
     final systemInst = _prefs.getBool(_systemInstallKey) ?? false;
     final autoApply = _prefs.getBool(_autoApplyKey) ?? false;
     final colorVal = _prefs.getInt(_colorKey);
-    final color =
-        colorVal != null ? Color(colorVal) : const Color(0xFFE91E8C);
+    final color = colorVal != null ? Color(colorVal) : const Color(0xFFE91E8C);
     final modeIdx = _prefs.getInt(_themeModeKey);
-    final mode =
-        modeIdx != null ? ThemeMode.values[modeIdx] : ThemeMode.dark;
+    final mode = modeIdx != null ? ThemeMode.values[modeIdx] : ThemeMode.dark;
     final onboarding = _prefs.getBool(_onboardingKey) ?? false;
 
     return Settings(
@@ -173,7 +171,9 @@ class SettingsNotifier extends Notifier<SettingsState> {
 
   Future<void> _persist(Settings s) async {
     await _prefs.setStringList(
-        _sizesKey, s.cursorSizes.map((e) => e.toString()).toList());
+      _sizesKey,
+      s.cursorSizes.map((e) => e.toString()).toList(),
+    );
     await _prefs.setInt(_delayKey, s.defaultDelay);
     if (s.customOutputDir != null) {
       await _prefs.setString(_outDirKey, s.customOutputDir!);
@@ -227,11 +227,11 @@ class SettingsNotifier extends Notifier<SettingsState> {
       _updateCurrent(state.current.copyWith(defaultDelay: delay));
 
   void updateCustomOutputDir(String? dir) => _updateCurrent(
-        state.current.copyWith(
-          customOutputDir: dir,
-          clearCustomOutputDir: dir == null,
-        ),
-      );
+    state.current.copyWith(
+      customOutputDir: dir,
+      clearCustomOutputDir: dir == null,
+    ),
+  );
 
   void updateSystemInstall(bool install) =>
       _updateCurrent(state.current.copyWith(systemInstall: install));

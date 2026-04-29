@@ -102,9 +102,7 @@ class AdvancedTab extends StatelessWidget {
           const SizedBox(width: 40),
 
           // ─── Columna derecha ─ (reservada para futuros ajustes) ──────────
-          const Expanded(
-            child: SizedBox.shrink(),
-          ),
+          const Expanded(child: SizedBox.shrink()),
         ],
       ),
     );

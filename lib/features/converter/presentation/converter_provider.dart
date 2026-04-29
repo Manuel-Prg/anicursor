@@ -18,9 +18,11 @@ final themeExportServiceProvider = Provider<ThemeExportService>((ref) {
   return ThemeExportService();
 });
 
-final cursorThemeProvider = NotifierProvider<CursorThemeNotifier, CursorTheme?>(() {
-  return CursorThemeNotifier();
-});
+final cursorThemeProvider = NotifierProvider<CursorThemeNotifier, CursorTheme?>(
+  () {
+    return CursorThemeNotifier();
+  },
+);
 
 class CursorThemeNotifier extends Notifier<CursorTheme?> {
   @override

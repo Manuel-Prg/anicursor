@@ -10,15 +10,21 @@ final mappingDataSourceProvider = Provider<CursorMappingDataSource>((ref) {
   return CursorMappingDataSource();
 });
 
-final extractionDataSourceProvider = Provider<CursorExtractionDataSource>((ref) {
+final extractionDataSourceProvider = Provider<CursorExtractionDataSource>((
+  ref,
+) {
   return CursorExtractionDataSource();
 });
 
-final generationDataSourceProvider = Provider<CursorGenerationDataSource>((ref) {
+final generationDataSourceProvider = Provider<CursorGenerationDataSource>((
+  ref,
+) {
   return CursorGenerationDataSource();
 });
 
-final installationDataSourceProvider = Provider<ThemeInstallationDataSource>((ref) {
+final installationDataSourceProvider = Provider<ThemeInstallationDataSource>((
+  ref,
+) {
   return ThemeInstallationDataSource();
 });
 

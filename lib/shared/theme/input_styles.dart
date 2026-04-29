@@ -34,24 +34,15 @@ class AppInputStyles {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(borderRadius ?? RadiusTokens.sm),
-        borderSide: BorderSide(
-          color: DesignTokens.primaryColor,
-          width: 2,
-        ),
+        borderSide: BorderSide(color: DesignTokens.primaryColor, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(borderRadius ?? RadiusTokens.sm),
-        borderSide: BorderSide(
-          color: DesignTokens.errorColor,
-          width: 2,
-        ),
+        borderSide: BorderSide(color: DesignTokens.errorColor, width: 2),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(borderRadius ?? RadiusTokens.sm),
-        borderSide: BorderSide(
-          color: DesignTokens.errorColor,
-          width: 2,
-        ),
+        borderSide: BorderSide(color: DesignTokens.errorColor, width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: SpacingTokens.md,
@@ -67,7 +58,7 @@ class AppInputStyles {
       ),
     );
   }
-  
+
   static InputDecoration searchInput({
     String? hintText,
     Widget? prefixIcon,
@@ -76,11 +67,9 @@ class AppInputStyles {
   }) {
     return defaultInput(
       hintText: hintText ?? 'Buscar...',
-      prefixIcon: prefixIcon ?? Icon(
-        Icons.search,
-        color: DesignTokens.neutral500,
-        size: 20,
-      ),
+      prefixIcon:
+          prefixIcon ??
+          Icon(Icons.search, color: DesignTokens.neutral500, size: 20),
       fillColor: fillColor ?? DesignTokens.surface300,
       borderRadius: borderRadius ?? RadiusTokens.xxl,
       borderColor: DesignTokens.neutral700.withValues(alpha: 0.3),

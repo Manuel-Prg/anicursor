@@ -5,7 +5,10 @@ import 'package:ani_to_xcursor/shared/services/logger_service.dart';
 
 class XCursorParser {
   /// Extrae el primer frame de un archivo XCursor y lo convierte a PNG usando ImageMagick
-  static Future<String?> extractFirstFrame(String xcursorPath, String name) async {
+  static Future<String?> extractFirstFrame(
+    String xcursorPath,
+    String name,
+  ) async {
     final file = File(xcursorPath);
     if (!await file.exists()) return null;
 
@@ -13,13 +16,16 @@ class XCursorParser {
     if (bytes.length < 16) return null;
 
     // Verificar magia 'Xcur'
-    if (bytes[0] != 0x58 || bytes[1] != 0x63 || bytes[2] != 0x75 || bytes[3] != 0x72) {
+    if (bytes[0] != 0x58 ||
+        bytes[1] != 0x63 ||
+        bytes[2] != 0x75 ||
+        bytes[3] != 0x72) {
       return null;
     }
 
     final data = ByteData.view(bytes.buffer);
     final ntoc = data.getUint32(12, Endian.little);
-    
+
     int firstImageOffset = -1;
     int width = 0;
     int height = 0;
@@ -36,7 +42,9 @@ class XCursorParser {
       }
     }
 
-    if (firstImageOffset == -1 || firstImageOffset + 36 > bytes.length) return null;
+    if (firstImageOffset == -1 || firstImageOffset + 36 > bytes.length) {
+      return null;
+    }
 
     // Leer cabecera de la imagen
     // El tamaño de la cabecera es usualmente 36
@@ -48,7 +56,7 @@ class XCursorParser {
     if (pixelsOffset + pixelsSize > bytes.length) return null;
 
     final rawPixels = bytes.sublist(pixelsOffset, pixelsOffset + pixelsSize);
-    
+
     // Guardar temporalmente los píxeles raw usando un nombre único
     final uniqueId = DateTime.now().microsecondsSinceEpoch;
     final tempDir = Directory.systemTemp.path;
@@ -57,12 +65,16 @@ class XCursorParser {
 
     await File(rawPath).writeAsBytes(rawPixels);
 
-    await LoggerService.log('XCursor: Convirtiendo raw $width x $height para $name');
+    await LoggerService.log(
+      'XCursor: Convirtiendo raw $width x $height para $name',
+    );
 
     // Convertir raw BGRA a PNG usando ImageMagick
     final result = await Process.run('convert', [
-      '-size', '${width}x$height',
-      '-depth', '8',
+      '-size',
+      '${width}x$height',
+      '-depth',
+      '8',
       'bgra:$rawPath',
       outPath,
     ]);

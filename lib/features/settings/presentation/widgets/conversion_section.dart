@@ -70,9 +70,9 @@ class ConversionSection extends ConsumerWidget {
                 dense: true,
                 title: const Text('Directorio de Salida'),
                 subtitle: Text(
-                  settings.customOutputDir != null 
-                    ? p.basename(settings.customOutputDir!)
-                    : 'Carpeta de entrada (automático)',
+                  settings.customOutputDir != null
+                      ? p.basename(settings.customOutputDir!)
+                      : 'Carpeta de entrada (automático)',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

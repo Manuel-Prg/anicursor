@@ -176,12 +176,15 @@ class CursorExtractionDataSource {
   /// Extrae solo el primer frame para vista previa rápida
   Future<String?> extractPreview(String fileOrAniPath, String name) async {
     final tempDir = Directory.systemTemp.path;
-    final previewPath = p.join(tempDir, 'anicursor_preview_${name}_${DateTime.now().millisecondsSinceEpoch}.png');
-    
+    final previewPath = p.join(
+      tempDir,
+      'anicursor_preview_${name}_${DateTime.now().millisecondsSinceEpoch}.png',
+    );
+
     // [0] le dice a ImageMagick que solo extraiga el primer frame
     final result = await Process.run('convert', [
-      '$fileOrAniPath[0]', 
-      'PNG32:$previewPath'
+      '$fileOrAniPath[0]',
+      'PNG32:$previewPath',
     ]);
 
     if (result.exitCode == 0 && await File(previewPath).exists()) {

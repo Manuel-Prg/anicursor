@@ -61,17 +61,17 @@ class GeneralTab extends ConsumerWidget {
                       (
                         value: ThemeMode.system,
                         icon: Icons.computer,
-                        label: 'Sistema'
+                        label: 'Sistema',
                       ),
                       (
                         value: ThemeMode.light,
                         icon: Icons.light_mode_outlined,
-                        label: 'Claro'
+                        label: 'Claro',
                       ),
                       (
                         value: ThemeMode.dark,
                         icon: Icons.dark_mode_outlined,
-                        label: 'Oscuro'
+                        label: 'Oscuro',
                       ),
                     ],
                     onChanged: notifier.updateThemeMode,
@@ -99,10 +99,9 @@ class GeneralTab extends ConsumerWidget {
                         '${settings.defaultDelay} ms',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.5),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                       const SizedBox(height: 4),

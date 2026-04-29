@@ -161,8 +161,9 @@ class FlatSegmentedRow<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
-    final surface =
-        theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4);
+    final surface = theme.colorScheme.surfaceContainerHighest.withValues(
+      alpha: 0.4,
+    );
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -199,8 +200,9 @@ class FlatSegmentedRow<T> extends StatelessWidget {
                     item.label,
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                       color: isSelected
                           ? primary
                           : theme.colorScheme.onSurface.withValues(alpha: 0.6),

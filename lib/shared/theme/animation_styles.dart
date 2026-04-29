@@ -16,7 +16,7 @@ class AppAnimationStyles {
       child: child,
     );
   }
-  
+
   static Widget fadeAnimation({
     required Widget child,
     Duration duration = AnimationTokens.normal,
@@ -31,7 +31,7 @@ class AppAnimationStyles {
       child: child,
     );
   }
-  
+
   static Widget slideAnimation({
     required Widget child,
     Offset begin = const Offset(0, 0.2),

@@ -36,9 +36,7 @@ class InstallationSection extends ConsumerWidget {
               SwitchListTile(
                 dense: true,
                 title: const Text('Auto-Aplicar Cursor'),
-                subtitle: const Text(
-                  'Forzar inmediatamente vía gsettings',
-                ),
+                subtitle: const Text('Forzar inmediatamente vía gsettings'),
                 value: settings.autoApplyCursor,
                 onChanged: notifier.updateAutoApply,
               ),

@@ -71,7 +71,9 @@ class _InstalledThemesPageState extends ConsumerState<InstalledThemesPage> {
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                   side: BorderSide(
-                    color: themeData.colorScheme.onSurface.withValues(alpha: 0.05),
+                    color: themeData.colorScheme.onSurface.withValues(
+                      alpha: 0.05,
+                    ),
                   ),
                 ),
               ),

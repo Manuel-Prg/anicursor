@@ -46,10 +46,7 @@ class ConverterPage extends ConsumerWidget {
           // Header / Summary Section
           _HeaderSection(cursorTheme: cursorTheme),
 
-          Divider(
-            height: 1,
-            color: Theme.of(context).dividerColor,
-          ),
+          Divider(height: 1, color: Theme.of(context).dividerColor),
 
           // Grid of Cursors
           Expanded(child: _CursorGrid(cursors: cursorTheme.cursors)),
@@ -73,12 +70,7 @@ class _HeaderSection extends StatelessWidget {
       padding: const EdgeInsets.all(SpacingTokens.lg),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: theme.dividerColor,
-            width: 1,
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: theme.dividerColor, width: 1)),
       ),
       child: Column(
         children: [
@@ -197,9 +189,7 @@ class _StatusBadge extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             label,
-            style: AppTextStyles.caption(
-              color: color.withValues(alpha: 0.8),
-            ),
+            style: AppTextStyles.caption(color: color.withValues(alpha: 0.8)),
           ),
         ],
       ),
@@ -337,7 +327,7 @@ class _CursorPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Prioridad: framesData[0] (ya convertido) > previewPath (pre-extracción)
     String? imagePath;
     if (cursor.framesData.isNotEmpty) {
@@ -565,7 +555,9 @@ class _ThemeNameEditorState extends ConsumerState<_ThemeNameEditor> {
 
   void _save() {
     if (_controller.text.trim().isNotEmpty) {
-      ref.read(cursorThemeProvider.notifier).updateThemeName(_controller.text.trim());
+      ref
+          .read(cursorThemeProvider.notifier)
+          .updateThemeName(_controller.text.trim());
     }
     setState(() => _isEditing = false);
   }
@@ -593,7 +585,10 @@ class _ThemeNameEditorState extends ConsumerState<_ThemeNameEditor> {
                   color: primaryColor,
                 ),
                 decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   isDense: true,
                   filled: true,
                   fillColor: primaryColor.withValues(alpha: 0.1),
@@ -603,7 +598,9 @@ class _ThemeNameEditorState extends ConsumerState<_ThemeNameEditor> {
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: primaryColor.withValues(alpha: 0.5)),
+                    borderSide: BorderSide(
+                      color: primaryColor.withValues(alpha: 0.5),
+                    ),
                   ),
                   hintText: 'Nombre del tema...',
                   suffixIcon: IconButton(
@@ -632,12 +629,13 @@ class _ThemeNameEditorState extends ConsumerState<_ThemeNameEditor> {
                 hoverColor: primaryColor.withValues(alpha: 0.08),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 10,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Colors.transparent,
-                    ),
+                    border: Border.all(color: Colors.transparent),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

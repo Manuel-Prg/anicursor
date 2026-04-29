@@ -21,13 +21,15 @@ class AppButtonStyles {
       shape: RoundedRectangleBorder(
         borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.sm),
       ),
-      textStyle: textStyle ?? const TextStyle(
-        fontSize: TypographyTokens.sm,
-        fontWeight: TypographyTokens.medium,
-      ),
+      textStyle:
+          textStyle ??
+          const TextStyle(
+            fontSize: TypographyTokens.sm,
+            fontWeight: TypographyTokens.medium,
+          ),
     );
   }
-  
+
   static ButtonStyle secondary({
     Color? backgroundColor,
     Color? foregroundColor,
@@ -51,13 +53,15 @@ class AppButtonStyles {
       shape: RoundedRectangleBorder(
         borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.sm),
       ),
-      textStyle: textStyle ?? const TextStyle(
-        fontSize: TypographyTokens.sm,
-        fontWeight: TypographyTokens.medium,
-      ),
+      textStyle:
+          textStyle ??
+          const TextStyle(
+            fontSize: TypographyTokens.sm,
+            fontWeight: TypographyTokens.medium,
+          ),
     );
   }
-  
+
   static ButtonStyle ghost({
     Color? foregroundColor,
     double? padding,
@@ -76,17 +80,16 @@ class AppButtonStyles {
       shape: RoundedRectangleBorder(
         borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.sm),
       ),
-      textStyle: textStyle ?? const TextStyle(
-        fontSize: TypographyTokens.sm,
-        fontWeight: TypographyTokens.medium,
-      ),
+      textStyle:
+          textStyle ??
+          const TextStyle(
+            fontSize: TypographyTokens.sm,
+            fontWeight: TypographyTokens.medium,
+          ),
     );
   }
-  
-  static ButtonStyle success({
-    double? padding,
-    BorderRadius? borderRadius,
-  }) {
+
+  static ButtonStyle success({double? padding, BorderRadius? borderRadius}) {
     return primary(
       backgroundColor: DesignTokens.successColor,
       foregroundColor: Colors.white,
@@ -94,11 +97,8 @@ class AppButtonStyles {
       borderRadius: borderRadius,
     );
   }
-  
-  static ButtonStyle danger({
-    double? padding,
-    BorderRadius? borderRadius,
-  }) {
+
+  static ButtonStyle danger({double? padding, BorderRadius? borderRadius}) {
     return primary(
       backgroundColor: DesignTokens.errorColor,
       foregroundColor: Colors.white,

@@ -127,7 +127,7 @@ class InstalledThemesScanner {
     // 2. Intentar extraer del cursor 'left_ptr' o 'default'
     final cursorsDir = p.join(themePath, 'cursors');
     final possibleCursors = ['left_ptr', 'default', 'arrow', 'pointer'];
-    
+
     File? cursorFile;
     for (final c in possibleCursors) {
       final f = File(p.join(cursorsDir, c));
@@ -141,7 +141,10 @@ class InstalledThemesScanner {
     if (cursorFile == null) {
       final dir = Directory(cursorsDir);
       if (await dir.exists()) {
-        final first = await dir.list().firstWhere((e) => e is File, orElse: () => File(''));
+        final first = await dir.list().firstWhere(
+          (e) => e is File,
+          orElse: () => File(''),
+        );
         if (await (first as File).exists()) {
           cursorFile = first;
         }

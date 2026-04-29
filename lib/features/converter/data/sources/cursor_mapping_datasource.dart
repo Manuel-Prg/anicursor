@@ -84,16 +84,25 @@ class CursorMappingDataSource {
     final files = dir.listSync().whereType<File>().toList();
 
     // 1. Intentar parsear archivo .inf para mapeo exacto
-    LoggerService.log('Escaneando directorio: $dirPath', severity: LogSeverity.debug);
+    LoggerService.log(
+      'Escaneando directorio: $dirPath',
+      severity: LogSeverity.debug,
+    );
     Map<String, String> infMapping = {};
     for (final file in files) {
       if (p.extension(file.path).toLowerCase() == '.inf') {
         try {
-          LoggerService.log('Encontrado archivo INF: ${file.path}', severity: LogSeverity.debug);
+          LoggerService.log(
+            'Encontrado archivo INF: ${file.path}',
+            severity: LogSeverity.debug,
+          );
           infMapping = _parseInfFile(file.path);
           break;
         } catch (e) {
-          LoggerService.log('Error al parsear INF: $e', severity: LogSeverity.warning);
+          LoggerService.log(
+            'Error al parsear INF: $e',
+            severity: LogSeverity.warning,
+          );
         }
       }
     }

@@ -74,7 +74,9 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                 colors: _hovering
                     ? [
                         colorScheme.surfaceContainerHigh,
-                        colorScheme.surfaceContainerHighest.withValues(alpha: 0.8),
+                        colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.8,
+                        ),
                       ]
                     : [
                         colorScheme.surfaceContainerLow.withValues(alpha: 0.8),
@@ -117,7 +119,9 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                             border: Border.all(
                               color: _hovering
                                   ? colorScheme.primary.withValues(alpha: 0.4)
-                                  : colorScheme.onSurface.withValues(alpha: 0.1),
+                                  : colorScheme.onSurface.withValues(
+                                      alpha: 0.1,
+                                    ),
                               width: 1,
                             ),
                           ),
@@ -139,7 +143,7 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                                         color: _hovering
                                             ? colorScheme.primary
                                             : colorScheme.onSurfaceVariant
-                                                .withValues(alpha: 0.4),
+                                                  .withValues(alpha: 0.4),
                                       ),
                                     )
                                   : Icon(
@@ -148,7 +152,7 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                                       color: _hovering
                                           ? colorScheme.primary
                                           : colorScheme.onSurfaceVariant
-                                              .withValues(alpha: 0.4),
+                                                .withValues(alpha: 0.4),
                                     ),
                             ),
                           ),
@@ -161,7 +165,9 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: colorScheme.onSurface.withValues(alpha: 0.05),
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.05,
+                              ),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -235,8 +241,9 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                                       ),
                                       backgroundColor: _hovering
                                           ? colorScheme.primary
-                                          : colorScheme.primary
-                                              .withValues(alpha: 0.1),
+                                          : colorScheme.primary.withValues(
+                                              alpha: 0.1,
+                                            ),
                                       foregroundColor: _hovering
                                           ? colorScheme.onPrimary
                                           : colorScheme.primary,
@@ -269,8 +276,9 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                                       size: 18,
                                     ),
                                     style: IconButton.styleFrom(
-                                      backgroundColor:
-                                          Colors.red.withValues(alpha: 0.1),
+                                      backgroundColor: Colors.red.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       foregroundColor: Colors.red.shade400,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),

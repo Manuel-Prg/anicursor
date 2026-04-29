@@ -73,7 +73,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     if (confirmed == true && mounted) {
       await ref.read(settingsProvider.notifier).resetToDefaults();
       if (mounted) {
-        SnackBarUtils.show(context, 'Configuración restaurada a valores por defecto.');
+        SnackBarUtils.show(
+          context,
+          'Configuración restaurada a valores por defecto.',
+        );
       }
     }
   }
@@ -137,8 +140,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     icon: const Icon(Icons.arrow_back, size: 20),
                     onPressed: () => context.pop(),
                     style: IconButton.styleFrom(
-                      foregroundColor:
-                          colorScheme.onSurface.withValues(alpha: 0.6),
+                      foregroundColor: colorScheme.onSurface.withValues(
+                        alpha: 0.6,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -154,7 +158,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     const SizedBox(width: 10),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: colorScheme.primary.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(20),
@@ -198,8 +204,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       style: FilledButton.styleFrom(
                         backgroundColor: colorScheme.primary,
                         foregroundColor: colorScheme.onPrimary,
-                        disabledBackgroundColor:
-                            colorScheme.primary.withValues(alpha: 0.5),
+                        disabledBackgroundColor: colorScheme.primary.withValues(
+                          alpha: 0.5,
+                        ),
                         disabledForegroundColor: colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,

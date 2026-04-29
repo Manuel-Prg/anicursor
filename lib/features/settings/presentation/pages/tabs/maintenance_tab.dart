@@ -161,8 +161,9 @@ class MaintenanceTab extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest
-                    .withValues(alpha: 0.4),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.4,
+                ),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: SelectableText(
@@ -181,8 +182,11 @@ class MaintenanceTab extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.lightbulb_outline,
-                      color: Colors.blueAccent, size: 15),
+                  const Icon(
+                    Icons.lightbulb_outline,
+                    color: Colors.blueAccent,
+                    size: 15,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(

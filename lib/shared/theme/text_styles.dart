@@ -10,7 +10,7 @@ class AppTextStyles {
       height: TypographyTokens.tight,
     );
   }
-  
+
   static TextStyle h2({Color? color, FontWeight? fontWeight}) {
     return TextStyle(
       fontSize: TypographyTokens.xxxl,
@@ -19,7 +19,7 @@ class AppTextStyles {
       height: TypographyTokens.tight,
     );
   }
-  
+
   static TextStyle h3({Color? color, FontWeight? fontWeight}) {
     return TextStyle(
       fontSize: TypographyTokens.xxl,
@@ -28,7 +28,7 @@ class AppTextStyles {
       height: TypographyTokens.tight,
     );
   }
-  
+
   static TextStyle h4({Color? color, FontWeight? fontWeight}) {
     return TextStyle(
       fontSize: TypographyTokens.xl,
@@ -37,7 +37,7 @@ class AppTextStyles {
       height: TypographyTokens.tight,
     );
   }
-  
+
   static TextStyle bodyLarge({Color? color, FontWeight? fontWeight}) {
     return TextStyle(
       fontSize: TypographyTokens.lg,
@@ -46,7 +46,7 @@ class AppTextStyles {
       height: TypographyTokens.lineHeightNormal,
     );
   }
-  
+
   static TextStyle body({Color? color, FontWeight? fontWeight}) {
     return TextStyle(
       fontSize: TypographyTokens.base,
@@ -55,7 +55,7 @@ class AppTextStyles {
       height: TypographyTokens.lineHeightNormal,
     );
   }
-  
+
   static TextStyle bodySmall({Color? color, FontWeight? fontWeight}) {
     return TextStyle(
       fontSize: TypographyTokens.sm,
@@ -64,7 +64,7 @@ class AppTextStyles {
       height: TypographyTokens.lineHeightNormal,
     );
   }
-  
+
   static TextStyle caption({Color? color, FontWeight? fontWeight}) {
     return TextStyle(
       fontSize: TypographyTokens.xs,
@@ -73,7 +73,7 @@ class AppTextStyles {
       height: TypographyTokens.lineHeightNormal,
     );
   }
-  
+
   static TextStyle primary({Color? color, FontWeight? fontWeight}) {
     return TextStyle(
       fontSize: TypographyTokens.base,
@@ -82,7 +82,7 @@ class AppTextStyles {
       height: TypographyTokens.lineHeightNormal,
     );
   }
-  
+
   static TextStyle success({Color? color, FontWeight? fontWeight}) {
     return TextStyle(
       fontSize: TypographyTokens.base,
@@ -91,7 +91,7 @@ class AppTextStyles {
       height: TypographyTokens.lineHeightNormal,
     );
   }
-  
+
   static TextStyle warning({Color? color, FontWeight? fontWeight}) {
     return TextStyle(
       fontSize: TypographyTokens.base,
@@ -100,7 +100,7 @@ class AppTextStyles {
       height: TypographyTokens.lineHeightNormal,
     );
   }
-  
+
   static TextStyle error({Color? color, FontWeight? fontWeight}) {
     return TextStyle(
       fontSize: TypographyTokens.base,

@@ -18,7 +18,7 @@ class AppCardStyles {
       boxShadow: boxShadow ?? ShadowTokens.sm,
     );
   }
-  
+
   static BoxDecoration elevatedCard({
     Color? backgroundColor,
     Color? borderColor,
@@ -35,7 +35,7 @@ class AppCardStyles {
       boxShadow: boxShadow ?? ShadowTokens.md,
     );
   }
-  
+
   static BoxDecoration interactiveCard({
     Color? backgroundColor,
     Color? borderColor,

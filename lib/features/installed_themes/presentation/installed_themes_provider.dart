@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ani_to_xcursor/features/installed_themes/data/sources/installed_themes_scanner.dart';
 import 'package:ani_to_xcursor/features/installed_themes/domain/models/installed_theme.dart';
-import 'package:ani_to_xcursor/features/converter/presentation/converter_provider.dart';
 import 'package:ani_to_xcursor/features/converter/presentation/datasources_provider.dart';
 import 'package:ani_to_xcursor/shared/services/logger_service.dart';
 
