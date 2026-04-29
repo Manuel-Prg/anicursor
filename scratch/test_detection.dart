@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
 class _CursorRole {
@@ -113,7 +114,9 @@ class MockScanner {
   }
 
   void scan(String dirPath) {
-    print('Testing directory: $dirPath');
+    if (kDebugMode) {
+      print('Testing directory: $dirPath');
+    }
     final dir = Directory(dirPath);
     final files = dir.listSync().whereType<File>().toList();
 
@@ -123,9 +126,13 @@ class MockScanner {
         (f) => p.extension(f.path).toLowerCase() == '.inf',
       );
       infMapping = _parseInfFile(infFile.path);
-      print('Found INF file: ${p.basename(infFile.path)}');
+      if (kDebugMode) {
+        print('Found INF file: ${p.basename(infFile.path)}');
+      }
     } catch (_) {
-      print('No INF file found.');
+      if (kDebugMode) {
+        print('No INF file found.');
+      }
     }
 
     for (final file in files) {
@@ -146,7 +153,9 @@ class MockScanner {
           );
           if (config.linuxName.isNotEmpty) {
             matchedLinuxName = config.linuxName;
-            print(' [INF] $name -> $matchedLinuxName');
+            if (kDebugMode) {
+              print(' [INF] $name -> $matchedLinuxName');
+            }
             break;
           }
         }
@@ -164,14 +173,18 @@ class MockScanner {
           }
           if (matched) {
             matchedLinuxName = config.linuxName;
-            print(' [FUZZY] $name -> $matchedLinuxName');
+            if (kDebugMode) {
+              print(' [FUZZY] $name -> $matchedLinuxName');
+            }
             break;
           }
         }
       }
 
       if (matchedLinuxName == null) {
-        print(' [NONE] $name');
+        if (kDebugMode) {
+          print(' [NONE] $name');
+        }
       }
     }
   }
@@ -180,6 +193,8 @@ class MockScanner {
 void main() {
   final scanner = MockScanner();
   scanner.scan('/home/manuelprz/Documentos/cursores/niko_cursor');
-  print('\n---\n');
+  if (kDebugMode) {
+    print('\n---\n');
+  }
   scanner.scan('/home/manuelprz/Documentos/cursores/Roxy_Cursor');
 }
