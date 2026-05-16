@@ -42,6 +42,13 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
       icon: Icons.layers_outlined,
       color: Colors.orangeAccent,
     ),
+    OnboardingStep(
+      title: 'Dependencias del Sistema',
+      description:
+          'Asegúrate de tener instaladas estas herramientas para que todo funcione correctamente.',
+      icon: Icons.build_rounded,
+      color: Colors.greenAccent,
+    ),
   ];
 
   @override
@@ -63,34 +70,106 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
                 itemCount: _steps.length,
                 itemBuilder: (context, index) {
                   final step = _steps[index];
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          color: step.color.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
+                  return SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(32),
+                          decoration: BoxDecoration(
+                            color: step.color.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(step.icon, size: 80, color: step.color),
                         ),
-                        child: Icon(step.icon, size: 80, color: step.color),
-                      ),
-                      const SizedBox(height: 48),
-                      Text(
-                        step.title,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+                        const SizedBox(height: 32),
+                        Text(
+                          step.title,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        step.description,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: Colors.white60,
-                        ),
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        if (index == 3) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              step.description,
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: Colors.white60,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.black87,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '# ImageMagick (extraer frames)',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontFamily: 'monospace',
+                                    color: Colors.green.shade300,
+                                    height: 1.6,
+                                  ),
+                                ),
+                                Text(
+                                  '# xcursorgen (generar cursores)',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontFamily: 'monospace',
+                                    color: Colors.green.shade300,
+                                    height: 1.6,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  r'sudo apt install imagemagick x11-apps',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontFamily: 'monospace',
+                                    color: Colors.amber.shade200,
+                                    height: 1.6,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              'En Arch Linux / Fedora el paquete xcursorgen puede variar (xorg-xcursorgen).',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.white38,
+                              ),
+                            ),
+                          ),
+                        ] else ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              step.description,
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: Colors.white60,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   );
                 },
               ),
