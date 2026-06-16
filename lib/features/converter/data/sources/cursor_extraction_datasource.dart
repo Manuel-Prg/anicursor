@@ -130,21 +130,39 @@ class CursorExtractionDataSource {
 
     // Parsear header CUR básica
     // Offset 6: Width, 7: Height, 10: HotspotX, 12: HotspotY
-    if (data.length < 14) {
+    int width = 32;
+    int height = 32;
+    int hX = 0;
+    int hY = 0;
+
+    try {
+      if (data.length < 14) {
+        throw FormatException('Datos de frame insuficientes (${data.length} bytes)');
+      }
+
+      width = data[6];
+      height = data[7];
+      if (width == 0) width = 256;
+      if (height == 0) height = 256;
+
+      hX = data[10] | (data[11] << 8);
+      hY = data[12] | (data[13] << 8);
+
+      // Validación lógica de hotspots razonables
+      if (hX < 0 || hX > 256 || hY < 0 || hY > 256) {
+        await LoggerService.log(
+          'Advertencia: Hotspot detectado fuera de límites normales ($hX, $hY) para $name. Usando fallback (0, 0)',
+          severity: LogSeverity.warning,
+        );
+        hX = 0;
+        hY = 0;
+      }
+    } catch (e) {
       await LoggerService.log(
-        'Error: Datos de frame insuficientes (${data.length} bytes)',
-        severity: LogSeverity.error,
+        'Error al parsear cabecera del frame $frameNum de $name: $e. Usando valores por defecto.',
+        severity: LogSeverity.warning,
       );
-      return null;
     }
-
-    int width = data[6];
-    int height = data[7];
-    if (width == 0) width = 256;
-    if (height == 0) height = 256;
-
-    final hX = data[10] | (data[11] << 8);
-    final hY = data[12] | (data[13] << 8);
 
     final result = await Process.run('convert', [curPath, 'PNG32:$pngPath']);
 

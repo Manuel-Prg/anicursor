@@ -15,12 +15,15 @@ class SystemAudioService {
       final tempFile = File(p.join(cacheDir.path, p.basename(assetPath)));
       await tempFile.writeAsBytes(byteData.buffer.asUint8List());
 
-      await Process.run('gst-launch-1.0', [
+      final process = await Process.start('gst-launch-1.0', [
         'playbin',
         'uri=file://${tempFile.path}',
         'video-sink=fakesink',
         'audio-sink=autoaudiosink',
       ]);
+      // Drenar las salidas para evitar bloqueos del proceso
+      process.stdout.drain();
+      process.stderr.drain();
 
       await LoggerService.log(
         'Sonido sistema ejecutado: $assetPath',

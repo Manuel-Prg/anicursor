@@ -71,8 +71,12 @@ Example=left_ptr
     } else {
       // Instalación local
       try {
-        if (await Directory(dest).exists() || await Link(dest).exists()) {
-          await Process.run('rm', ['-rf', dest]);
+        final dir = Directory(dest);
+        final link = Link(dest);
+        if (await dir.exists()) {
+          await dir.delete(recursive: true);
+        } else if (await link.exists()) {
+          await link.delete();
         }
         await Directory(dest).create(recursive: true);
 

@@ -26,128 +26,142 @@ class ConvertThemeUsecase {
     );
     yield current;
 
-    for (int i = 0; i < current.cursors.length; i++) {
-      final cursor = current.cursors[i];
+    try {
+      for (int i = 0; i < current.cursors.length; i++) {
+        final cursor = current.cursors[i];
 
-      if (cursor.status == ConversionStatus.error) continue;
+        if (cursor.status == ConversionStatus.error) continue;
 
-      // Marcar como convirtiendo
-      final updatedCursors = List<CursorFile>.from(current.cursors);
-      updatedCursors[i] = cursor.copyWith(status: ConversionStatus.converting);
+        // Marcar como convirtiendo
+        final updatedCursors = List<CursorFile>.from(current.cursors);
+        updatedCursors[i] = cursor.copyWith(status: ConversionStatus.converting);
 
-      final cursorProgress = (i / current.cursors.length);
-      final overall = 0.05 + (cursorProgress * 0.85); // 5% to 90%
+        final cursorProgress = (i / current.cursors.length);
+        final overall = 0.05 + (cursorProgress * 0.85); // 5% to 90%
 
-      current = current.copyWith(
-        cursors: updatedCursors,
-        progress: ((i / current.cursors.length) * 100).round(),
-        overallProgress: overall,
-        statusMessage: "Procesando ${cursor.windowsName}...",
-      );
-      yield current;
-
-      try {
-        // Extraer frames
-        final frames = await _repository.extractFrames(
-          cursor.aniPath,
-          framesDir,
-          StringUtils.sanitizeFilename(cursor.windowsName),
-          settings.defaultDelay,
+        current = current.copyWith(
+          cursors: updatedCursors,
+          progress: ((i / current.cursors.length) * 100).round(),
+          overallProgress: overall,
+          statusMessage: "Procesando ${cursor.windowsName}...",
         );
+        yield current;
 
-        if (frames.isEmpty) {
-          updatedCursors[i] = cursor.copyWith(
-            status: ConversionStatus.error,
-            errorMessage: 'No se pudieron extraer frames del archivo.',
-          );
-        } else {
-          // Generar cursor
-          final outputPath = p.join(cursorsDir, cursor.linuxName);
-          final success = await _repository.generateCursor(
-            frames,
-            outputPath,
-            settings.cursorSizes,
+        try {
+          // Extraer frames
+          final frames = await _repository.extractFrames(
+            cursor.aniPath,
+            framesDir,
+            StringUtils.sanitizeFilename(cursor.windowsName),
+            settings.defaultDelay,
           );
 
-          // Crear aliases
-          if (success && cursor.aliases.isNotEmpty) {
-            await _repository.createAliases(
-              cursorsDir,
-              cursor.linuxName,
-              cursor.aliases,
+          if (frames.isEmpty) {
+            updatedCursors[i] = cursor.copyWith(
+              status: ConversionStatus.error,
+              errorMessage: 'No se pudieron extraer frames del archivo.',
+            );
+          } else {
+            // Generar cursor
+            final outputPath = p.join(cursorsDir, cursor.linuxName);
+            final success = await _repository.generateCursor(
+              frames,
+              outputPath,
+              settings.cursorSizes,
+            );
+
+            // Crear aliases
+            if (success && cursor.aliases.isNotEmpty) {
+              await _repository.createAliases(
+                cursorsDir,
+                cursor.linuxName,
+                cursor.aliases,
+              );
+            }
+
+            updatedCursors[i] = cursor.copyWith(
+              status: success ? ConversionStatus.done : ConversionStatus.error,
+              framesData: frames,
+              errorMessage: success
+                  ? null
+                  : 'Error en la generación del cursor (xcursorgen).',
             );
           }
-
+        } catch (e, stack) {
+          await LoggerService.log(
+            'Error crítico detectado en conversion de ${cursor.windowsName}: $e',
+            severity: LogSeverity.error,
+          );
+          await LoggerService.log(stack.toString(), severity: LogSeverity.debug);
           updatedCursors[i] = cursor.copyWith(
-            status: success ? ConversionStatus.done : ConversionStatus.error,
-            framesData: frames,
-            errorMessage: success
-                ? null
-                : 'Error en la generación del cursor (xcursorgen).',
+            status: ConversionStatus.error,
+            errorMessage: e.toString(),
           );
         }
-      } catch (e, stack) {
-        await LoggerService.log(
-          'Error crítico detectado en conversion de ${cursor.windowsName}: $e',
-          severity: LogSeverity.error,
+
+        current = current.copyWith(
+          cursors: updatedCursors,
+          progress: (((i + 1) / current.cursors.length) * 100).round(),
+          overallProgress: 0.05 + (((i + 1) / current.cursors.length) * 0.85),
         );
-        await LoggerService.log(stack.toString(), severity: LogSeverity.debug);
-        updatedCursors[i] = cursor.copyWith(
-          status: ConversionStatus.error,
-          errorMessage: e.toString(),
-        );
+        yield current;
       }
 
-      current = current.copyWith(
-        cursors: updatedCursors,
-        progress: (((i + 1) / current.cursors.length) * 100).round(),
-        overallProgress: 0.05 + (((i + 1) / current.cursors.length) * 0.85),
-      );
-      yield current;
-    }
-
-    try {
-      current = current.copyWith(
-        statusMessage: "Generando metadatos (index.theme)...",
-        overallProgress: 0.95,
-      );
-      yield current;
-
-      // Crear archivo cursor.theme
-      await _repository.createThemeFile(theme.outputDir, theme.name);
-
-      // Guardar vista previa para el gestor
       try {
-        final leftPtr = current.cursors.firstWhere(
-          (c) => c.linuxName == 'left_ptr',
-          orElse: () => current.cursors.first,
+        current = current.copyWith(
+          statusMessage: "Generando metadatos (index.theme)...",
+          overallProgress: 0.95,
         );
-        if (leftPtr.framesData.isNotEmpty) {
-          final firstFrame = leftPtr.framesData.first.imagePath;
-          await File(firstFrame).copy(p.join(theme.outputDir, 'preview.png'));
-        }
-      } catch (_) {}
+        yield current;
 
-      current = current.copyWith(
-        status: current.errors > 0 ? ThemeStatus.error : ThemeStatus.done,
-        progress: 100,
-        overallProgress: 1.0,
-        statusMessage: current.errors > 0
-            ? "Conversión finalizada con algunos errores"
-            : "¡Conversión completada con éxito!",
-      );
-    } catch (e) {
-      await LoggerService.log(
-        'Error al finalizar el tema: $e',
-        severity: LogSeverity.error,
-      );
-      current = current.copyWith(
-        status: ThemeStatus.error,
-        progress: 100,
-        overallProgress: 1.0,
-        statusMessage: "Error al generar archivos finales",
-      );
+        // Crear archivo cursor.theme
+        await _repository.createThemeFile(theme.outputDir, theme.name);
+
+        // Guardar vista previa para el gestor
+        try {
+          final leftPtr = current.cursors.firstWhere(
+            (c) => c.linuxName == 'left_ptr',
+            orElse: () => current.cursors.first,
+          );
+          if (leftPtr.framesData.isNotEmpty) {
+            final firstFrame = leftPtr.framesData.first.imagePath;
+            await File(firstFrame).copy(p.join(theme.outputDir, 'preview.png'));
+          }
+        } catch (_) {}
+
+        current = current.copyWith(
+          status: current.errors > 0 ? ThemeStatus.error : ThemeStatus.done,
+          progress: 100,
+          overallProgress: 1.0,
+          statusMessage: current.errors > 0
+              ? "Conversión finalizada con algunos errores"
+              : "¡Conversión completada con éxito!",
+        );
+      } catch (e) {
+        await LoggerService.log(
+          'Error al finalizar el tema: $e',
+          severity: LogSeverity.error,
+        );
+        current = current.copyWith(
+          status: ThemeStatus.error,
+          progress: 100,
+          overallProgress: 1.0,
+          statusMessage: "Error al generar archivos finales",
+        );
+      }
+      yield current;
+    } finally {
+      try {
+        final dir = Directory(framesDir);
+        if (await dir.exists()) {
+          await dir.delete(recursive: true);
+        }
+      } catch (e) {
+        await LoggerService.log(
+          'Error limpiando directorio temporal de frames: $e',
+          severity: LogSeverity.warning,
+        );
+      }
     }
-    yield current;
   }
 }

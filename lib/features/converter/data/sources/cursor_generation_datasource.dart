@@ -63,8 +63,11 @@ class CursorGenerationDataSource {
 
     // Borrar el destino si ya existe (podría ser un symlink de un alias previo)
     final output = File(outputPath);
-    if (await output.exists() || await Link(outputPath).exists()) {
-      await Process.run('rm', ['-f', outputPath]);
+    final link = Link(outputPath);
+    if (await output.exists()) {
+      await output.delete();
+    } else if (await link.exists()) {
+      await link.delete();
     }
 
     final result = await Process.run(
@@ -143,8 +146,11 @@ class CursorGenerationDataSource {
         final link = Link(linkPath);
 
         // Si ya existe algo ahí, lo borramos para poder crear el link
-        if (await File(linkPath).exists() || await Link(linkPath).exists()) {
-          await Process.run('rm', ['-f', linkPath]);
+        final file = File(linkPath);
+        if (await file.exists()) {
+          await file.delete();
+        } else if (await link.exists()) {
+          await link.delete();
         }
 
         await LoggerService.log('Creando alias: $alias -> $linuxName');
