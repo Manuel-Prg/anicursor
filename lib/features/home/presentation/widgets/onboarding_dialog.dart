@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ani_to_xcursor/shared/providers/dependency_provider.dart';
 
 class OnboardingDialog extends StatefulWidget {
   const OnboardingDialog({super.key});
@@ -104,46 +105,55 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.black87,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '# ImageMagick (extraer frames)',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontFamily: 'monospace',
-                                    color: Colors.green.shade300,
-                                    height: 1.6,
-                                  ),
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final depsState = ref.watch(dependencyProvider);
+                              final displayCmd = depsState.packageManager != PackageManager.unknown
+                                  ? depsState.packageManager.displayCommand
+                                  : 'sudo apt install imagemagick x11-apps';
+
+                              return Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.black87,
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                Text(
-                                  '# xcursorgen (generar cursores)',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontFamily: 'monospace',
-                                    color: Colors.green.shade300,
-                                    height: 1.6,
-                                  ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '# ImageMagick (extraer frames)',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontFamily: 'monospace',
+                                        color: Colors.green.shade300,
+                                        height: 1.6,
+                                      ),
+                                    ),
+                                    Text(
+                                      '# xcursorgen (generar cursores)',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontFamily: 'monospace',
+                                        color: Colors.green.shade300,
+                                        height: 1.6,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      displayCmd,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontFamily: 'monospace',
+                                        color: Colors.amber.shade200,
+                                        height: 1.6,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  r'sudo apt install imagemagick x11-apps',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontFamily: 'monospace',
-                                    color: Colors.amber.shade200,
-                                    height: 1.6,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 12),
                           Padding(

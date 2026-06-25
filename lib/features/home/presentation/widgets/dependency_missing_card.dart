@@ -59,18 +59,26 @@ class DependencyMissingCard extends StatelessWidget {
             else
               Consumer(
                 builder: (context, ref, _) {
+                  final pmName = deps.packageManager.name;
+                  final label = deps.packageManager == PackageManager.unknown
+                      ? 'Instalar automáticamente (No soportado)'
+                      : 'Instalar automáticamente ($pmName)';
+                  final canInstall = deps.packageManager != PackageManager.unknown;
+
                   return FilledButton.icon(
                     style: AppButtonStyles.danger(
                       padding: SpacingTokens.lg,
                       borderRadius: BorderRadius.circular(RadiusTokens.md),
                     ),
-                    onPressed: () async {
-                      await ref
-                          .read(dependencyProvider.notifier)
-                          .installDependencies();
-                    },
+                    onPressed: canInstall
+                        ? () async {
+                            await ref
+                                .read(dependencyProvider.notifier)
+                                .installDependencies();
+                          }
+                        : null,
                     icon: const Icon(Icons.download),
-                    label: const Text('Instalar automáticamente (Apt)'),
+                    label: Text(label),
                   );
                 },
               ),
