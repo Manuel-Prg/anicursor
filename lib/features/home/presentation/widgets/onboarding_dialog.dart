@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ani_to_xcursor/shared/providers/dependency_provider.dart';
 
@@ -108,8 +109,8 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
                           Consumer(
                             builder: (context, ref, _) {
                               final depsState = ref.watch(dependencyProvider);
-                              final displayCmd = depsState.packageManager != PackageManager.unknown
-                                  ? depsState.packageManager.displayCommand
+                              final displayCmd = depsState.recommendedCommand.isNotEmpty
+                                  ? depsState.recommendedCommand
                                   : 'sudo apt install imagemagick x11-apps';
 
                               return Container(
@@ -123,7 +124,16 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '# ImageMagick (extraer frames)',
+                                      '# Sistema detectado: ${depsState.distroName}',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontFamily: 'monospace',
+                                        color: Colors.blue.shade300,
+                                        height: 1.6,
+                                      ),
+                                    ),
+                                    Text(
+                                      '# ImageMagick + xcursorgen',
                                       style: TextStyle(
                                         fontSize: 13,
                                         fontFamily: 'monospace',
@@ -131,24 +141,39 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
                                         height: 1.6,
                                       ),
                                     ),
-                                    Text(
-                                      '# xcursorgen (generar cursores)',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontFamily: 'monospace',
-                                        color: Colors.green.shade300,
-                                        height: 1.6,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      displayCmd,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontFamily: 'monospace',
-                                        color: Colors.amber.shade200,
-                                        height: 1.6,
-                                      ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            displayCmd,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontFamily: 'monospace',
+                                              color: Colors.amber.shade200,
+                                              height: 1.6,
+                                            ),
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.copy, size: 16),
+                                          color: Colors.white54,
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          onPressed: () {
+                                            Clipboard.setData(
+                                              ClipboardData(text: displayCmd),
+                                            );
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text('Comando copiado al portapapeles'),
+                                                duration: Duration(seconds: 2),
+                                              ),
+                                            );
+                                          },
+                                          tooltip: 'Copiar comando',
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -159,7 +184,7 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Text(
-                              'En Arch Linux / Fedora el paquete xcursorgen puede variar (xorg-xcursorgen).',
+                              'En algunas distribuciones el nombre de los paquetes de dependencias puede variar.',
                               textAlign: TextAlign.center,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: Colors.white38,

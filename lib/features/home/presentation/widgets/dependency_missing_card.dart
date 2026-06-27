@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ani_to_xcursor/shared/theme/design_system.dart';
 import 'package:ani_to_xcursor/shared/theme/components.dart';
@@ -11,6 +12,8 @@ class DependencyMissingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return AppAnimationStyles.fadeAnimation(
       child: Container(
         width: 450,
@@ -48,6 +51,80 @@ class DependencyMissingCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: AppTextStyles.body(
                 color: DesignTokens.errorColor.withValues(alpha: 0.8),
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.md),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: SpacingTokens.md,
+                vertical: SpacingTokens.sm,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.05),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Distro: ${deps.distroName}',
+                        style: AppTextStyles.bodySmall(
+                          color: Colors.white.withValues(alpha: 0.6),
+                        ).copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        'Recomendado',
+                        style: AppTextStyles.bodySmall(
+                          color: DesignTokens.warningColor.withValues(alpha: 0.8),
+                        ).copyWith(fontSize: 10),
+                      ),
+                    ],
+                  ),
+                  const Divider(color: Colors.white10, height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          deps.recommendedCommand.isNotEmpty
+                              ? deps.recommendedCommand
+                              : 'Instalación manual requerida',
+                          style: TextStyle(
+                            fontFamily: TypographyTokens.mono,
+                            fontSize: TypographyTokens.xs,
+                            color: Colors.amber.shade200,
+                          ),
+                        ),
+                      ),
+                      if (deps.recommendedCommand.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(Icons.copy, size: 16),
+                          color: Colors.white.withValues(alpha: 0.6),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () {
+                            Clipboard.setData(
+                              ClipboardData(text: deps.recommendedCommand),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Comando copiado al portapapeles'),
+                                backgroundColor: theme.colorScheme.primary,
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          tooltip: 'Copiar comando',
+                        ),
+                    ],
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: SpacingTokens.lg),
