@@ -34,6 +34,7 @@ rm -rf $APPDIR
 mkdir -p $APPDIR/usr/bin
 mkdir -p $APPDIR/usr/share/applications
 mkdir -p $APPDIR/usr/share/icons/hicolor/256x256/apps
+mkdir -p $APPDIR/usr/share/icons/hicolor/scalable/apps
 
 # Copiar el build the flutter completo
 cp -r "$BUNDLE_DIR/"* "$APPDIR/usr/bin/"
@@ -60,18 +61,22 @@ export LD_LIBRARY_PATH="\${HERE}/usr/bin/lib:\${LD_LIBRARY_PATH}"
 # Auto integration para Wayland/GNOME
 mkdir -p "\$HOME/.local/share/applications"
 mkdir -p "\$HOME/.local/share/icons/hicolor/scalable/apps"
+mkdir -p "\$HOME/.local/share/icons/hicolor/256x256/apps"
 cp -f "\$HERE/com.manuelprz.anicursor.desktop" "\$HOME/.local/share/applications/" 2>/dev/null
 cp -f "\$HERE/anicursor.svg" "\$HOME/.local/share/icons/hicolor/scalable/apps/" 2>/dev/null
+cp -f "\$HERE/anicursor.png" "\$HOME/.local/share/icons/hicolor/256x256/apps/" 2>/dev/null
 update-desktop-database "\$HOME/.local/share/applications" 2>/dev/null || true
 
 exec "\${HERE}/usr/bin/anicursor" "\\\$@"
 EOF
 chmod +x $APPDIR/AppRun
 
-# Copiar el SVG como icono principal
-# Nota: AppImage necesita un PNG o SVG de fallback en la raiz 
+# Copiar el PNG y SVG como iconos principales
+# Nota: AppImage necesita un PNG de fallback en la raiz para .DirIcon
+cp "$ROOT_DIR/assets/icons/anicursor.png" "$APPDIR/anicursor.png"
 cp "$ROOT_DIR/assets/ani_xcursor_logo_v3.svg" "$APPDIR/anicursor.svg"
-cp "$ROOT_DIR/assets/ani_xcursor_logo_v3.svg" "$APPDIR/usr/share/icons/hicolor/256x256/apps/anicursor.svg"
+cp "$ROOT_DIR/assets/icons/anicursor.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/anicursor.png"
+cp "$ROOT_DIR/assets/ani_xcursor_logo_v3.svg" "$APPDIR/usr/share/icons/hicolor/scalable/apps/anicursor.svg"
 
 echo "🚀 Empaquetando finalmente a .AppImage..."
 rm -f AniCursor-x86_64.AppImage
