@@ -1,7 +1,7 @@
 # AniCursor 🐁✨
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/16530704-59f7-4b9f-bb55-6ccd825cf46e" width="800"/>
+  <img width="720" height="454" alt="video_1" src="https://github.com/user-attachments/assets/81f2de29-085a-4aac-b3fc-cc3df372c956" />
 </p>
 
 **AniCursor** es una aplicación de escritorio para Linux que te permite convertir fácilmente cursores animados de Windows (`.ani` / `.cur`) al formato nativo de Linux (`XCursor`) en segundos.
@@ -13,7 +13,7 @@ Arrastra tu carpeta de cursores, conviértelos automáticamente y aplícalos a t
 ## ⚡ Demo rápido
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/e80e50b9-990d-4259-944a-7379e66bcd11" width="800"/>
+  <img width="720" height="435" alt="video_2" src="https://github.com/user-attachments/assets/46c12a3d-d35a-4623-83d3-30f8a716096b" />
 </p>
 
 1. Arrastra una carpeta con cursores `.ani`
@@ -51,16 +51,16 @@ Todo en una interfaz moderna y simple.
 ## 🖼️ Capturas
 
 ### Interfaz principal
-<img src="https://github.com/user-attachments/assets/06a985be-e6cc-4304-8571-b88c4423e2bf" width="800"/>
+<img width="1920" height="1080" alt="inicio" src="https://github.com/user-attachments/assets/f92eddc9-8fec-468b-82c7-a0f252b8a479" />
 
 ### Vista previa animada
 <img src="https://github.com/user-attachments/assets/e0692b3b-96ec-481f-8a6b-47e70ba4e131" width="800"/>
 
 ### Proceso de conversión
-<img src="https://github.com/user-attachments/assets/007e777e-a0aa-4dec-8a8c-0616b6a12e6d" width="800"/>
+<img width="1920" height="1080" alt="conversor" src="https://github.com/user-attachments/assets/17baac7e-4649-4efc-b1e2-5f6b77e81472" />
 
 ### Cursores instalados
-<img src="https://github.com/user-attachments/assets/1a60354f-6f89-46be-8fce-c03e1e5a9f33" width="800"/>
+<img width="1920" height="1080" alt="visualizador" src="https://github.com/user-attachments/assets/ea197a00-a63e-4265-bab6-fb3a46bac418" />
 
 ---
 
