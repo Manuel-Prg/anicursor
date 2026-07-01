@@ -151,17 +151,8 @@ class ConvertThemeUsecase {
       }
       yield current;
     } finally {
-      try {
-        final dir = Directory(framesDir);
-        if (await dir.exists()) {
-          await dir.delete(recursive: true);
-        }
-      } catch (e) {
-        await LoggerService.log(
-          'Error limpiando directorio temporal de frames: $e',
-          severity: LogSeverity.warning,
-        );
-      }
+      // Se conservan los frames para la vista previa en la UI.
+      // Serán eliminados al reiniciar/resetear el estado en CursorThemeNotifier.
     }
   }
 }

@@ -294,12 +294,18 @@ class _AnimatedCursorState extends State<_AnimatedCursor> {
   @override
   void initState() {
     super.initState();
-    _precacheFrames();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _precacheFrames();
+      }
+    });
     _startAnimation();
   }
 
   Future<void> _precacheFrames() async {
+    if (!mounted) return;
     for (final frame in widget.cursor.framesData) {
+      if (!mounted) return;
       precacheImage(FileImage(File(frame.imagePath)), context);
     }
   }

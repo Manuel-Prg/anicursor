@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:ani_to_xcursor/features/converter/domain/models/cursor_theme.dart';
@@ -26,9 +27,32 @@ final cursorThemeProvider = NotifierProvider<CursorThemeNotifier, CursorTheme?>(
 
 class CursorThemeNotifier extends Notifier<CursorTheme?> {
   @override
-  CursorTheme? build() => null;
+  CursorTheme? build() {
+    ref.onDispose(() {
+      _cleanupFrames();
+    });
+    return null;
+  }
+
+  void _cleanupFrames() {
+    if (state != null) {
+      final framesDir = p.join(state!.outputDir, 'frames');
+      try {
+        final dir = Directory(framesDir);
+        if (dir.existsSync()) {
+          dir.deleteSync(recursive: true);
+        }
+      } catch (e) {
+        LoggerService.log(
+          'Error limpiando directorio de frames temporales: $e',
+          severity: LogSeverity.warning,
+        );
+      }
+    }
+  }
 
   Future<void> scanDirectory(String dirPath) async {
+    _cleanupFrames();
     final repo = ref.read(converterRepositoryProvider);
     final settings = ref.read(settingsProvider).current;
     final cursors = repo.scanDirectory(dirPath);
@@ -117,5 +141,8 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
     await exportService.exportTarGz(state!.name, state!.outputDir);
   }
 
-  void reset() => state = null;
+  void reset() {
+    _cleanupFrames();
+    state = null;
+  }
 }
