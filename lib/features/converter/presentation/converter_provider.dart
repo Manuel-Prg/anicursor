@@ -56,14 +56,15 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
     final repo = ref.read(converterRepositoryProvider);
     final settings = ref.read(settingsProvider).current;
     final cursors = repo.scanDirectory(dirPath);
-    final themeName = dirPath.split('/').last;
+    final rawThemeName = dirPath.split('/').last;
+    final themeName = StringUtils.sanitizeFilename(rawThemeName).toLowerCase();
 
     state = CursorTheme(
       name: themeName,
       inputDir: dirPath,
       outputDir: settings.customOutputDir != null
-          ? p.join(settings.customOutputDir!, '$themeName-Linux')
-          : p.join(dirPath, '..', '$themeName-Linux'),
+          ? p.join(settings.customOutputDir!, '$themeName-linux')
+          : p.join(dirPath, '..', '$themeName-linux'),
       cursors: cursors,
     );
 
@@ -89,7 +90,14 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
 
   void updateThemeName(String name) {
     if (state == null) return;
-    state = state!.copyWith(name: name);
+    final settings = ref.read(settingsProvider).current;
+    final themeName = StringUtils.sanitizeFilename(name).toLowerCase();
+    state = state!.copyWith(
+      name: themeName,
+      outputDir: settings.customOutputDir != null
+          ? p.join(settings.customOutputDir!, '$themeName-linux')
+          : p.join(state!.inputDir, '..', '$themeName-linux'),
+    );
   }
 
   Future<void> convert() async {

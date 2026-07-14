@@ -133,35 +133,41 @@ Example=left_ptr
           success = res2.exitCode == 0;
         }
       } else if (de == DesktopEnvironment.kde) {
-        // En KDE a veces hay que probar con kwriteconfig5 o 6
-        final writeConfigCmd = await _getKdeWriteConfigCmd();
-        final res1 = await Process.run(writeConfigCmd, [
-          '--file',
-          'kcminputrc',
-          '--group',
-          'Mouse',
-          '--key',
-          'cursorTheme',
-          themeName,
-        ]);
-        success = res1.exitCode == 0;
+        // Intentar usar el comando oficial plasma-apply-cursortheme
+        final resApply = await Process.run('plasma-apply-cursortheme', [themeName]);
+        success = resApply.exitCode == 0;
 
-        // Intentar recargar KWin para que tome el cambio (Wayland/X11)
-        await Process.run('dbus-send', [
-          '--type=method_call',
-          '--dest=org.kde.KWin',
-          '/KWin',
-          'org.kde.KWin.reconfigure',
-        ]);
+        if (!success) {
+          // En KDE a veces hay que probar con kwriteconfig5 o 6 (Fallback)
+          final writeConfigCmd = await _getKdeWriteConfigCmd();
+          final res1 = await Process.run(writeConfigCmd, [
+            '--file',
+            'kcminputrc',
+            '--group',
+            'Mouse',
+            '--key',
+            'cursorTheme',
+            themeName,
+          ]);
+          success = res1.exitCode == 0;
 
-        // Fallback para Plasma 5/6 si el anterior no tiene efecto inmediato en aplicaciones GTK
-        await Process.run('dbus-send', [
-          '--type=method_call',
-          '--dest=org.kde.GtkConfig',
-          '/GtkConfig',
-          'org.kde.GtkConfig.setCursorTheme',
-          'string:$themeName',
-        ]);
+          // Intentar recargar KWin para que tome el cambio (Wayland/X11)
+          await Process.run('dbus-send', [
+            '--type=method_call',
+            '--dest=org.kde.KWin',
+            '/KWin',
+            'org.kde.KWin.reconfigure',
+          ]);
+
+          // Fallback para Plasma 5/6 si el anterior no tiene efecto inmediato en aplicaciones GTK
+          await Process.run('dbus-send', [
+            '--type=method_call',
+            '--dest=org.kde.GtkConfig',
+            '/GtkConfig',
+            'org.kde.GtkConfig.setCursorTheme',
+            'string:$themeName',
+          ]);
+        }
       } else if (de == DesktopEnvironment.xfce) {
         final res1 = await Process.run('xfconf-query', [
           '-c',
@@ -186,6 +192,13 @@ Example=left_ptr
         await LoggerService.log(
           'Tema aplicado con éxito en $de (o mediante comandos directos)',
         );
+
+        if (de == DesktopEnvironment.kde ||
+            de == DesktopEnvironment.gnome ||
+            de == DesktopEnvironment.cinnamon) {
+          await _writeXWaylandDefaultTheme(themeName);
+          await _updateGtkSettings(themeName);
+        }
       } else {
         await LoggerService.log(
           'Fallo al auto-aplicar en $de tras intentar fallbacks',
@@ -199,6 +212,91 @@ Example=left_ptr
       );
     }
     return success;
+  }
+
+  Future<void> _writeXWaylandDefaultTheme(String themeName) async {
+    final home = Platform.environment['HOME'];
+    if (home == null) return;
+
+    final path = p.join(home, '.icons', 'default', 'index.theme');
+    try {
+      final file = File(path);
+      await file.create(recursive: true);
+      await file.writeAsString('[Icon Theme]\nInherits=$themeName\n');
+      await LoggerService.log(
+        'Escrito ~/.icons/default/index.theme para XWayland ($themeName)',
+      );
+    } catch (e) {
+      await LoggerService.log(
+        'Error escribiendo ~/.icons/default/index.theme: $e',
+        severity: LogSeverity.warning,
+      );
+    }
+  }
+
+  Future<void> _updateGtkSettings(String themeName) async {
+    final home = Platform.environment['HOME'];
+    if (home == null) return;
+
+    final paths = [
+      p.join(home, '.config', 'gtk-3.0', 'settings.ini'),
+      p.join(home, '.config', 'gtk-4.0', 'settings.ini'),
+    ];
+
+    for (final path in paths) {
+      try {
+        final file = File(path);
+        if (!await file.exists()) {
+          await file.create(recursive: true);
+          await file.writeAsString(
+            '[Settings]\ngtk-cursor-theme-name=$themeName\n',
+          );
+          await LoggerService.log(
+            'Creado nuevo archivo de configuración GTK en $path ($themeName)',
+          );
+          continue;
+        }
+
+        final lines = await file.readAsLines();
+        bool foundSettings = false;
+        bool updated = false;
+
+        for (int i = 0; i < lines.length; i++) {
+          final line = lines[i].trim();
+          if (line == '[Settings]') {
+            foundSettings = true;
+          }
+          if (line.startsWith('gtk-cursor-theme-name=')) {
+            lines[i] = 'gtk-cursor-theme-name=$themeName';
+            updated = true;
+            break;
+          }
+        }
+
+        if (!updated) {
+          if (foundSettings) {
+            final index = lines.indexOf('[Settings]');
+            lines.insert(index + 1, 'gtk-cursor-theme-name=$themeName');
+          } else {
+            if (lines.isNotEmpty && lines.last.isNotEmpty) {
+              lines.add('');
+            }
+            lines.add('[Settings]');
+            lines.add('gtk-cursor-theme-name=$themeName');
+          }
+        }
+
+        await file.writeAsString('${lines.join('\n')}\n');
+        await LoggerService.log(
+          'Actualizado archivo de configuración GTK en $path ($themeName)',
+        );
+      } catch (e) {
+        await LoggerService.log(
+          'Error actualizando configuración GTK en $path: $e',
+          severity: LogSeverity.warning,
+        );
+      }
+    }
   }
 
   Future<String> _getKdeWriteConfigCmd() async {
