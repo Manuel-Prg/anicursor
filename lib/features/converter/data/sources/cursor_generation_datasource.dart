@@ -42,11 +42,11 @@ class CursorGenerationDataSource {
           return false;
         }
 
-        // Escalar hotspots proporcionalmente
+        // Escalar hotspots proporcionalmente y limitar al rango válido [0, size - 1]
         final scaleX = size / frame.width;
         final scaleY = size / frame.height;
-        final hX = (frame.hotspotX * scaleX).round();
-        final hY = (frame.hotspotY * scaleY).round();
+        final hX = (frame.hotspotX * scaleX).round().clamp(0, size - 1);
+        final hY = (frame.hotspotY * scaleY).round().clamp(0, size - 1);
 
         // Usar SOLO el basename → xcursorgen lo resolverá relativo al .conf
         conf.writeln('$size $hX $hY $resizedName ${frame.delay}');

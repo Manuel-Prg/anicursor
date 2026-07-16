@@ -8,6 +8,7 @@ import 'package:ani_to_xcursor/features/converter/presentation/converter_provide
 import 'package:ani_to_xcursor/features/converter/presentation/datasources_provider.dart';
 import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 import 'package:ani_to_xcursor/shared/utils/snackbar_utils.dart';
+import 'package:ani_to_xcursor/shared/utils/dialog_utils.dart';
 import 'package:ani_to_xcursor/shared/theme/design_system.dart';
 import 'package:ani_to_xcursor/shared/theme/components.dart';
 
@@ -512,9 +513,24 @@ class _ActionButtons extends ConsumerWidget {
       if (result != 'replace') return;
     }
 
-    await notifier.install();
+    final success = await notifier.install();
     if (context.mounted) {
-      SnackBarUtils.show(context, 'Tema instalado correctamente');
+      if (success) {
+        if (settings.autoApplyCursor) {
+          DialogUtils.showSessionRestartDialog(
+            context,
+            themeName: cursorThemeState.name,
+          );
+        } else {
+          SnackBarUtils.show(context, 'Tema instalado correctamente');
+        }
+      } else {
+        SnackBarUtils.show(
+          context,
+          'Fallo al instalar el tema',
+          isError: true,
+        );
+      }
     }
   }
 }

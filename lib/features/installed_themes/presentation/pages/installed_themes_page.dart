@@ -4,6 +4,7 @@ import 'package:ani_to_xcursor/features/installed_themes/domain/models/installed
 import 'package:ani_to_xcursor/features/installed_themes/presentation/installed_themes_provider.dart';
 import 'package:ani_to_xcursor/features/home/presentation/widgets/animated_theme_card.dart';
 import 'package:ani_to_xcursor/shared/utils/snackbar_utils.dart';
+import 'package:ani_to_xcursor/shared/utils/dialog_utils.dart';
 
 class InstalledThemesPage extends ConsumerStatefulWidget {
   const InstalledThemesPage({super.key});
@@ -153,13 +154,18 @@ class _InstalledThemesPageState extends ConsumerState<InstalledThemesPage> {
         .read(installedThemesProvider.notifier)
         .apply(theme);
     if (context.mounted) {
-      SnackBarUtils.show(
-        context,
-        success
-            ? 'Tema ${theme.displayName} aplicado con éxito'
-            : 'Fallo al aplicar el tema',
-        isError: !success,
-      );
+      if (success) {
+        DialogUtils.showSessionRestartDialog(
+          context,
+          themeName: theme.displayName ?? theme.name,
+        );
+      } else {
+        SnackBarUtils.show(
+          context,
+          'Fallo al aplicar el tema',
+          isError: true,
+        );
+      }
     }
   }
 

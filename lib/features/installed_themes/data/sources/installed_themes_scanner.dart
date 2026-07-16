@@ -184,6 +184,29 @@ class InstalledThemesScanner {
       final dir = Directory(path);
       if (await dir.exists()) {
         await dir.delete(recursive: true);
+
+        // Si el tema estaba en ~/.local/share/icons o ~/.icons, también lo borramos del otro directorio
+        final home = Platform.environment['HOME'];
+        if (home != null) {
+          final themeName = p.basename(path);
+          final localIconsPath = p.join(home, '.local', 'share', 'icons', themeName);
+          final legacyIconsPath = p.join(home, '.icons', themeName);
+
+          if (path == localIconsPath) {
+            final legacyDir = Directory(legacyIconsPath);
+            if (await legacyDir.exists()) {
+              await legacyDir.delete(recursive: true);
+              await LoggerService.log('También eliminado tema duplicado/heredado en $legacyIconsPath');
+            }
+          } else if (path == legacyIconsPath) {
+            final localDir = Directory(localIconsPath);
+            if (await localDir.exists()) {
+              await localDir.delete(recursive: true);
+              await LoggerService.log('También eliminado tema duplicado/heredado en $localIconsPath');
+            }
+          }
+        }
+
         return true;
       }
     } catch (e) {

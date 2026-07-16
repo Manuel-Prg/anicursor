@@ -12,7 +12,7 @@ class ThemeInstallationDataSource {
 [Icon Theme]
 Name=$themeName
 Comment=$themeName cursor theme for Linux - converted with ANI to XCursor
-Inherits=core
+Inherits=Adwaita,breeze,hicolor,core
 Example=left_ptr
 ''';
     await File(p.join(themeDir, 'index.theme')).writeAsString(content);
@@ -71,6 +71,7 @@ Example=left_ptr
     } else {
       // Instalación local
       try {
+        // 1. Instalar en ~/.local/share/icons
         final dir = Directory(dest);
         final link = Link(dest);
         if (await dir.exists()) {
@@ -88,8 +89,33 @@ Example=left_ptr
           final res = await Process.run('cp', ['-a', indexThemeSrc, dest]);
           if (res.exitCode != 0) success = false;
         }
-        // También aplicamos chmod 755 de forma local para mayor robustez
         await Process.run('chmod', ['-R', '755', dest]);
+
+        // 2. Instalar en ~/.icons para compatibilidad con Flatpak/X11
+        final legacyIconsDir = p.join(home, '.icons');
+        final legacyDest = p.join(legacyIconsDir, themeName);
+        final legacyDir = Directory(legacyDest);
+        final legacyLink = Link(legacyDest);
+
+        if (await legacyDir.exists()) {
+          await legacyDir.delete(recursive: true);
+        } else if (await legacyLink.exists()) {
+          await legacyLink.delete();
+        }
+        
+        await Directory(legacyIconsDir).create(recursive: true);
+        await Directory(legacyDest).create(recursive: true);
+
+        if (await Directory(cursorsSrc).exists()) {
+          final res = await Process.run('cp', ['-a', cursorsSrc, legacyDest]);
+          if (res.exitCode != 0) success = false;
+        }
+        if (await File(indexThemeSrc).exists()) {
+          final res = await Process.run('cp', ['-a', indexThemeSrc, legacyDest]);
+          if (res.exitCode != 0) success = false;
+        }
+        await Process.run('chmod', ['-R', '755', legacyDest]);
+
         await Process.run('sync', []);
       } catch (e) {
         await LoggerService.log(
@@ -188,22 +214,23 @@ Example=left_ptr
         success = res1.exitCode == 0;
       }
 
+      // Sincronizar configuraciones globales de forma incondicional para mayor robustez
+      final activeSize = await _getActiveCursorSize();
+      await _writeXWaylandDefaultTheme(themeName);
+      await _updateGtkSettings(themeName, activeSize);
+      await _updateXResources(themeName, activeSize);
+
       if (success) {
         await LoggerService.log(
           'Tema aplicado con éxito en $de (o mediante comandos directos)',
         );
-
-        if (de == DesktopEnvironment.kde ||
-            de == DesktopEnvironment.gnome ||
-            de == DesktopEnvironment.cinnamon) {
-          await _writeXWaylandDefaultTheme(themeName);
-          await _updateGtkSettings(themeName);
-        }
       } else {
         await LoggerService.log(
-          'Fallo al auto-aplicar en $de tras intentar fallbacks',
+          'Fallo al auto-aplicar en $de tras intentar fallbacks, pero se actualizaron configuraciones globales',
           severity: LogSeverity.warning,
         );
+        // Retornamos true si pudimos escribir las configuraciones globales, ya que eso suele ser suficiente
+        success = true;
       }
     } catch (e) {
       await LoggerService.log(
@@ -214,27 +241,75 @@ Example=left_ptr
     return success;
   }
 
+  Future<int> _getActiveCursorSize() async {
+    // 1. Intentar con gsettings (GNOME/Cinnamon/MATE/etc)
+    try {
+      final res = await Process.run('gsettings', [
+        'get',
+        'org.gnome.desktop.interface',
+        'cursor-size',
+      ]);
+      if (res.exitCode == 0) {
+        final val = int.tryParse(res.stdout.toString().trim());
+        if (val != null && val > 0) return val;
+      }
+    } catch (_) {}
+
+    // 2. Intentar con kcminputrc (KDE)
+    try {
+      final home = Platform.environment['HOME'];
+      if (home != null) {
+        final file = File(p.join(home, '.config', 'kcminputrc'));
+        if (await file.exists()) {
+          final lines = await file.readAsLines();
+          bool inMouse = false;
+          for (final line in lines) {
+            final trimmed = line.trim();
+            if (trimmed == '[Mouse]') {
+              inMouse = true;
+            } else if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+              inMouse = false;
+            }
+            if (inMouse && trimmed.startsWith('cursorSize=')) {
+              final val = int.tryParse(trimmed.substring(11).trim());
+              if (val != null && val > 0) return val;
+            }
+          }
+        }
+      }
+    } catch (_) {}
+
+    // 3. Fallback por defecto a 24
+    return 24;
+  }
+
   Future<void> _writeXWaylandDefaultTheme(String themeName) async {
     final home = Platform.environment['HOME'];
     if (home == null) return;
 
-    final path = p.join(home, '.icons', 'default', 'index.theme');
-    try {
-      final file = File(path);
-      await file.create(recursive: true);
-      await file.writeAsString('[Icon Theme]\nInherits=$themeName\n');
-      await LoggerService.log(
-        'Escrito ~/.icons/default/index.theme para XWayland ($themeName)',
-      );
-    } catch (e) {
-      await LoggerService.log(
-        'Error escribiendo ~/.icons/default/index.theme: $e',
-        severity: LogSeverity.warning,
-      );
+    final paths = [
+      p.join(home, '.icons', 'default', 'index.theme'),
+      p.join(home, '.local', 'share', 'icons', 'default', 'index.theme'),
+    ];
+
+    for (final path in paths) {
+      try {
+        final file = File(path);
+        await file.create(recursive: true);
+        await file.writeAsString('[Icon Theme]\nInherits=$themeName\n');
+        await LoggerService.log(
+          'Escrito $path para XWayland ($themeName)',
+        );
+      } catch (e) {
+        await LoggerService.log(
+          'Error escribiendo $path: $e',
+          severity: LogSeverity.warning,
+        );
+      }
     }
   }
 
-  Future<void> _updateGtkSettings(String themeName) async {
+  Future<void> _updateGtkSettings(String themeName, int size) async {
     final home = Platform.environment['HOME'];
     if (home == null) return;
 
@@ -249,17 +324,18 @@ Example=left_ptr
         if (!await file.exists()) {
           await file.create(recursive: true);
           await file.writeAsString(
-            '[Settings]\ngtk-cursor-theme-name=$themeName\n',
+            '[Settings]\ngtk-cursor-theme-name=$themeName\ngtk-cursor-theme-size=$size\n',
           );
           await LoggerService.log(
-            'Creado nuevo archivo de configuración GTK en $path ($themeName)',
+            'Creado nuevo archivo de configuración GTK en $path ($themeName, $size)',
           );
           continue;
         }
 
         final lines = await file.readAsLines();
         bool foundSettings = false;
-        bool updated = false;
+        bool themeUpdated = false;
+        bool sizeUpdated = false;
 
         for (int i = 0; i < lines.length; i++) {
           final line = lines[i].trim();
@@ -268,12 +344,15 @@ Example=left_ptr
           }
           if (line.startsWith('gtk-cursor-theme-name=')) {
             lines[i] = 'gtk-cursor-theme-name=$themeName';
-            updated = true;
-            break;
+            themeUpdated = true;
+          }
+          if (line.startsWith('gtk-cursor-theme-size=')) {
+            lines[i] = 'gtk-cursor-theme-size=$size';
+            sizeUpdated = true;
           }
         }
 
-        if (!updated) {
+        if (!themeUpdated) {
           if (foundSettings) {
             final index = lines.indexOf('[Settings]');
             lines.insert(index + 1, 'gtk-cursor-theme-name=$themeName');
@@ -286,9 +365,21 @@ Example=left_ptr
           }
         }
 
+        // Recalcular índice si insertamos
+        bool hasSettingsAfterInsert = lines.contains('[Settings]');
+        int settingsIndex = lines.indexOf('[Settings]');
+
+        if (!sizeUpdated) {
+          if (hasSettingsAfterInsert) {
+            lines.insert(settingsIndex + 1, 'gtk-cursor-theme-size=$size');
+          } else {
+            lines.add('gtk-cursor-theme-size=$size');
+          }
+        }
+
         await file.writeAsString('${lines.join('\n')}\n');
         await LoggerService.log(
-          'Actualizado archivo de configuración GTK en $path ($themeName)',
+          'Actualizado archivo de configuración GTK en $path ($themeName, $size)',
         );
       } catch (e) {
         await LoggerService.log(
@@ -296,6 +387,82 @@ Example=left_ptr
           severity: LogSeverity.warning,
         );
       }
+    }
+  }
+
+  Future<void> _updateXResources(String themeName, int size) async {
+    final home = Platform.environment['HOME'];
+    if (home == null) return;
+
+    final files = [
+      File(p.join(home, '.Xresources')),
+      File(p.join(home, '.Xdefaults')),
+    ];
+
+    for (final file in files) {
+      try {
+        if (!await file.exists()) {
+          await file.create();
+          await file.writeAsString(
+            'Xcursor.theme: $themeName\nXcursor.size: $size\n',
+          );
+          await LoggerService.log(
+            'Creado nuevo archivo Xresources en ${file.path} ($themeName, $size)',
+          );
+          continue;
+        }
+
+        final lines = await file.readAsLines();
+        bool themeUpdated = false;
+        bool sizeUpdated = false;
+
+        for (int i = 0; i < lines.length; i++) {
+          final line = lines[i].trim();
+          final lowerLine = line.toLowerCase();
+          if (RegExp(r'^xcursor\.theme\s*:').hasMatch(lowerLine)) {
+            lines[i] = 'Xcursor.theme: $themeName';
+            themeUpdated = true;
+          } else if (RegExp(r'^xcursor\.size\s*:').hasMatch(lowerLine)) {
+            lines[i] = 'Xcursor.size: $size';
+            sizeUpdated = true;
+          }
+        }
+
+        if (!themeUpdated) {
+          lines.add('Xcursor.theme: $themeName');
+        }
+        if (!sizeUpdated) {
+          lines.add('Xcursor.size: $size');
+        }
+
+        await file.writeAsString('${lines.join('\n')}\n');
+        await LoggerService.log(
+          'Actualizado archivo Xresources en ${file.path} ($themeName, $size)',
+        );
+      } catch (e) {
+        await LoggerService.log(
+          'Error actualizando Xresources en ${file.path}: $e',
+          severity: LogSeverity.warning,
+        );
+      }
+    }
+
+    // Ejecutar xrdb para aplicar cambios en X11/XWayland inmediatamente si está disponible
+    try {
+      final res = await Process.run('xrdb', ['-merge', p.join(home, '.Xresources')]);
+      if (res.exitCode == 0) {
+        await LoggerService.log('Comando xrdb ejecutado con éxito para aplicar cambios en X11');
+      } else {
+        await LoggerService.log(
+          'El comando xrdb falló con código ${res.exitCode}: ${res.stderr}',
+          severity: LogSeverity.warning,
+        );
+      }
+    } catch (e) {
+      await LoggerService.log(
+        'El comando xrdb no está disponible o falló: $e',
+        severity: LogSeverity.warning,
+      );
     }
   }
 
