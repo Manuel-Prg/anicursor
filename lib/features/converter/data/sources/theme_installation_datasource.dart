@@ -33,8 +33,9 @@ Example=left_ptr
   Future<bool> installTheme(
     String themeDir,
     String themeName,
-    Settings settings,
-  ) async {
+    Settings settings, {
+    SettingsNotifier? settingsNotifier,
+  }) async {
     await LoggerService.log('Iniciando instalación del tema: $themeName');
     final home = Platform.environment['HOME']!;
     final iconsDir = settings.systemInstall
@@ -127,15 +128,112 @@ Example=left_ptr
     }
 
     if (success && settings.autoApplyCursor) {
-      await applyTheme(themeName);
+      await applyTheme(themeName, settingsNotifier: settingsNotifier);
     }
 
     return success;
   }
 
-  Future<bool> applyTheme(String themeName) async {
+  Future<String?> getActiveSystemThemeName() async {
+    final de = SystemInfoService.desktopEnvironment;
+    try {
+      if (de == DesktopEnvironment.gnome || de == DesktopEnvironment.cinnamon) {
+        final res = await Process.run('gsettings', [
+          'get',
+          'org.gnome.desktop.interface',
+          'cursor-theme',
+        ]);
+        if (res.exitCode == 0) {
+          var val = res.stdout.toString().trim();
+          if (val.startsWith("'") && val.endsWith("'")) {
+            val = val.substring(1, val.length - 1);
+          }
+          if (val.isNotEmpty) return val;
+        }
+      } else if (de == DesktopEnvironment.kde) {
+        final home = Platform.environment['HOME'];
+        if (home != null) {
+          final file = File(p.join(home, '.config', 'kcminputrc'));
+          if (await file.exists()) {
+            final lines = await file.readAsLines();
+            bool inMouse = false;
+            for (final line in lines) {
+              final trimmed = line.trim();
+              if (trimmed == '[Mouse]') {
+                inMouse = true;
+              } else if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+                inMouse = false;
+              }
+              if (inMouse && trimmed.startsWith('cursorTheme=')) {
+                final val = trimmed.substring(12).trim();
+                if (val.isNotEmpty) return val;
+              }
+            }
+          }
+        }
+      } else if (de == DesktopEnvironment.xfce) {
+        final res = await Process.run('xfconf-query', [
+          '-c',
+          'xsettings',
+          '-p',
+          '/Gtk/CursorThemeName',
+        ]);
+        if (res.exitCode == 0) {
+          final val = res.stdout.toString().trim();
+          if (val.isNotEmpty) return val;
+        }
+      } else if (de == DesktopEnvironment.mate) {
+        final res = await Process.run('gsettings', [
+          'get',
+          'org.mate.peripherals-mouse',
+          'cursor-theme',
+        ]);
+        if (res.exitCode == 0) {
+          var val = res.stdout.toString().trim();
+          if (val.startsWith("'") && val.endsWith("'")) {
+            val = val.substring(1, val.length - 1);
+          }
+          if (val.isNotEmpty) return val;
+        }
+      }
+    } catch (_) {}
+
+    try {
+      final home = Platform.environment['HOME'];
+      if (home != null) {
+        final gtk3 = File(p.join(home, '.config', 'gtk-3.0', 'settings.ini'));
+        if (await gtk3.exists()) {
+          final lines = await gtk3.readAsLines();
+          for (final line in lines) {
+            if (line.trim().startsWith('gtk-cursor-theme-name=')) {
+              final val = line.trim().substring(22).trim();
+              if (val.isNotEmpty) return val;
+            }
+          }
+        }
+      }
+    } catch (_) {}
+
+    return null;
+  }
+
+  Future<bool> applyTheme(
+    String themeName, {
+    SettingsNotifier? settingsNotifier,
+  }) async {
     final de = SystemInfoService.desktopEnvironment;
     await LoggerService.log('Intentando auto-aplicar tema en $de');
+
+    // Intentar respaldar el tema original del sistema si aún no ha sido guardado
+    if (settingsNotifier != null) {
+      try {
+        final currentTheme = await getActiveSystemThemeName();
+        if (currentTheme != null && currentTheme != themeName) {
+          await settingsNotifier.saveOriginalSystemCursorTheme(currentTheme);
+        }
+      } catch (_) {}
+    }
+
     bool success = false;
 
     try {
@@ -216,7 +314,7 @@ Example=left_ptr
 
       // Sincronizar configuraciones globales de forma incondicional para mayor robustez
       final activeSize = await _getActiveCursorSize();
-      await _writeXWaylandDefaultTheme(themeName);
+      await cleanupGhostDefaultFolders();
       await _updateGtkSettings(themeName, activeSize);
       await _updateXResources(themeName, activeSize);
 
@@ -283,29 +381,32 @@ Example=left_ptr
     return 24;
   }
 
-  Future<void> _writeXWaylandDefaultTheme(String themeName) async {
+  Future<void> cleanupGhostDefaultFolders() async {
     final home = Platform.environment['HOME'];
     if (home == null) return;
-
-    final paths = [
-      p.join(home, '.icons', 'default', 'index.theme'),
-      p.join(home, '.local', 'share', 'icons', 'default', 'index.theme'),
-    ];
-
-    for (final path in paths) {
-      try {
+    try {
+      final paths = [
+        p.join(home, '.local', 'share', 'icons', 'default'),
+        p.join(home, '.icons', 'default'),
+        p.join(home, '.local', 'share', 'icons', 'cursors'),
+        p.join(home, '.icons', 'cursors'),
+        p.join(home, '.local', 'share', 'icons', 'index.theme'),
+        p.join(home, '.icons', 'index.theme'),
+      ];
+      for (final path in paths) {
         final file = File(path);
-        await file.create(recursive: true);
-        await file.writeAsString('[Icon Theme]\nInherits=$themeName\n');
-        await LoggerService.log(
-          'Escrito $path para XWayland ($themeName)',
-        );
-      } catch (e) {
-        await LoggerService.log(
-          'Error escribiendo $path: $e',
-          severity: LogSeverity.warning,
-        );
+        final dir = Directory(path);
+        if (await file.exists()) {
+          await file.delete();
+        } else if (await dir.exists()) {
+          await dir.delete(recursive: true);
+        }
       }
+    } catch (e) {
+      await LoggerService.log(
+        'Error limpiando carpetas fantasma por defecto: $e',
+        severity: LogSeverity.warning,
+      );
     }
   }
 

@@ -64,6 +64,11 @@ class InstalledThemesScanner {
     final indexThemeFile = File(p.join(themePath, 'index.theme'));
     final cursorsDir = Directory(p.join(themePath, 'cursors'));
 
+    final themeName = p.basename(themePath);
+    if (themeName.toLowerCase() == 'default' || themeName.toLowerCase() == 'cursors') {
+      return null;
+    }
+
     // 1. Validación básica: debe tener index.theme y carpeta cursors/
     if (!await indexThemeFile.exists() || !await cursorsDir.exists()) {
       return null;

@@ -35,6 +35,7 @@ class Settings {
   final Color primaryColor;
   final ThemeMode themeMode;
   final bool? showedOnboarding;
+  final String? originalSystemCursorTheme;
 
   const Settings({
     required this.cursorSizes,
@@ -45,6 +46,7 @@ class Settings {
     required this.primaryColor,
     required this.themeMode,
     this.showedOnboarding,
+    this.originalSystemCursorTheme,
   });
 
   factory Settings.defaults() => const Settings(
@@ -56,6 +58,7 @@ class Settings {
     primaryColor: _Defaults.primaryColor,
     themeMode: _Defaults.themeMode,
     showedOnboarding: false,
+    originalSystemCursorTheme: null,
   );
 
   Settings copyWith({
@@ -67,6 +70,7 @@ class Settings {
     Color? primaryColor,
     ThemeMode? themeMode,
     bool? showedOnboarding,
+    String? originalSystemCursorTheme,
     bool clearCustomOutputDir = false,
   }) {
     return Settings(
@@ -80,6 +84,8 @@ class Settings {
       primaryColor: primaryColor ?? this.primaryColor,
       themeMode: themeMode ?? this.themeMode,
       showedOnboarding: showedOnboarding ?? this.showedOnboarding,
+      originalSystemCursorTheme:
+          originalSystemCursorTheme ?? this.originalSystemCursorTheme,
     );
   }
 
@@ -90,7 +96,8 @@ class Settings {
         systemInstall == other.systemInstall &&
         autoApplyCursor == other.autoApplyCursor &&
         primaryColor.toARGB32() == other.primaryColor.toARGB32() &&
-        themeMode == other.themeMode;
+        themeMode == other.themeMode &&
+        originalSystemCursorTheme == other.originalSystemCursorTheme;
   }
 }
 
@@ -123,6 +130,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
   static const _colorKey = 'primary_color';
   static const _themeModeKey = 'theme_mode';
   static const _onboardingKey = 'showed_onboarding';
+  static const _originalSystemThemeKey = 'original_system_cursor_theme';
 
   late final SharedPreferences _prefs;
 
@@ -154,6 +162,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
     final modeIdx = _prefs.getInt(_themeModeKey);
     final mode = modeIdx != null ? ThemeMode.values[modeIdx] : ThemeMode.dark;
     final onboarding = _prefs.getBool(_onboardingKey) ?? false;
+    final origTheme = _prefs.getString(_originalSystemThemeKey);
 
     return Settings(
       cursorSizes: sizes,
@@ -164,6 +173,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
       primaryColor: color,
       themeMode: mode,
       showedOnboarding: onboarding,
+      originalSystemCursorTheme: origTheme,
     );
   }
 
@@ -184,6 +194,12 @@ class SettingsNotifier extends Notifier<SettingsState> {
     await _prefs.setBool(_autoApplyKey, s.autoApplyCursor);
     await _prefs.setInt(_colorKey, s.primaryColor.toARGB32());
     await _prefs.setInt(_themeModeKey, s.themeMode.index);
+    if (s.originalSystemCursorTheme != null) {
+      await _prefs.setString(
+        _originalSystemThemeKey,
+        s.originalSystemCursorTheme!,
+      );
+    }
   }
 
   // ─── Acciones de los botones del header ──────────────────────────────────
@@ -198,6 +214,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
   Future<void> resetToDefaults() async {
     final defaults = Settings.defaults().copyWith(
       showedOnboarding: state.current.showedOnboarding,
+      originalSystemCursorTheme: state.current.originalSystemCursorTheme,
     );
     await _persist(defaults);
     state = SettingsState(current: defaults, saved: defaults);
@@ -250,5 +267,15 @@ class SettingsNotifier extends Notifier<SettingsState> {
     // El onboarding se persiste inmediatamente (no es preferencia editable por el usuario).
     _prefs.setBool(_onboardingKey, showed);
     state = state.copyWith(saved: state.current);
+  }
+
+  Future<void> saveOriginalSystemCursorTheme(String themeName) async {
+    if (_prefs.getString(_originalSystemThemeKey) == null) {
+      await _prefs.setString(_originalSystemThemeKey, themeName);
+      final updated = state.current.copyWith(
+        originalSystemCursorTheme: themeName,
+      );
+      state = state.copyWith(current: updated, saved: updated);
+    }
   }
 }

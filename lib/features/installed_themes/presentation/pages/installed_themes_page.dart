@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ani_to_xcursor/features/installed_themes/domain/models/installed_theme.dart';
 import 'package:ani_to_xcursor/features/installed_themes/presentation/installed_themes_provider.dart';
 import 'package:ani_to_xcursor/features/home/presentation/widgets/animated_theme_card.dart';
+import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
 import 'package:ani_to_xcursor/shared/utils/snackbar_utils.dart';
 import 'package:ani_to_xcursor/shared/utils/dialog_utils.dart';
 
@@ -27,12 +28,23 @@ class _InstalledThemesPageState extends ConsumerState<InstalledThemesPage> {
   @override
   Widget build(BuildContext context) {
     final themeState = ref.watch(installedThemesProvider);
+    final activeThemeAsync = ref.watch(activeThemeNameProvider);
+    final activeThemeName = activeThemeAsync.asData?.value;
     final themeData = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gestor de Temas'),
         actions: [
+          Tooltip(
+            message: 'Restablecer al cursor por defecto del sistema',
+            child: TextButton.icon(
+              onPressed: () => _restoreSystemDefault(context, ref),
+              icon: const Icon(Icons.restart_alt, size: 18),
+              label: const Text('Restablecer SO'),
+            ),
+          ),
+          const SizedBox(width: 8),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () =>
@@ -130,6 +142,7 @@ class _InstalledThemesPageState extends ConsumerState<InstalledThemesPage> {
                     final item = filteredThemes[index];
                     return AnimatedThemeCard(
                       theme: item,
+                      isActive: activeThemeName == item.name,
                       onApply: () => _applyTheme(context, ref, item),
                       onDelete: () => _confirmDelete(context, ref, item),
                     );
@@ -197,6 +210,53 @@ class _InstalledThemesPageState extends ConsumerState<InstalledThemesPage> {
 
     if (confirm == true) {
       await ref.read(installedThemesProvider.notifier).delete(theme);
+    }
+  }
+
+  Future<void> _restoreSystemDefault(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final settings = ref.read(settingsProvider).current;
+    final origTheme = settings.originalSystemCursorTheme ?? 'Adwaita';
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Restablecer cursor del SO'),
+        content: Text(
+          '¿Deseas restablecer el tema de cursores al valor por defecto original del sistema ($origTheme)?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Restablecer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final success = await ref
+          .read(installedThemesProvider.notifier)
+          .restoreSystemDefault();
+      if (context.mounted) {
+        if (success) {
+          DialogUtils.showSessionRestartDialog(
+            context,
+            themeName: origTheme,
+          );
+        } else {
+          SnackBarUtils.show(
+            context,
+            'Fallo al restablecer el tema por defecto del SO',
+            isError: true,
+          );
+        }
+      }
     }
   }
 }

@@ -8,6 +8,7 @@ class AnimatedThemeCard extends StatefulWidget {
   final VoidCallback onDelete;
   final bool isDeleting;
   final bool isApplying;
+  final bool isActive;
 
   const AnimatedThemeCard({
     super.key,
@@ -16,6 +17,7 @@ class AnimatedThemeCard extends StatefulWidget {
     required this.onDelete,
     this.isDeleting = false,
     this.isApplying = false,
+    this.isActive = false,
   });
 
   @override
@@ -158,6 +160,40 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                           ),
                         ),
                       ),
+                      if (widget.isActive)
+                        Positioned(
+                          top: 14,
+                          left: 14,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade700,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  size: 12,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Activo',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       if (widget.theme.isSystem)
                         Positioned(
                           top: 18,
@@ -229,34 +265,62 @@ class _AnimatedThemeCardState extends State<AnimatedThemeCard>
                                       ),
                                     ),
                                   )
-                                : FilledButton(
-                                    onPressed: widget.onApply,
-                                    style: FilledButton.styleFrom(
-                                      minimumSize: Size.zero,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                      backgroundColor: _hovering
-                                          ? colorScheme.primary
-                                          : colorScheme.primary.withValues(
-                                              alpha: 0.1,
+                                : widget.isActive
+                                    ? OutlinedButton.icon(
+                                        onPressed: widget.onApply,
+                                        icon: const Icon(Icons.check, size: 14),
+                                        label: const Text(
+                                          'Aplicado',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        style: OutlinedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 12,
+                                          ),
+                                          foregroundColor: Colors.green,
+                                          side: const BorderSide(
+                                            color: Colors.green,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              14,
                                             ),
-                                      foregroundColor: _hovering
-                                          ? colorScheme.onPrimary
-                                          : colorScheme.primary,
-                                      elevation: 0,
-                                    ),
-                                    child: const Text(
-                                      'Aplicar',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                      )
+                                    : FilledButton(
+                                        onPressed: widget.onApply,
+                                        style: FilledButton.styleFrom(
+                                          minimumSize: Size.zero,
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 12,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              14,
+                                            ),
+                                          ),
+                                          backgroundColor: _hovering
+                                              ? colorScheme.primary
+                                              : colorScheme.primary.withValues(
+                                                  alpha: 0.1,
+                                                ),
+                                          foregroundColor: _hovering
+                                              ? colorScheme.onPrimary
+                                              : colorScheme.primary,
+                                          elevation: 0,
+                                        ),
+                                        child: const Text(
+                                          'Aplicar',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
                           ),
                           if (!widget.theme.isSystem) ...[
                             const SizedBox(width: 8),

@@ -4,9 +4,16 @@ import 'package:ani_to_xcursor/features/installed_themes/domain/models/installed
 import 'package:ani_to_xcursor/features/converter/presentation/datasources_provider.dart';
 import 'package:ani_to_xcursor/shared/services/logger_service.dart';
 
+import 'package:ani_to_xcursor/shared/providers/settings_provider.dart';
+
 final installedThemesScannerProvider = Provider(
   (ref) => InstalledThemesScanner(),
 );
+
+final activeThemeNameProvider = FutureProvider<String?>((ref) async {
+  final installationSource = ref.read(installationDataSourceProvider);
+  return await installationSource.getActiveSystemThemeName();
+});
 
 final installedThemesProvider =
     NotifierProvider<InstalledThemesNotifier, AsyncValue<List<InstalledTheme>>>(
@@ -33,6 +40,7 @@ class InstalledThemesNotifier
 
   Future<void> refresh() async {
     state = const AsyncValue.loading();
+    ref.invalidate(activeThemeNameProvider);
     try {
       final themes = await _scanner.scan();
       state = AsyncValue.data(themes);
@@ -44,14 +52,39 @@ class InstalledThemesNotifier
   Future<bool> apply(InstalledTheme theme) async {
     try {
       final installationSource = ref.read(installationDataSourceProvider);
-      await installationSource.applyTheme(theme.name);
+      final settingsNotifier = ref.read(settingsProvider.notifier);
+      final success = await installationSource.applyTheme(
+        theme.name,
+        settingsNotifier: settingsNotifier,
+      );
       await LoggerService.log(
         'Tema ${theme.displayName} aplicado desde el gestor',
       );
-      return true;
+      ref.invalidate(activeThemeNameProvider);
+      return success;
     } catch (e) {
       await LoggerService.log(
         'Error al aplicar tema ${theme.name}: $e',
+        severity: LogSeverity.error,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> restoreSystemDefault() async {
+    try {
+      final settings = ref.read(settingsProvider).current;
+      final originalTheme = settings.originalSystemCursorTheme ?? 'Adwaita';
+      final installationSource = ref.read(installationDataSourceProvider);
+      final success = await installationSource.applyTheme(originalTheme);
+      await LoggerService.log(
+        'Restablecido el cursor por defecto del sistema ($originalTheme)',
+      );
+      ref.invalidate(activeThemeNameProvider);
+      return success;
+    } catch (e) {
+      await LoggerService.log(
+        'Error al restablecer cursor del sistema: $e',
         severity: LogSeverity.error,
       );
       return false;

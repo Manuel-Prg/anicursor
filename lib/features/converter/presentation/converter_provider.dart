@@ -51,13 +51,34 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
     }
   }
 
+  String _generateUniqueThemeName(String baseName) {
+    final home = Platform.environment['HOME'] ?? '';
+    final localIconsDir = p.join(home, '.local', 'share', 'icons');
+    final usrIconsDir = '/usr/share/icons';
+
+    var sanitized = StringUtils.sanitizeFilename(baseName).toLowerCase();
+    if (sanitized.isEmpty) sanitized = 'custom-cursor';
+
+    String candidate = sanitized;
+    int counter = 1;
+
+    while (Directory(p.join(localIconsDir, candidate)).existsSync() ||
+        Directory(p.join(usrIconsDir, candidate)).existsSync() ||
+        Link(p.join(localIconsDir, candidate)).existsSync()) {
+      candidate = '$sanitized-$counter';
+      counter++;
+    }
+
+    return candidate;
+  }
+
   Future<void> scanDirectory(String dirPath) async {
     _cleanupFrames();
     final repo = ref.read(converterRepositoryProvider);
     final settings = ref.read(settingsProvider).current;
     final cursors = repo.scanDirectory(dirPath);
     final rawThemeName = dirPath.split('/').last;
-    final themeName = StringUtils.sanitizeFilename(rawThemeName).toLowerCase();
+    final themeName = _generateUniqueThemeName(rawThemeName);
 
     state = CursorTheme(
       name: themeName,
@@ -130,11 +151,17 @@ class CursorThemeNotifier extends Notifier<CursorTheme?> {
 
   Future<bool> install() async {
     if (state == null) return false;
-    final repo = ref.read(converterRepositoryProvider);
     final settings = ref.read(settingsProvider).current;
+    final settingsNotifier = ref.read(settingsProvider.notifier);
+    final installationSource = ref.read(installationDataSourceProvider);
 
-    await repo.createThemeFile(state!.outputDir, state!.name);
-    return await repo.installTheme(state!.outputDir, state!.name, settings);
+    await installationSource.createThemeFile(state!.outputDir, state!.name);
+    return await installationSource.installTheme(
+      state!.outputDir,
+      state!.name,
+      settings,
+      settingsNotifier: settingsNotifier,
+    );
   }
 
   Future<void> exportZip() async {
